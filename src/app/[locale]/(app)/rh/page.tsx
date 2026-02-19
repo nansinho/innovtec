@@ -1,6 +1,5 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Users,
@@ -175,7 +174,6 @@ const RECENT_ACTIVITIES: RecentActivity[] = [
 ];
 
 export default function RHPage() {
-  const t = useTranslations('rh');
   const [leaveFilter, setLeaveFilter] = useState<'all' | LeaveStatus>('all');
 
   const filteredRequests = DEMO_LEAVE_REQUESTS.filter(

@@ -1,6 +1,5 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Search,
@@ -165,7 +164,6 @@ const DEMO_ALBUMS: PhotoAlbum[] = [
 ];
 
 export default function GaleriePage() {
-  const t = useTranslations('gallery');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tous');
   const [viewMode, setViewMode] = useState<'grid' | 'large'>('grid');

@@ -30,7 +30,11 @@
     "settings": "Configurações",
     "logout": "Sair",
     "profile": "Meu perfil",
-    "notifications": "Notificações"
+    "notifications": "Notificações",
+    "error": "Ocorreu um erro",
+    "success": "Operação bem-sucedida",
+    "noData": "Nenhum dado disponível",
+    "retry": "Tentar novamente"
   },
   "nav": {
     "dashboard": "Painel",
@@ -50,10 +54,11 @@
     "documents": "Documentos",
     "gallery": "Galeria",
     "blog": "Blog",
-    "search": "Pesquisa"
+    "search": "Pesquisa",
+    "profile": "Perfil"
   },
   "dashboard": {
-    "welcome": "Olá, {name} 👋",
+    "welcome": "Olá, {name}",
     "welcomeSubtitle": "Aqui está um resumo do seu dia",
     "quickAccess": "Acesso rápido",
     "kpiTitle": "Indicadores SSE",
@@ -172,6 +177,56 @@
     "rememberMe": "Lembrar de mim",
     "forgotPassword": "Esqueceu a senha?",
     "loginButton": "Entrar",
-    "loggingIn": "Entrando..."
+    "loggingIn": "Entrando...",
+    "invalidCredentials": "Email ou senha incorretos",
+    "emailNotConfirmed": "Por favor, confirme seu email",
+    "noAccount": "Ainda não tem conta?",
+    "registerLink": "Criar uma conta",
+    "hasAccount": "Já tem uma conta?",
+    "loginLink": "Entrar",
+    "registerTitle": "Criar uma conta",
+    "registerSubtitle": "Junte-se à intranet INNOVTEC",
+    "firstName": "Nome",
+    "lastName": "Sobrenome",
+    "confirmPassword": "Confirmar senha",
+    "registerButton": "Criar minha conta",
+    "registering": "Criando...",
+    "passwordMismatch": "As senhas não correspondem",
+    "passwordTooShort": "A senha deve ter pelo menos 8 caracteres",
+    "passwordHint": "Mínimo de 8 caracteres",
+    "emailAlreadyUsed": "Este email já está em uso",
+    "registrationSuccess": "Conta criada! Verifique seu email para confirmar sua inscrição.",
+    "forgotPasswordTitle": "Esqueceu a senha",
+    "forgotPasswordSubtitle": "Insira seu email para receber um link de redefinição",
+    "sendResetLink": "Enviar link",
+    "sending": "Enviando...",
+    "resetEmailSent": "Um email de redefinição foi enviado. Verifique sua caixa de entrada.",
+    "backToLogin": "Voltar ao login"
+  },
+  "profile": {
+    "title": "Meu perfil",
+    "personalInfo": "Informações pessoais",
+    "security": "Segurança",
+    "preferences": "Preferências",
+    "changePassword": "Alterar senha",
+    "currentPassword": "Senha atual",
+    "newPassword": "Nova senha",
+    "confirmNewPassword": "Confirmar nova senha",
+    "updateProfile": "Atualizar",
+    "updatePassword": "Atualizar senha",
+    "phone": "Telefone",
+    "position": "Cargo",
+    "team": "Equipe",
+    "role": "Função",
+    "language": "Idioma",
+    "profileUpdated": "Perfil atualizado com sucesso",
+    "passwordUpdated": "Senha atualizada com sucesso"
+  },
+  "errors": {
+    "pageNotFound": "Página não encontrada",
+    "pageNotFoundDescription": "A página que você procura não existe ou foi movida.",
+    "goHome": "Voltar ao início",
+    "somethingWentWrong": "Algo deu errado",
+    "tryAgain": "Tentar novamente"
   }
 }

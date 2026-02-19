@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: #0052CC;
+    --primary-light: #4C9AFF;
+    --accent: #FF6B35;
+    --success: #36B37E;
+    --warning: #FFAB00;
+    --danger: #FF5630;
+    --background: #F4F5F7;
+    --card: #FFFFFF;
+    --sidebar-bg: #0A1628;
+    --sidebar-light: #0D2137;
+    --text-primary: #172B4D;
+    --text-secondary: #5E6C84;
+    --text-muted: #97A0AF;
+    --border: #DFE1E6;
+    --border-light: #EBECF0;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    background-color: var(--background);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-card rounded-card border border-border-light shadow-card transition-shadow duration-200;
+  }
+
+  .card:hover {
+    @apply shadow-card-hover;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white rounded-button px-5 py-2.5 font-semibold text-sm
+           hover:bg-primary-dark transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-primary/30;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-text-primary border border-border rounded-button px-5 py-2.5 font-semibold text-sm
+           hover:bg-gray-50 transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-primary/20;
+  }
+
+  .btn-accent {
+    @apply bg-accent text-white rounded-button px-5 py-2.5 font-semibold text-sm
+           hover:bg-accent-dark transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-accent/30;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  .badge-qse {
+    @apply bg-orange-100 text-orange-700;
+  }
+
+  .badge-rex {
+    @apply bg-emerald-100 text-emerald-700;
+  }
+
+  .badge-info {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  .badge-securite {
+    @apply bg-red-100 text-red-700;
+  }
+
+  .badge-blog {
+    @apply bg-purple-100 text-purple-700;
+  }
+
+  .input {
+    @apply w-full rounded-button border border-border bg-white px-4 py-2.5 text-sm
+           placeholder:text-text-muted
+           focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
+           transition-all duration-200;
+  }
+
+  .animate-stagger > * {
+    @apply animate-fade-in-up;
+  }
+
+  .animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .animate-stagger > *:nth-child(2) { animation-delay: 60ms; }
+  .animate-stagger > *:nth-child(3) { animation-delay: 120ms; }
+  .animate-stagger > *:nth-child(4) { animation-delay: 180ms; }
+  .animate-stagger > *:nth-child(5) { animation-delay: 240ms; }
+  .animate-stagger > *:nth-child(6) { animation-delay: 300ms; }
+  .animate-stagger > *:nth-child(7) { animation-delay: 360ms; }
+  .animate-stagger > *:nth-child(8) { animation-delay: 420ms; }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C1C7D0;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #97A0AF;
+}
+
+/* Sidebar scrollbar */
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}

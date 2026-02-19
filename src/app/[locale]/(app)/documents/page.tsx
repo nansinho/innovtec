@@ -1,6 +1,5 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Search,
@@ -206,7 +205,6 @@ const DEMO_DOCUMENTS: Document[] = [
 ];
 
 export default function DocumentsPage() {
-  const t = useTranslations('documents');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('Tous');
   const [sortField, setSortField] = useState<SortField>('date');

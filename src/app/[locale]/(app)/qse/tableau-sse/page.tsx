@@ -21,7 +21,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSupabaseQuery, useRealtimeSubscription } from '@/lib/hooks/use-supabase-query';
-import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { PageSkeleton, EmptyState } from '@/components/ui/DataStates';
+import { PageBanner } from '@/components/ui/PageBanner';
 
 // --- Types ---
 interface KPI {
@@ -447,30 +448,17 @@ export default function TableauSSEPage() {
     : 1;
 
   if (isLoading) {
-    return <LoadingState message="Chargement du tableau de bord SSE..." />;
+    return <PageSkeleton variant="cards" />;
   }
 
   if (!rawMetrics || metrics.length === 0) {
     return (
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-card bg-primary/10">
-                <Activity size={20} className="text-primary" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-text-primary">
-                  Tableau de Bord SSE
-                </h1>
-                <p className="text-sm text-text-secondary mt-0.5">
-                  Indicateurs Santé, Sécurité et Environnement
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <PageBanner
+          icon={Activity}
+          title="Tableau de Bord SSE"
+          subtitle="Indicateurs Santé, Sécurité et Environnement"
+        />
         <EmptyState
           message="Aucune donnée SSE disponible"
           description="Les indicateurs apparaîtront ici une fois les premières données saisies dans le système."
@@ -481,47 +469,34 @@ export default function TableauSSEPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-card bg-primary/10">
-              <Activity size={20} className="text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-text-primary">
-                Tableau de Bord SSE
-              </h1>
-              <p className="text-sm text-text-secondary mt-0.5">
-                Indicateurs Santé, Sécurité et Environnement
-              </p>
-            </div>
-          </div>
-        </div>
+      <PageBanner
+        icon={Activity}
+        title="Tableau de Bord SSE"
+        subtitle="Indicateurs Santé, Sécurité et Environnement"
+      >
         <div className="flex items-center gap-3">
-          {/* Period selector */}
-          <div className="flex items-center gap-1 bg-white border border-border rounded-button px-2 py-1">
-            <button className="p-1 hover:bg-gray-100 rounded transition-colors">
-              <ChevronLeft size={14} className="text-text-secondary" />
+          <div className="flex items-center gap-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-3 py-1.5">
+            <button className="p-1 hover:bg-white/10 rounded transition-colors">
+              <ChevronLeft size={14} className="text-white/70" />
             </button>
             <select
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="text-sm font-medium text-text-primary bg-transparent border-none focus:outline-none px-2"
+              className="text-sm font-medium text-white bg-transparent border-none focus:outline-none px-2"
             >
-              <option value="2026">2025-2026</option>
-              <option value="2025">2024-2025</option>
+              <option value="2026" className="text-text-primary">2025-2026</option>
+              <option value="2025" className="text-text-primary">2024-2025</option>
             </select>
-            <button className="p-1 hover:bg-gray-100 rounded transition-colors">
-              <ChevronRight size={14} className="text-text-secondary" />
+            <button className="p-1 hover:bg-white/10 rounded transition-colors">
+              <ChevronRight size={14} className="text-white/70" />
             </button>
           </div>
-          <button className="btn-secondary flex items-center gap-2">
+          <button className="flex items-center gap-2 rounded-xl px-4 py-2 font-medium text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
             <Download size={14} />
             Exporter PDF
           </button>
         </div>
-      </div>
+      </PageBanner>
 
       {/* KPI Cards */}
       <div

@@ -16,7 +16,8 @@ import { Link } from '@/i18n/routing';
 import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
 import { useToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
-import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { PageSkeleton, EmptyState } from '@/components/ui/DataStates';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { createGallery } from '@/lib/actions';
 
 const GRADIENTS = [
@@ -82,25 +83,20 @@ export default function GaleriePage() {
     }
   };
 
-  if (loading) return <LoadingState />;
+  if (loading) return <PageSkeleton variant="cards" />;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Galerie photos</h1>
-          <p className="text-sm text-text-secondary mt-1">
-            {filteredAlbums.length} album{filteredAlbums.length > 1 ? 's' : ''}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setShowCreateModal(true)} className="btn-primary flex items-center gap-2">
-            <Plus size={16} />
-            Nouvel album
-          </button>
-        </div>
-      </div>
+      <PageBanner
+        icon={Camera}
+        title="Galerie photos"
+        subtitle={`${filteredAlbums.length} album${filteredAlbums.length > 1 ? 's' : ''}`}
+      >
+        <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
+          <Plus size={16} />
+          Nouvel album
+        </button>
+      </PageBanner>
 
       {/* Search + View Toggle */}
       <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>

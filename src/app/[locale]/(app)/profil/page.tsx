@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/client';
 import { cn, getInitials, getAvatarGradient, getRoleLabel, getRoleBadgeClass, calculateSeniority, formatDateShort } from '@/lib/utils';
 import { useToast } from '@/components/ui/Toast';
 import { POSITIONS, CONTRACT_TYPES, EMERGENCY_RELATIONSHIPS } from '@/lib/constants';
+import { PageBanner } from '@/components/ui/PageBanner';
 import type { Diploma, Experience, FormationEnrollment } from '@/lib/types';
 
 type ProfileTab = 'info' | 'career' | 'diplomas' | 'experiences' | 'formations' | 'security';
@@ -331,8 +332,28 @@ export default function ProfilePage() {
   // ─── Loading state ───
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="h-8 w-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+      <div className="space-y-6">
+        <div className="relative overflow-hidden rounded-card-lg bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 p-6 md:p-8 animate-pulse">
+          <div className="flex items-center gap-4">
+            <div className="h-20 w-20 rounded-2xl bg-gray-300 animate-pulse" />
+            <div className="space-y-2">
+              <div className="h-6 w-48 rounded bg-gray-300 animate-pulse" />
+              <div className="h-4 w-32 rounded bg-gray-300/70 animate-pulse" />
+            </div>
+          </div>
+        </div>
+        <div className="card p-6 animate-pulse space-y-4">
+          <div className="flex gap-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-8 w-24 rounded-lg bg-gray-200 animate-pulse" />
+            ))}
+          </div>
+          <div className="space-y-3 pt-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-10 w-full rounded-lg bg-gray-100 animate-pulse" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -359,9 +380,11 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-text-primary">{t('title')}</h1>
-      </div>
+      <PageBanner
+        icon={User}
+        title={t('title')}
+        subtitle={user ? `${displayName} — ${user.position || ''}` : ''}
+      />
 
       <div className="card p-6">
         {/* ═══ Profile Header ═══ */}

@@ -23,7 +23,8 @@ import { cn, getAvatarGradient, getInitials } from '@/lib/utils';
 import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
 import { createDocument } from '@/lib/actions';
 import { Modal } from '@/components/ui/Modal';
-import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { PageSkeleton, EmptyState } from '@/components/ui/DataStates';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { useToast } from '@/components/ui/Toast';
 
 type FileType = 'pdf' | 'word' | 'excel' | 'image' | 'other';
@@ -183,23 +184,20 @@ export default function DocumentsPage() {
     }
   };
 
-  if (loading) return <LoadingState message="Chargement des documents..." />;
+  if (loading) return <PageSkeleton variant="table" />;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Documents</h1>
-          <p className="text-sm text-text-secondary mt-1">
-            {filteredDocuments.length} document{filteredDocuments.length > 1 ? 's' : ''} - {totalSizeMB} Mo
-          </p>
-        </div>
-        <button onClick={() => setShowCreateModal(true)} className="btn-primary flex items-center gap-2 w-fit">
+      <PageBanner
+        icon={FolderOpen}
+        title="Documents"
+        subtitle={`${filteredDocuments.length} document${filteredDocuments.length > 1 ? 's' : ''} — ${totalSizeMB} Mo`}
+      >
+        <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
           <Upload size={16} />
           Importer un document
         </button>
-      </div>
+      </PageBanner>
 
       {/* Stats bar */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 animate-fade-in-up" style={{ animationDelay: '60ms' }}>

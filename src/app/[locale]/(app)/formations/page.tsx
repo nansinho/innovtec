@@ -20,7 +20,8 @@ import { Link } from '@/i18n/routing';
 import { useSupabaseQuery, useRealtimeSubscription } from '@/lib/hooks/use-supabase-query';
 import { useToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
-import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { PageSkeleton, EmptyState } from '@/components/ui/DataStates';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { createFormation, enrollInFormation } from '@/lib/actions';
 
 type FormationType = 'presentiel' | 'elearning' | 'mixte';
@@ -139,27 +140,20 @@ export default function FormationsPage() {
     }
   };
 
-  if (loading) return <LoadingState />;
+  if (loading) return <PageSkeleton variant="cards" />;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Formations</h1>
-          <p className="text-sm text-text-secondary mt-1">Catalogue de formations et suivi de vos parcours</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-2 bg-primary-50 rounded-button">
-            <Award size={16} className="text-primary" />
-            <span className="text-sm font-semibold text-primary">{totalHours}h de formation</span>
-          </div>
-          <button onClick={() => setShowCreateModal(true)} className="btn-primary flex items-center gap-2">
-            <Plus size={16} />
-            Nouvelle formation
-          </button>
-        </div>
-      </div>
+      <PageBanner
+        icon={BookOpen}
+        title="Formations"
+        subtitle={`Catalogue de formations et suivi de vos parcours — ${totalHours}h de formation`}
+      >
+        <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
+          <Plus size={16} />
+          Nouvelle formation
+        </button>
+      </PageBanner>
 
       {/* KPI Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>

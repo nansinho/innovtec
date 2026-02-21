@@ -21,7 +21,8 @@ import { cn, getAvatarGradient, getInitials, getRoleLabel } from '@/lib/utils';
 import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
 import { useToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
-import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { PageSkeleton, EmptyState } from '@/components/ui/DataStates';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { updateUserRole, updateUserStatus, adminUpdateProfile } from '@/lib/actions';
 
 const ROLE_OPTIONS = [
@@ -143,24 +144,15 @@ export default function AdminPage() {
     setOpenMenuId(null);
   };
 
-  if (loading) return <LoadingState />;
+  if (loading) return <PageSkeleton variant="table" />;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-card bg-red-100">
-            <Shield size={20} className="text-red-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-text-primary">Administration</h1>
-            <p className="text-sm text-text-secondary mt-0.5">
-              Gestion des utilisateurs et des rôles
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageBanner
+        icon={Shield}
+        title="Administration"
+        subtitle="Gestion des utilisateurs et des rôles"
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>

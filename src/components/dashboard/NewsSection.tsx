@@ -47,7 +47,7 @@ export function NewsSection() {
             return (
               <Link key={article.id as string} href={`/actualites/${article.id}`} className="card-elevated group overflow-hidden hover:-translate-y-1">
                 {/* Cover image area with gradient placeholder */}
-                <div className={`relative h-36 bg-gradient-to-br ${COVER_GRADIENTS[gradientIdx]} overflow-hidden`}>
+                <div className={`relative h-44 bg-gradient-to-br ${COVER_GRADIENTS[gradientIdx]} overflow-hidden`}>
                   {/* Decorative elements */}
                   <div className="absolute inset-0 opacity-20">
                     <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/20" />

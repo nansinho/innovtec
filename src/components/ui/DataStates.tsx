@@ -41,7 +41,24 @@ function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse rounded-lg bg-gray-200', className)} />;
 }
 
-export function BannerSkeleton() {
+export function BannerSkeleton({ overlapping = false }: { overlapping?: boolean }) {
+  if (overlapping) {
+    return (
+      <div className="relative overflow-hidden -mx-6 md:-mx-8 -mt-6 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-300 pb-32 pt-8 px-6 md:px-10 animate-pulse">
+        <div className="max-w-content mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-12 w-12 rounded-xl bg-gray-400/40" />
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-48 bg-gray-400/40" />
+              <Skeleton className="h-4 w-32 bg-gray-400/30" />
+            </div>
+          </div>
+          <Skeleton className="h-10 w-40 rounded-button bg-gray-400/40" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative overflow-hidden rounded-card-lg bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 p-6 md:p-8 animate-pulse">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -135,11 +152,17 @@ export function TableSkeleton({ rows = 5 }: { rows?: number }) {
   );
 }
 
-export function PageSkeleton({ variant = 'cards' }: { variant?: 'cards' | 'table' | 'calendar' | 'kanban' }) {
+export function PageSkeleton({ variant = 'cards', overlapping = false }: { variant?: 'cards' | 'table' | 'calendar' | 'kanban'; overlapping?: boolean }) {
   return (
     <div className="space-y-6">
-      <BannerSkeleton />
-      <KPICardsSkeleton />
+      <BannerSkeleton overlapping={overlapping} />
+      {overlapping ? (
+        <div className="-mt-20 relative z-10 mb-6">
+          <KPICardsSkeleton />
+        </div>
+      ) : (
+        <KPICardsSkeleton />
+      )}
       {variant === 'cards' && <CardGridSkeleton />}
       {variant === 'table' && <TableSkeleton />}
       {variant === 'calendar' && (

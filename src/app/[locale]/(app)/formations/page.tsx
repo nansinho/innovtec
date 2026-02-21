@@ -140,7 +140,7 @@ export default function FormationsPage() {
     }
   };
 
-  if (loading) return <PageSkeleton variant="cards" />;
+  if (loading) return <PageSkeleton variant="cards" overlapping />;
 
   return (
     <div className="space-y-6">
@@ -148,6 +148,7 @@ export default function FormationsPage() {
         icon={BookOpen}
         title="Formations"
         subtitle={`Catalogue de formations et suivi de vos parcours — ${totalHours}h de formation`}
+        overlapping
       >
         <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
           <Plus size={16} />
@@ -155,19 +156,25 @@ export default function FormationsPage() {
         </button>
       </PageBanner>
 
-      {/* KPI Summary */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
-        {[
-          { label: 'Total formations', value: allFormations.length, color: 'text-primary', bg: 'bg-primary-50' },
-          { label: 'En cours', value: allFormations.filter((f) => f.status === 'en_cours').length, color: 'text-accent', bg: 'bg-accent-50' },
-          { label: 'Planifiées', value: allFormations.filter((f) => f.status === 'planifiee').length, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Terminées', value: allFormations.filter((f) => f.status === 'terminee').length, color: 'text-success', bg: 'bg-emerald-50' },
-        ].map((kpi) => (
-          <div key={kpi.label} className="card p-4">
-            <div className="text-xs text-text-muted font-medium">{kpi.label}</div>
-            <div className={cn('text-2xl font-bold mt-1', kpi.color)}>{kpi.value}</div>
-          </div>
-        ))}
+      {/* KPI Summary - overlapping the banner */}
+      <div className="-mt-20 relative z-10 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: 'Total formations', value: allFormations.length, color: 'text-primary', bg: 'bg-primary-50' },
+            { label: 'En cours', value: allFormations.filter((f) => f.status === 'en_cours').length, color: 'text-accent', bg: 'bg-accent-50' },
+            { label: 'Planifiées', value: allFormations.filter((f) => f.status === 'planifiee').length, color: 'text-amber-600', bg: 'bg-amber-50' },
+            { label: 'Terminées', value: allFormations.filter((f) => f.status === 'terminee').length, color: 'text-success', bg: 'bg-emerald-50' },
+          ].map((kpi, i) => (
+            <div
+              key={kpi.label}
+              className="bg-white rounded-2xl border border-white/80 p-4 opacity-0 animate-fade-in-up"
+              style={{ animationDelay: `${i * 80}ms`, boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' }}
+            >
+              <div className="text-xs text-text-muted font-medium">{kpi.label}</div>
+              <div className={cn('text-2xl font-bold mt-1', kpi.color)}>{kpi.value}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Tabs */}

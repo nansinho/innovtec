@@ -263,7 +263,7 @@ export default function RHPage() {
 
   const isLoading = loadingLeaves || loadingExpenses || loadingProfiles;
 
-  if (isLoading) return <PageSkeleton variant="cards" />;
+  if (isLoading) return <PageSkeleton variant="cards" overlapping />;
 
   return (
     <div className="space-y-6">
@@ -271,6 +271,7 @@ export default function RHPage() {
         icon={Users}
         title="Ressources Humaines"
         subtitle="Tableau de bord RH et gestion administrative"
+        overlapping
       >
         <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
           <Plus size={16} />
@@ -278,36 +279,42 @@ export default function RHPage() {
         </button>
       </PageBanner>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-stagger">
-        {kpis.map((kpi) => {
-          const Icon = kpi.icon;
-          return (
-            <div key={kpi.label} className="card p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs font-medium text-text-muted uppercase tracking-wide">{kpi.label}</p>
-                  <p className={cn('text-3xl font-bold mt-2', kpi.color)}>{kpi.value}</p>
-                  <p className="text-xs text-text-secondary mt-1">{kpi.sublabel}</p>
+      {/* KPI Cards - overlapping the banner */}
+      <div className="-mt-20 relative z-10 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {kpis.map((kpi, i) => {
+            const Icon = kpi.icon;
+            return (
+              <div
+                key={kpi.label}
+                className="bg-white rounded-2xl border border-white/80 p-5 opacity-0 animate-fade-in-up"
+                style={{ animationDelay: `${i * 80}ms`, boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' }}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-text-muted uppercase tracking-wide">{kpi.label}</p>
+                    <p className={cn('text-3xl font-bold mt-2', kpi.color)}>{kpi.value}</p>
+                    <p className="text-xs text-text-secondary mt-1">{kpi.sublabel}</p>
+                  </div>
+                  <div className={cn('flex h-11 w-11 items-center justify-center rounded-xl', kpi.bg)}>
+                    <Icon size={22} className={kpi.color} />
+                  </div>
                 </div>
-                <div className={cn('flex h-11 w-11 items-center justify-center rounded-xl', kpi.bg)}>
-                  <Icon size={22} className={kpi.color} />
+                <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border-light">
+                  {kpi.trendUp ? (
+                    <ArrowUpRight size={14} className="text-success" />
+                  ) : (
+                    <ArrowDownRight size={14} className="text-danger" />
+                  )}
+                  <span className={cn('text-xs font-semibold', kpi.trendUp ? 'text-success' : 'text-danger')}>
+                    {kpi.trend}
+                  </span>
+                  <span className="text-xs text-text-muted ml-1">ce mois</span>
                 </div>
               </div>
-              <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border-light">
-                {kpi.trendUp ? (
-                  <ArrowUpRight size={14} className="text-success" />
-                ) : (
-                  <ArrowDownRight size={14} className="text-danger" />
-                )}
-                <span className={cn('text-xs font-semibold', kpi.trendUp ? 'text-success' : 'text-danger')}>
-                  {kpi.trend}
-                </span>
-                <span className="text-xs text-text-muted ml-1">ce mois</span>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* Quick Links */}

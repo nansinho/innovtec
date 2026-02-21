@@ -24,11 +24,11 @@ import { createArticle } from '@/lib/actions';
 
 const CATEGORIES = [
   { name: 'Toutes', value: 'all', color: '#0052CC' },
-  { name: 'QSE', value: 'qse', color: '#D14900' },
+  { name: 'QSE', value: 'qse', color: '#D4A017' },
   { name: 'REX', value: 'rex', color: '#00875A' },
   { name: 'Info', value: 'info', color: '#0052CC' },
   { name: 'Sécurité', value: 'securite', color: '#FF5630' },
-  { name: 'Blog', value: 'blog', color: '#6B21A8' },
+  { name: 'Blog', value: 'blog', color: '#1E3A5F' },
 ];
 
 export default function BonnesPratiquesPage() {
@@ -99,7 +99,7 @@ export default function BonnesPratiquesPage() {
   return (
     <div className="space-y-6">
       {/* Page Header with gradient banner */}
-      <div className="relative overflow-hidden rounded-card-lg bg-gradient-to-br from-[#1A0A44] via-accent-dark to-accent p-6 md:p-8 text-white shadow-banner">
+      <div className="relative overflow-hidden rounded-card-lg bg-gradient-to-br from-[#060E1F] via-[#0B1A3E] to-[#0F2A5E] p-6 md:p-8 text-white shadow-banner">
         <div className="banner-grid absolute inset-0" />
         <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/5 animate-float" />
         <div className="absolute left-1/3 bottom-0 h-32 w-32 rounded-full bg-white/5 animate-float-slow" />

@@ -21,14 +21,14 @@ import { createGallery } from '@/lib/actions';
 
 const GRADIENTS = [
   'from-blue-500 via-blue-600 to-indigo-700',
-  'from-amber-500 via-orange-500 to-red-500',
-  'from-purple-500 via-purple-600 to-pink-600',
+  'from-amber-500 via-amber-600 to-yellow-600',
+  'from-slate-500 via-slate-600 to-blue-700',
   'from-emerald-500 via-teal-500 to-cyan-600',
-  'from-red-500 via-rose-500 to-pink-500',
   'from-sky-500 via-blue-500 to-blue-700',
-  'from-violet-500 via-purple-500 to-indigo-600',
-  'from-yellow-400 via-amber-500 to-orange-600',
   'from-teal-400 via-emerald-500 to-green-600',
+  'from-cyan-500 via-cyan-600 to-blue-600',
+  'from-blue-600 via-blue-700 to-slate-700',
+  'from-amber-400 via-yellow-500 to-amber-600',
   'from-slate-500 via-gray-600 to-zinc-700',
 ];
 

@@ -32,7 +32,7 @@ export function DocumentsToSign() {
     <div className="card-elevated p-6 h-full opacity-0 animate-fade-in-up" style={{ animationDelay: '440ms' }}>
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500/10 to-orange-600/10 text-orange-600">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-600/10 text-amber-600">
             <PenTool size={20} strokeWidth={1.8} />
           </div>
           <div>

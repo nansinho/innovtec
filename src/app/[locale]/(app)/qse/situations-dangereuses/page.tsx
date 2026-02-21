@@ -134,7 +134,7 @@ export default function SituationsDangereusesPage() {
   return (
     <div className="space-y-6">
       {/* Page Header with gradient banner */}
-      <div className="relative overflow-hidden rounded-card-lg bg-gradient-to-br from-[#2D0A0A] via-danger-dark to-danger p-6 md:p-8 text-white shadow-banner">
+      <div className="relative overflow-hidden rounded-card-lg bg-gradient-to-br from-[#060E1F] via-[#0B1A3E] to-[#0F2A5E] p-6 md:p-8 text-white shadow-banner">
         <div className="banner-grid absolute inset-0" />
         <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/5 animate-float" />
         <div className="absolute left-1/3 bottom-0 h-32 w-32 rounded-full bg-white/5 animate-float-slow" />

@@ -8,9 +8,9 @@ import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
 
 const COVER_GRADIENTS = [
   'from-blue-600 via-blue-500 to-cyan-400',
-  'from-indigo-600 via-purple-500 to-pink-400',
+  'from-sky-600 via-sky-500 to-blue-400',
   'from-emerald-600 via-emerald-500 to-teal-400',
-  'from-orange-600 via-orange-500 to-amber-400',
+  'from-amber-600 via-amber-500 to-yellow-400',
 ];
 
 export function NewsSection() {
@@ -34,7 +34,7 @@ export function NewsSection() {
     <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: '260ms' }}>
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500/10 to-rose-600/10 text-pink-600">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/10 text-blue-600">
             <Newspaper size={20} strokeWidth={1.8} />
           </div>
           <h2 className="text-base font-bold text-text-primary tracking-tight">{t('latestNews')}</h2>

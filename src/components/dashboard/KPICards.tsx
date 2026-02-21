@@ -109,7 +109,7 @@ export function KPICards() {
       ringColor: closureRate >= 80 ? '#36B37E' : closureRate >= 60 ? '#FFAB00' : '#FF5630',
       ringValue: closureRate,
       ringMax: 100,
-      chartColor: '#6B21A8',
+      chartColor: '#1E3A5F',
       trendData: trendData.plans,
       change: getChange(trendData.plans),
       invertTrend: false,

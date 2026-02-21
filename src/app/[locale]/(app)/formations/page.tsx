@@ -29,7 +29,7 @@ type FormationStatus = 'planifiee' | 'en_cours' | 'terminee' | 'annulee';
 const TYPE_CONFIG: Record<FormationType, { label: string; icon: typeof Monitor; color: string; bg: string }> = {
   presentiel: { label: 'Présentiel', icon: MapPin, color: '#0052CC', bg: 'bg-blue-50 text-blue-700' },
   elearning: { label: 'E-learning', icon: Monitor, color: '#36B37E', bg: 'bg-emerald-50 text-emerald-700' },
-  mixte: { label: 'Mixte', icon: Shuffle, color: '#6B21A8', bg: 'bg-purple-50 text-purple-700' },
+  mixte: { label: 'Mixte', icon: Shuffle, color: '#1E3A5F', bg: 'bg-slate-50 text-slate-700' },
 };
 
 const STATUS_CONFIG: Record<FormationStatus, { label: string; color: string }> = {

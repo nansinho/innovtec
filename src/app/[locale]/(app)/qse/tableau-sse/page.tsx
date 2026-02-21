@@ -76,7 +76,7 @@ const RISK_COLORS = [
   'bg-amber-500',
   'bg-yellow-500',
   'bg-blue-500',
-  'bg-purple-500',
+  'bg-slate-500',
   'bg-gray-400',
 ];
 
@@ -266,8 +266,8 @@ export default function TableauSSEPage() {
         target: getMetricTarget(currentYearMetrics, 'formations'),
         previousValue: formPrev,
         icon: Users,
-        color: 'text-purple-600',
-        bgColor: 'bg-purple-50',
+        color: 'text-sky-600',
+        bgColor: 'bg-sky-50',
       },
     ];
   }, [currentYearMetrics, previousYearMetrics]);
@@ -329,7 +329,7 @@ export default function TableauSSEPage() {
         label: 'Formations réalisées',
         value: totalFormations,
         total: formTarget,
-        color: 'bg-purple-500',
+        color: 'bg-sky-500',
       },
       {
         id: '4',
@@ -405,8 +405,8 @@ export default function TableauSSEPage() {
         value: totalFormationHrs > 0 ? `${totalFormationHrs}h` : '0h',
         subtext: formHrsTarget > 0 ? `objectif ${formHrsTarget}h` : '',
         icon: Users,
-        color: 'text-purple-600',
-        bg: 'bg-purple-50',
+        color: 'text-sky-600',
+        bg: 'bg-sky-50',
       },
       {
         label: 'Visites sécurité',

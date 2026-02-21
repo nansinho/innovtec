@@ -10,7 +10,7 @@ function getProgressColor(progress: number): string {
   if (progress >= 80) return '#36B37E';
   if (progress >= 50) return '#0052CC';
   if (progress >= 25) return '#FFAB00';
-  return '#FF6B35';
+  return '#D4A017';
 }
 
 export function FormationsProgress() {
@@ -32,7 +32,7 @@ export function FormationsProgress() {
     <div className="card-elevated p-6 h-full opacity-0 animate-fade-in-up" style={{ animationDelay: '500ms' }}>
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/10 text-purple-600">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500/10 to-sky-600/10 text-sky-600">
             <GraduationCap size={20} strokeWidth={1.8} />
           </div>
           <div>
@@ -73,7 +73,7 @@ export function FormationsProgress() {
                   <div className="flex items-center gap-2 mt-0.5">
                     <Clock size={11} className="text-text-muted" />
                     <span className="text-[11px] text-text-muted">{formation.duration_hours as number}h</span>
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-600">
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-sky-50 text-sky-600">
                       En cours
                     </span>
                   </div>

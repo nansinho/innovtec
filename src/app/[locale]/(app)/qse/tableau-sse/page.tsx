@@ -20,7 +20,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
+import { useSupabaseQuery, useRealtimeSubscription } from '@/lib/hooks/use-supabase-query';
 import { LoadingState, EmptyState } from '@/components/ui/DataStates';
 
 // --- Types ---
@@ -139,6 +139,10 @@ export default function TableauSSEPage() {
       supabase.from('safety_reports').select('severity, status')
   );
 
+  useRealtimeSubscription('sse_metrics', () => { /* refetch handled by query deps */ });
+  useRealtimeSubscription('action_plans', () => { /* refetch handled by query deps */ });
+  useRealtimeSubscription('safety_reports', () => { /* refetch handled by query deps */ });
+
   // Cast all data as Record<string, any>[]
   const metrics = (rawMetrics ?? []) as Record<string, any>[];
   const actionPlans = (rawActionPlans ?? []) as Record<string, any>[];
@@ -201,7 +205,7 @@ export default function TableauSSEPage() {
     return [
       {
         id: 'tf',
-        label: 'Taux de Frequence (TF)',
+        label: 'Taux de Fr\u00e9quence (TF)',
         value: Number(tf.toFixed(2)),
         unit: '',
         target: getMetricTarget(currentYearMetrics, 'taux_frequence'),
@@ -212,7 +216,7 @@ export default function TableauSSEPage() {
       },
       {
         id: 'tg',
-        label: 'Taux de Gravite (TG)',
+        label: 'Taux de Gravit\u00e9 (TG)',
         value: Number(tg.toFixed(2)),
         unit: '',
         target: getMetricTarget(currentYearMetrics, 'taux_gravite'),
@@ -245,9 +249,9 @@ export default function TableauSSEPage() {
       },
       {
         id: 'qh',
-        label: 'Quarts d\'heure securite',
+        label: 'Quarts d\'heure s\u00e9curit\u00e9',
         value: qh,
-        unit: 'realises',
+        unit: 'r\u00e9alis\u00e9s',
         target: getMetricTarget(currentYearMetrics, 'quarts_heure'),
         previousValue: qhPrev,
         icon: Clock,
@@ -256,7 +260,7 @@ export default function TableauSSEPage() {
       },
       {
         id: 'form',
-        label: 'Formations securite',
+        label: 'Formations s\u00e9curit\u00e9',
         value: form,
         unit: 'sessions',
         target: getMetricTarget(currentYearMetrics, 'formations'),
@@ -308,7 +312,7 @@ export default function TableauSSEPage() {
     return [
       {
         id: '1',
-        label: 'Plans d\'actions clotures',
+        label: 'Plans d\'actions cl\u00f4tur\u00e9s',
         value: closedPlans,
         total: totalPlans || 1,
         color: 'bg-emerald-500',
@@ -322,21 +326,21 @@ export default function TableauSSEPage() {
       },
       {
         id: '3',
-        label: 'Formations realisees',
+        label: 'Formations r\u00e9alis\u00e9es',
         value: totalFormations,
         total: formTarget,
         color: 'bg-purple-500',
       },
       {
         id: '4',
-        label: 'Visites securite effectuees',
+        label: 'Visites s\u00e9curit\u00e9 effectu\u00e9es',
         value: totalVisites,
         total: visitesTarget,
         color: 'bg-orange-500',
       },
       {
         id: '5',
-        label: 'Situations dangereuses traitees',
+        label: 'Situations dangereuses trait\u00e9es',
         value: totalSD,
         total: sdTarget,
         color: 'bg-cyan-500',
@@ -391,7 +395,7 @@ export default function TableauSSEPage() {
       {
         label: 'Presqu\'accidents',
         value: String(totalPresquAcc),
-        subtext: 'declares et traites',
+        subtext: 'd\u00e9clar\u00e9s et trait\u00e9s',
         icon: AlertTriangle,
         color: 'text-amber-600',
         bg: 'bg-amber-50',
@@ -405,7 +409,7 @@ export default function TableauSSEPage() {
         bg: 'bg-purple-50',
       },
       {
-        label: 'Visites securite',
+        label: 'Visites s\u00e9curit\u00e9',
         value: String(totalVisites),
         subtext: visitesTarget > 0 ? `objectif ${visitesTarget}` : '',
         icon: HardHat,
@@ -421,9 +425,9 @@ export default function TableauSSEPage() {
         bg: 'bg-emerald-50',
       },
       {
-        label: 'Documents mis a jour',
+        label: 'Documents mis \u00e0 jour',
         value: String(totalDocs),
-        subtext: docsTarget > 0 ? `sur ${docsTarget} prevus` : '',
+        subtext: docsTarget > 0 ? `sur ${docsTarget} pr\u00e9vus` : '',
         icon: FileText,
         color: 'text-cyan-600',
         bg: 'bg-cyan-50',
@@ -461,15 +465,15 @@ export default function TableauSSEPage() {
                   Tableau de Bord SSE
                 </h1>
                 <p className="text-sm text-text-secondary mt-0.5">
-                  Indicateurs Sante, Securite et Environnement
+                  Indicateurs Sant\u00e9, S\u00e9curit\u00e9 et Environnement
                 </p>
               </div>
             </div>
           </div>
         </div>
         <EmptyState
-          message="Aucune donnee SSE disponible"
-          description="Les indicateurs apparaitront ici une fois les premieres donnees saisies dans le systeme."
+          message="Aucune donn\u00e9e SSE disponible"
+          description="Les indicateurs appara\u00eetront ici une fois les premi\u00e8res donn\u00e9es saisies dans le syst\u00e8me."
         />
       </div>
     );
@@ -489,7 +493,7 @@ export default function TableauSSEPage() {
                 Tableau de Bord SSE
               </h1>
               <p className="text-sm text-text-secondary mt-0.5">
-                Indicateurs Sante, Securite et Environnement
+                Indicateurs Sant\u00e9, S\u00e9curit\u00e9 et Environnement
               </p>
             </div>
           </div>
@@ -622,7 +626,7 @@ export default function TableauSSEPage() {
         >
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold text-text-primary">
-              Evolution mensuelle
+              \u00c9volution mensuelle
             </h2>
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1.5 text-[10px] text-text-secondary">
@@ -687,7 +691,7 @@ export default function TableauSSEPage() {
           style={{ animationDelay: '180ms' }}
         >
           <h2 className="text-sm font-bold text-text-primary mb-4">
-            Repartition des risques identifies
+            R\u00e9partition des risques identifi\u00e9s
           </h2>
 
           <div className="space-y-3">
@@ -721,7 +725,7 @@ export default function TableauSSEPage() {
 
           <div className="mt-4 pt-3 border-t border-border-light">
             <p className="text-xs text-text-muted">
-              Total : {safetyReports.length} risques identifies sur la periode
+              Total : {safetyReports.length} risques identifi\u00e9s sur la p\u00e9riode
             </p>
           </div>
         </div>
@@ -736,10 +740,10 @@ export default function TableauSSEPage() {
         >
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold text-text-primary">
-              Taux de realisation
+              Taux de r\u00e9alisation
             </h2>
             <span className="text-xs text-text-muted">
-              Annee en cours
+              Ann\u00e9e en cours
             </span>
           </div>
 
@@ -793,7 +797,7 @@ export default function TableauSSEPage() {
           style={{ animationDelay: '300ms' }}
         >
           <h2 className="text-sm font-bold text-text-primary mb-4">
-            Bilan annuel cumule
+            Bilan annuel cumul\u00e9
           </h2>
 
           <div className="grid grid-cols-2 gap-4">
@@ -834,7 +838,7 @@ export default function TableauSSEPage() {
         <div className="p-5 pb-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-text-primary">
-              Detail mensuel
+              D\u00e9tail mensuel
             </h2>
             <button className="btn-secondary flex items-center gap-2 text-xs py-1.5 px-3">
               <Download size={12} />

@@ -551,6 +551,66 @@ export async function rejectDocument(signatureItemId: string, reason: string) {
 }
 
 // ============================================
+// ADMIN - USER MANAGEMENT
+// ============================================
+export async function updateUserRole(userId: string, role: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('profiles')
+    .update({ role })
+    .eq('id', userId);
+
+  if (error) throw error;
+  revalidatePath('/admin');
+  revalidatePath('/trombinoscope');
+}
+
+export async function updateUserStatus(userId: string, isActive: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('profiles')
+    .update({ is_active: isActive })
+    .eq('id', userId);
+
+  if (error) throw error;
+  revalidatePath('/admin');
+  revalidatePath('/trombinoscope');
+}
+
+export async function adminUpdateProfile(userId: string, data: {
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  position?: string;
+  phone?: string;
+  role?: string;
+  team_id?: string;
+  avatar_url?: string;
+}) {
+  const supabase = await createClient();
+  const cleanData: Record<string, unknown> = {};
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined && value !== '') {
+      cleanData[key] = value;
+    }
+  });
+
+  if (data.team_id === '') {
+    cleanData.team_id = null;
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update(cleanData)
+    .eq('id', userId);
+
+  if (error) throw error;
+  revalidatePath('/admin');
+  revalidatePath('/trombinoscope');
+  revalidatePath('/profil');
+}
+
+// ============================================
 // SSE METRICS
 // ============================================
 export async function upsertSSEMetric(data: {

@@ -24,6 +24,7 @@ import {
   ChevronDown,
   Zap,
   LogOut,
+  Shield,
 } from 'lucide-react';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -33,6 +34,7 @@ interface NavItem {
   label: string;
   href: string;
   icon: React.ReactNode;
+  adminOnly?: boolean;
   children?: { label: string; href: string; icon: React.ReactNode }[];
 }
 
@@ -56,6 +58,8 @@ export function Sidebar() {
     router.push('/login');
     router.refresh();
   };
+
+  const isAdmin = user?.role === 'admin';
 
   const navItems: NavItem[] = [
     {
@@ -116,7 +120,15 @@ export function Sidebar() {
       href: '/galerie',
       icon: <Image size={20} />,
     },
+    {
+      label: 'Administration',
+      href: '/admin',
+      icon: <Shield size={20} />,
+      adminOnly: true,
+    },
   ];
+
+  const visibleNavItems = navItems.filter((item) => !item.adminOnly || isAdmin);
 
   const isActive = (href: string) => {
     const cleanPath = pathname.replace(/^\/(fr|pt)/, '') || '/';
@@ -141,14 +153,14 @@ export function Sidebar() {
         </div>
         <div>
           <h1 className="text-sm font-bold text-white tracking-wide">INNOVTEC</h1>
-          <p className="text-[10px] text-white/50 font-medium tracking-widest uppercase">Réseaux</p>
+          <p className="text-[10px] text-white/50 font-medium tracking-widest uppercase">R\u00e9seaux</p>
         </div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 sidebar-scroll">
         <ul className="space-y-0.5">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <li key={item.href}>
               {item.children ? (
                 <div>
@@ -201,7 +213,8 @@ export function Sidebar() {
                     'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150',
                     isActive(item.href)
                       ? 'bg-white/10 text-white shadow-sm'
-                      : 'text-white/60 hover:bg-white/5 hover:text-white/90'
+                      : 'text-white/60 hover:bg-white/5 hover:text-white/90',
+                    item.adminOnly && 'border-t border-white/10 mt-2 pt-2.5'
                   )}
                 >
                   {item.icon}
@@ -217,12 +230,20 @@ export function Sidebar() {
       <div className="border-t border-white/10 p-4">
         <div className="flex items-center gap-3">
           <Link href="/profil" className="flex-1 flex items-center gap-3 min-w-0">
-            <div className={cn(
-              'flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white flex-shrink-0',
-              user ? getAvatarGradient(displayName) : 'from-primary to-primary-light'
-            )}>
-              {initials}
-            </div>
+            {user?.avatar_url ? (
+              <img
+                src={user.avatar_url}
+                alt={displayName}
+                className="h-9 w-9 rounded-full object-cover ring-2 ring-white/20 flex-shrink-0"
+              />
+            ) : (
+              <div className={cn(
+                'flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white flex-shrink-0',
+                user ? getAvatarGradient(displayName) : 'from-primary to-primary-light'
+              )}>
+                {initials}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white truncate">{displayName}</p>
               <span className={cn(

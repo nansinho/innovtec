@@ -2,10 +2,10 @@
 
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { Search, LayoutGrid, GitBranch, Phone, Mail } from 'lucide-react';
+import { Search, LayoutGrid, GitBranch, Phone, Mail, Briefcase } from 'lucide-react';
 import { cn, getAvatarGradient, getInitials } from '@/lib/utils';
 import { Link } from '@/i18n/routing';
-import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
+import { useSupabaseQuery, useRealtimeSubscription } from '@/lib/hooks/use-supabase-query';
 import { LoadingState, EmptyState } from '@/components/ui/DataStates';
 
 export default function TrombinoscopePage() {
@@ -14,7 +14,7 @@ export default function TrombinoscopePage() {
   const [selectedTeam, setSelectedTeam] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'org'>('grid');
 
-  const { data: profiles, loading } = useSupabaseQuery(
+  const { data: profiles, loading, refetch } = useSupabaseQuery(
     (supabase) =>
       supabase
         .from('profiles')
@@ -27,6 +27,8 @@ export default function TrombinoscopePage() {
     (supabase) =>
       supabase.from('teams').select('*').order('name'),
   );
+
+  useRealtimeSubscription('profiles', refetch);
 
   const teamNames = ['all', ...(teams || []).map((t: Record<string, any>) => t.name as string)];
 
@@ -74,7 +76,7 @@ export default function TrombinoscopePage() {
             className="input w-auto"
           >
             {teamNames.map((team) => (
-              <option key={team} value={team}>{team === 'all' ? 'Toutes les équipes' : team}</option>
+              <option key={team} value={team}>{team === 'all' ? 'Toutes les \u00e9quipes' : team}</option>
             ))}
           </select>
           <div className="flex rounded-button border border-border overflow-hidden">
@@ -102,53 +104,86 @@ export default function TrombinoscopePage() {
 
       {/* Grid view */}
       {filteredMembers.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-stagger">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 animate-stagger">
           {filteredMembers.map((member: Record<string, any>) => {
             const firstName = (member.first_name as string) || '';
             const lastName = (member.last_name as string) || '';
+            const position = (member.position as string) || '';
+            const email = (member.email as string) || '';
+            const phone = (member.phone as string) || '';
             const team = member.team as { name: string; color: string } | null;
+            const avatarUrl = member.avatar_url as string | null;
             const gradient = getAvatarGradient(firstName + lastName);
             const initials = getInitials(firstName, lastName);
 
             return (
               <Link key={member.id as string} href={`/trombinoscope/${member.id}`}>
-                <div className="card group p-5 text-center hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 cursor-pointer">
-                  <div className="relative inline-block mb-3">
-                    <div className={`flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-white font-bold text-xl shadow-md group-hover:scale-105 transition-transform`}>
-                      {initials}
+                <div className="card group overflow-hidden hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 cursor-pointer">
+                  <div
+                    className="h-1.5"
+                    style={{ backgroundColor: team?.color || '#0052CC' }}
+                  />
+                  <div className="p-5">
+                    <div className="flex justify-center mb-4">
+                      {avatarUrl ? (
+                        <img
+                          src={avatarUrl}
+                          alt={`${firstName} ${lastName}`}
+                          className="h-20 w-20 rounded-full object-cover ring-2 ring-white shadow-md group-hover:scale-105 transition-transform"
+                        />
+                      ) : (
+                        <div className={cn(
+                          'flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br text-white font-bold text-xl shadow-md ring-2 ring-white group-hover:scale-105 transition-transform',
+                          gradient
+                        )}>
+                          {initials}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  <h3 className="text-sm font-bold text-text-primary">
-                    {firstName} {lastName}
-                  </h3>
-                  <p className="text-xs text-text-secondary mt-0.5">{member.position as string}</p>
-                  {team && (
-                    <span
-                      className="badge mt-2 text-white"
-                      style={{ backgroundColor: team.color || '#0052CC' }}
-                    >
-                      {team.name}
-                    </span>
-                  )}
-                  <div className="flex items-center justify-center gap-2 mt-4 pt-3 border-t border-border-light">
-                    {member.phone && (
-                      <span
-                        onClick={(e) => { e.preventDefault(); window.location.href = `tel:${member.phone}`; }}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary hover:bg-primary-100 transition-colors"
-                        title={t('call')}
-                      >
-                        <Phone size={14} />
-                      </span>
+
+                    <div className="text-center mb-3">
+                      <h3 className="text-sm font-bold text-text-primary group-hover:text-primary transition-colors">
+                        {firstName} {lastName}
+                      </h3>
+                      {position && (
+                        <p className="text-xs text-text-secondary mt-1 flex items-center justify-center gap-1">
+                          <Briefcase size={11} className="text-text-muted" />
+                          {position}
+                        </p>
+                      )}
+                    </div>
+
+                    {team && (
+                      <div className="flex justify-center mb-4">
+                        <span
+                          className="badge text-white text-[10px]"
+                          style={{ backgroundColor: team.color || '#0052CC' }}
+                        >
+                          {team.name}
+                        </span>
+                      </div>
                     )}
-                    {member.email && (
-                      <span
-                        onClick={(e) => { e.preventDefault(); window.location.href = `mailto:${member.email}`; }}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary hover:bg-primary-100 transition-colors"
-                        title={t('email')}
-                      >
-                        <Mail size={14} />
-                      </span>
-                    )}
+
+                    <div className="flex items-center justify-center gap-2 pt-3 border-t border-border-light">
+                      {phone && (
+                        <span
+                          onClick={(e) => { e.preventDefault(); window.location.href = `tel:${phone}`; }}
+                          className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-50 text-primary hover:bg-primary-100 transition-colors"
+                          title={t('call')}
+                        >
+                          <Phone size={15} />
+                        </span>
+                      )}
+                      {email && (
+                        <span
+                          onClick={(e) => { e.preventDefault(); window.location.href = `mailto:${email}`; }}
+                          className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-50 text-primary hover:bg-primary-100 transition-colors"
+                          title={t('email')}
+                        >
+                          <Mail size={15} />
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Link>

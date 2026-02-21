@@ -12,7 +12,7 @@ import {
   MapPin,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
+import { useSupabaseQuery, useRealtimeSubscription } from '@/lib/hooks/use-supabase-query';
 import { createEvent } from '@/lib/actions';
 import { Modal } from '@/components/ui/Modal';
 import { LoadingState, EmptyState } from '@/components/ui/DataStates';
@@ -23,10 +23,10 @@ type ViewMode = 'week' | 'month';
 
 const EVENT_TYPE_CONFIG: Record<EventType, { label: string; color: string; bg: string; border: string }> = {
   formation: { label: 'Formation', color: '#0052CC', bg: 'bg-blue-50', border: 'border-l-[#0052CC]' },
-  reunion: { label: 'Reunion', color: '#6B21A8', bg: 'bg-purple-50', border: 'border-l-purple-700' },
+  reunion: { label: 'R\u00e9union', color: '#6B21A8', bg: 'bg-purple-50', border: 'border-l-purple-700' },
   visite: { label: 'Visite', color: '#FF6B35', bg: 'bg-orange-50', border: 'border-l-orange-500' },
   deadline: { label: 'Deadline', color: '#FF5630', bg: 'bg-red-50', border: 'border-l-red-500' },
-  conge: { label: 'Conge', color: '#36B37E', bg: 'bg-emerald-50', border: 'border-l-emerald-500' },
+  conge: { label: 'Cong\u00e9', color: '#36B37E', bg: 'bg-emerald-50', border: 'border-l-emerald-500' },
 };
 
 function getWeekDates(baseDate: Date): Date[] {
@@ -72,8 +72,8 @@ function formatTime(dateStr: string): string {
 
 const DAY_NAMES_SHORT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 const MONTH_NAMES = [
-  'Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
-  'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre',
+  'Janvier', 'F\u00e9vrier', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Ao\u00fbt', 'Septembre', 'Octobre', 'Novembre', 'D\u00e9cembre',
 ];
 
 export default function PlanningPage() {
@@ -98,13 +98,13 @@ export default function PlanningPage() {
     (supabase) => supabase.from('teams').select('id, name').order('name'),
   );
 
+  useRealtimeSubscription('events', refetch);
+
   const allEvents = (events || []) as Record<string, any>[];
   const allTeams = (teams || []) as Record<string, any>[];
 
   const filteredEvents = useMemo(() => {
     return allEvents.filter((event) => {
-      const team = event.team as Record<string, any> | null;
-      const teamName = team ? (team.name as string) : '';
       const matchesTeam = selectedTeam === 'all' || (event.team_id as string) === selectedTeam;
       const matchesType = selectedType === 'all' || (event.type as string) === selectedType;
       return matchesTeam && matchesType;
@@ -154,11 +154,11 @@ export default function PlanningPage() {
         location: (formData.get('location') as string) || undefined,
         team_id: (formData.get('team_id') as string) || undefined,
       });
-      toast('Evenement cree avec succes', 'success');
+      toast('\u00c9v\u00e9nement cr\u00e9\u00e9 avec succ\u00e8s', 'success');
       setShowCreateModal(false);
       refetch();
     } catch {
-      toast('Erreur lors de la creation', 'error');
+      toast('Erreur lors de la cr\u00e9ation', 'error');
     } finally {
       setSaving(false);
     }
@@ -177,20 +177,19 @@ export default function PlanningPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Planning d&apos;equipe</h1>
+          <h1 className="text-2xl font-bold text-text-primary">Planning d&apos;\u00e9quipe</h1>
           <p className="text-sm text-text-secondary mt-1">
-            {filteredEvents.length} evenement{filteredEvents.length > 1 ? 's' : ''} planifie{filteredEvents.length > 1 ? 's' : ''}
+            {filteredEvents.length} \u00e9v\u00e9nement{filteredEvents.length > 1 ? 's' : ''} planifi\u00e9{filteredEvents.length > 1 ? 's' : ''}
           </p>
         </div>
         <button onClick={() => setShowCreateModal(true)} className="btn-primary flex items-center gap-2 w-fit">
           <Plus size={16} />
-          Nouvel evenement
+          Nouvel \u00e9v\u00e9nement
         </button>
       </div>
 
       {/* Toolbar */}
       <div className="flex flex-col lg:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
-        {/* View toggle and navigation */}
         <div className="flex items-center gap-3">
           <div className="flex rounded-button border border-border overflow-hidden">
             <button
@@ -247,7 +246,7 @@ export default function PlanningPage() {
             onChange={(e) => setSelectedTeam(e.target.value)}
             className="input w-auto text-sm"
           >
-            <option value="all">Toutes les equipes</option>
+            <option value="all">Toutes les \u00e9quipes</option>
             {allTeams.map((team) => (
               <option key={team.id as string} value={team.id as string}>{team.name as string}</option>
             ))}
@@ -277,8 +276,8 @@ export default function PlanningPage() {
 
       {allEvents.length === 0 ? (
         <EmptyState
-          message="Aucun evenement"
-          description="Creez votre premier evenement en cliquant sur le bouton ci-dessus."
+          message="Aucun \u00e9v\u00e9nement"
+          description="Cr\u00e9ez votre premier \u00e9v\u00e9nement en cliquant sur le bouton ci-dessus."
         />
       ) : (
         <>
@@ -443,7 +442,7 @@ export default function PlanningPage() {
           <div className="card p-5 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
             <h2 className="text-base font-bold text-text-primary mb-4 flex items-center gap-2">
               <Calendar size={18} className="text-primary" />
-              Prochains evenements
+              Prochains \u00e9v\u00e9nements
             </h2>
             <div className="space-y-3">
               {filteredEvents
@@ -516,15 +515,15 @@ export default function PlanningPage() {
       )}
 
       {/* Create Modal */}
-      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Nouvel evenement" size="lg">
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Nouvel \u00e9v\u00e9nement" size="lg">
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1">Titre *</label>
-            <input name="title" required className="input w-full" placeholder="Titre de l'evenement" />
+            <input name="title" required className="input w-full" placeholder="Titre de l'\u00e9v\u00e9nement" />
           </div>
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1">Description</label>
-            <textarea name="description" rows={3} className="input w-full" placeholder="Description detaillee..." />
+            <textarea name="description" rows={3} className="input w-full" placeholder="Description d\u00e9taill\u00e9e..." />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -536,9 +535,9 @@ export default function PlanningPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">Equipe</label>
+              <label className="block text-sm font-medium text-text-primary mb-1">\u00c9quipe</label>
               <select name="team_id" className="input w-full">
-                <option value="">-- Selectionner --</option>
+                <option value="">-- S\u00e9lectionner --</option>
                 {allTeams.map((team) => (
                   <option key={team.id as string} value={team.id as string}>{team.name as string}</option>
                 ))}
@@ -547,7 +546,7 @@ export default function PlanningPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">Date de debut *</label>
+              <label className="block text-sm font-medium text-text-primary mb-1">Date de d\u00e9but *</label>
               <input name="start_date" type="datetime-local" required className="input w-full" />
             </div>
             <div>
@@ -557,12 +556,12 @@ export default function PlanningPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1">Lieu</label>
-            <input name="location" className="input w-full" placeholder="Lieu de l'evenement" />
+            <input name="location" className="input w-full" placeholder="Lieu de l'\u00e9v\u00e9nement" />
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t border-border-light">
             <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">Annuler</button>
             <button type="submit" disabled={saving} className="btn-primary">
-              {saving ? 'Enregistrement...' : 'Creer l\'evenement'}
+              {saving ? 'Enregistrement...' : 'Cr\u00e9er l\'\u00e9v\u00e9nement'}
             </button>
           </div>
         </form>

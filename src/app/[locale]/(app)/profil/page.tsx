@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import {
   User, Lock, Save, Check, Briefcase, GraduationCap, BookOpen,
   Plus, Pencil, Trash2, Calendar, MapPin, Phone, Shield, Clock,
-  Building2, X,
+  Building2, X, Camera,
 } from 'lucide-react';
 import { useCurrentUser, useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
 import { createClient } from '@/lib/supabase/client';
@@ -53,6 +53,9 @@ export default function ProfilePage() {
   const [editingExperience, setEditingExperience] = useState<string | null>(null);
   const [experienceForm, setExperienceForm] = useState({ company: '', position: '', start_date: '', end_date: '', description: '', is_current: false });
   const [savingExperience, setSavingExperience] = useState(false);
+
+  // ─── Avatar upload ───
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   // ─── Security ───
   const [newPassword, setNewPassword] = useState('');
@@ -105,6 +108,51 @@ export default function ProfilePage() {
   }, [user]);
 
   // ─── Handlers ───
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast('Veuillez s\u00e9lectionner une image', 'error');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast('L\'image ne doit pas d\u00e9passer 5 Mo', 'error');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const supabase = createClient();
+      const fileExt = file.name.split('.').pop();
+      const filePath = `avatars/${user.id}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      await refetch();
+      toast('Photo de profil mise \u00e0 jour', 'success');
+    } catch {
+      toast('Erreur lors du t\u00e9l\u00e9chargement de la photo', 'error');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const handleUpdatePersonalInfo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -318,11 +366,38 @@ export default function ProfilePage() {
       <div className="card p-6">
         {/* ═══ Profile Header ═══ */}
         <div className="flex items-start gap-5 mb-6">
-          <div className={cn(
-            'flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br text-2xl font-bold text-white flex-shrink-0',
-            user ? getAvatarGradient(displayName) : 'from-primary to-primary-light'
-          )}>
-            {initials}
+          <div className="relative flex-shrink-0 group">
+            {user?.avatar_url ? (
+              <img
+                src={user.avatar_url}
+                alt={displayName}
+                className="h-20 w-20 rounded-2xl object-cover ring-2 ring-white shadow-md"
+              />
+            ) : (
+              <div className={cn(
+                'flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br text-2xl font-bold text-white',
+                user ? getAvatarGradient(displayName) : 'from-primary to-primary-light'
+              )}>
+                {initials}
+              </div>
+            )}
+            <label className={cn(
+              'absolute inset-0 flex items-center justify-center rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer',
+              uploadingAvatar && 'opacity-100'
+            )}>
+              {uploadingAvatar ? (
+                <div className="h-5 w-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+              ) : (
+                <Camera size={20} className="text-white" />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+                disabled={uploadingAvatar}
+              />
+            </label>
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-xl font-bold text-text-primary">{displayName}</h2>

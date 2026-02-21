@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Download,
   TrendingUp,
@@ -20,6 +20,8 @@ import {
   FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
+import { LoadingState, EmptyState } from '@/components/ui/DataStates';
 
 // --- Types ---
 interface KPI {
@@ -52,113 +54,426 @@ interface ActionItem {
   color: string;
 }
 
-// --- Demo Data ---
-const DEMO_KPIS: KPI[] = [
-  {
-    id: 'tf',
-    label: 'Taux de Frequence (TF)',
-    value: 8.2,
-    unit: '',
-    target: 10.0,
-    previousValue: 9.5,
-    icon: Activity,
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50',
-  },
-  {
-    id: 'tg',
-    label: 'Taux de Gravite (TG)',
-    value: 0.45,
-    unit: '',
-    target: 0.60,
-    previousValue: 0.52,
-    icon: Shield,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-  },
-  {
-    id: 'jsa',
-    label: 'Jours sans accident',
-    value: 47,
-    unit: 'jours',
-    target: 90,
-    previousValue: 32,
-    icon: Award,
-    color: 'text-primary',
-    bgColor: 'bg-primary-50',
-  },
-  {
-    id: 'sd',
-    label: 'Situations dangereuses',
-    value: 12,
-    unit: 'ce mois',
-    target: 15,
-    previousValue: 8,
-    icon: AlertTriangle,
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50',
-  },
-  {
-    id: 'qh',
-    label: 'Quarts d\'heure securite',
-    value: 28,
-    unit: 'realises',
-    target: 32,
-    previousValue: 24,
-    icon: Clock,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-  },
-  {
-    id: 'form',
-    label: 'Formations securite',
-    value: 6,
-    unit: 'sessions',
-    target: 8,
-    previousValue: 5,
-    icon: Users,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-  },
+// --- Helpers ---
+const MONTH_NAMES: Record<number, string> = {
+  1: 'Jan',
+  2: 'Fev',
+  3: 'Mar',
+  4: 'Avr',
+  5: 'Mai',
+  6: 'Juin',
+  7: 'Juil',
+  8: 'Aout',
+  9: 'Sept',
+  10: 'Oct',
+  11: 'Nov',
+  12: 'Dec',
+};
+
+const RISK_COLORS = [
+  'bg-red-500',
+  'bg-orange-500',
+  'bg-amber-500',
+  'bg-yellow-500',
+  'bg-blue-500',
+  'bg-purple-500',
+  'bg-gray-400',
 ];
 
-const DEMO_MONTHLY_DATA: MonthlyMetric[] = [
-  { month: 'Sept', accidents_travail: 1, situations_dangereuses: 6, quarts_heure: 24, visites_securite: 8, formations: 3, jours_sans_accident: 18 },
-  { month: 'Oct', accidents_travail: 0, situations_dangereuses: 9, quarts_heure: 26, visites_securite: 10, formations: 4, jours_sans_accident: 31 },
-  { month: 'Nov', accidents_travail: 1, situations_dangereuses: 8, quarts_heure: 24, visites_securite: 7, formations: 5, jours_sans_accident: 15 },
-  { month: 'Dec', accidents_travail: 0, situations_dangereuses: 7, quarts_heure: 22, visites_securite: 6, formations: 2, jours_sans_accident: 31 },
-  { month: 'Jan', accidents_travail: 0, situations_dangereuses: 10, quarts_heure: 28, visites_securite: 9, formations: 6, jours_sans_accident: 31 },
-  { month: 'Fev', accidents_travail: 0, situations_dangereuses: 12, quarts_heure: 28, visites_securite: 11, formations: 6, jours_sans_accident: 19 },
-];
+function getMetricValue(
+  rows: Record<string, any>[],
+  metricName: string,
+  month?: number
+): number {
+  const match = rows.find(
+    (r) =>
+      r.metric_name === metricName &&
+      (month === undefined || Number(r.month) === month)
+  );
+  return match ? Number(match.value) : 0;
+}
 
-const DEMO_ACTION_STATS: ActionItem[] = [
-  { id: '1', label: 'Plans d\'actions clotures', value: 18, total: 28, color: 'bg-emerald-500' },
-  { id: '2', label: 'Situations dangereuses traitees', value: 42, total: 52, color: 'bg-blue-500' },
-  { id: '3', label: 'Formations realisees', value: 24, total: 32, color: 'bg-purple-500' },
-  { id: '4', label: 'Visites securite effectuees', value: 51, total: 60, color: 'bg-orange-500' },
-  { id: '5', label: 'Audits internes realises', value: 3, total: 6, color: 'bg-cyan-500' },
-];
-
-const DEMO_TOP_RISKS = [
-  { label: 'Chutes de hauteur', count: 8, percentage: 25, color: 'bg-red-500' },
-  { label: 'Risque electrique', count: 6, percentage: 19, color: 'bg-orange-500' },
-  { label: 'Manutention manuelle', count: 5, percentage: 16, color: 'bg-amber-500' },
-  { label: 'Eboulement de tranchee', count: 4, percentage: 13, color: 'bg-yellow-500' },
-  { label: 'Circulation engins', count: 3, percentage: 9, color: 'bg-blue-500' },
-  { label: 'Risque chimique', count: 2, percentage: 6, color: 'bg-purple-500' },
-  { label: 'Autres', count: 4, percentage: 12, color: 'bg-gray-400' },
-];
+function getMetricTarget(
+  rows: Record<string, any>[],
+  metricName: string
+): number {
+  const match = rows.find((r) => r.metric_name === metricName);
+  return match && match.target != null ? Number(match.target) : 0;
+}
 
 // --- Component ---
 export default function TableauSSEPage() {
   const t = useTranslations('qse');
   const [selectedPeriod, setSelectedPeriod] = useState('2026');
 
-  const maxBarValue = Math.max(
-    ...DEMO_MONTHLY_DATA.map((d) =>
-      Math.max(d.situations_dangereuses, d.quarts_heure, d.visites_securite)
-    )
+  const selectedYear = Number(selectedPeriod);
+
+  // Query sse_metrics for the selected year and previous year
+  const {
+    data: rawMetrics,
+    loading: loadingMetrics,
+  } = useSupabaseQuery(
+    (supabase) =>
+      supabase
+        .from('sse_metrics')
+        .select('*')
+        .order('year', { ascending: false })
+        .order('month', { ascending: false }),
+    [selectedYear]
   );
+
+  // Query action_plans for stats
+  const {
+    data: rawActionPlans,
+    loading: loadingActions,
+  } = useSupabaseQuery(
+    (supabase) => supabase.from('action_plans').select('status')
+  );
+
+  // Query safety_reports for risk distribution
+  const {
+    data: rawSafetyReports,
+    loading: loadingReports,
+  } = useSupabaseQuery(
+    (supabase) =>
+      supabase.from('safety_reports').select('severity, status')
+  );
+
+  // Cast all data as Record<string, any>[]
+  const metrics = (rawMetrics ?? []) as Record<string, any>[];
+  const actionPlans = (rawActionPlans ?? []) as Record<string, any>[];
+  const safetyReports = (rawSafetyReports ?? []) as Record<string, any>[];
+
+  // Filter metrics for selected year and previous year
+  const currentYearMetrics = useMemo(
+    () => metrics.filter((m) => Number(m.year) === selectedYear),
+    [metrics, selectedYear]
+  );
+  const previousYearMetrics = useMemo(
+    () => metrics.filter((m) => Number(m.year) === selectedYear - 1),
+    [metrics, selectedYear]
+  );
+
+  // Compute aggregate value for a metric across all months of a year
+  function sumMetric(rows: Record<string, any>[], metricName: string): number {
+    return rows
+      .filter((r) => r.metric_name === metricName)
+      .reduce((sum, r) => sum + Number(r.value), 0);
+  }
+
+  function avgMetric(rows: Record<string, any>[], metricName: string): number {
+    const matched = rows.filter((r) => r.metric_name === metricName);
+    if (matched.length === 0) return 0;
+    return matched.reduce((sum, r) => sum + Number(r.value), 0) / matched.length;
+  }
+
+  // Build KPIs from real data
+  const kpis: KPI[] = useMemo(() => {
+    const tf = avgMetric(currentYearMetrics, 'taux_frequence');
+    const tfPrev = avgMetric(previousYearMetrics, 'taux_frequence');
+    const tg = avgMetric(currentYearMetrics, 'taux_gravite');
+    const tgPrev = avgMetric(previousYearMetrics, 'taux_gravite');
+    const jsa = getMetricValue(
+      currentYearMetrics,
+      'jours_sans_accident',
+      currentYearMetrics.length > 0
+        ? Number(currentYearMetrics[0].month)
+        : undefined
+    );
+    const jsaPrev = getMetricValue(
+      previousYearMetrics,
+      'jours_sans_accident',
+      previousYearMetrics.length > 0
+        ? Number(previousYearMetrics[0].month)
+        : undefined
+    );
+    const sd = currentYearMetrics.length > 0
+      ? getMetricValue(currentYearMetrics, 'situations_dangereuses', Number(currentYearMetrics[0].month))
+      : 0;
+    const sdPrev = previousYearMetrics.length > 0
+      ? getMetricValue(previousYearMetrics, 'situations_dangereuses', Number(previousYearMetrics[0].month))
+      : 0;
+    const qh = sumMetric(currentYearMetrics, 'quarts_heure');
+    const qhPrev = sumMetric(previousYearMetrics, 'quarts_heure');
+    const form = sumMetric(currentYearMetrics, 'formations');
+    const formPrev = sumMetric(previousYearMetrics, 'formations');
+
+    return [
+      {
+        id: 'tf',
+        label: 'Taux de Frequence (TF)',
+        value: Number(tf.toFixed(2)),
+        unit: '',
+        target: getMetricTarget(currentYearMetrics, 'taux_frequence'),
+        previousValue: Number(tfPrev.toFixed(2)),
+        icon: Activity,
+        color: 'text-emerald-600',
+        bgColor: 'bg-emerald-50',
+      },
+      {
+        id: 'tg',
+        label: 'Taux de Gravite (TG)',
+        value: Number(tg.toFixed(2)),
+        unit: '',
+        target: getMetricTarget(currentYearMetrics, 'taux_gravite'),
+        previousValue: Number(tgPrev.toFixed(2)),
+        icon: Shield,
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-50',
+      },
+      {
+        id: 'jsa',
+        label: 'Jours sans accident',
+        value: jsa,
+        unit: 'jours',
+        target: getMetricTarget(currentYearMetrics, 'jours_sans_accident'),
+        previousValue: jsaPrev,
+        icon: Award,
+        color: 'text-primary',
+        bgColor: 'bg-primary-50',
+      },
+      {
+        id: 'sd',
+        label: 'Situations dangereuses',
+        value: sd,
+        unit: 'ce mois',
+        target: getMetricTarget(currentYearMetrics, 'situations_dangereuses'),
+        previousValue: sdPrev,
+        icon: AlertTriangle,
+        color: 'text-amber-600',
+        bgColor: 'bg-amber-50',
+      },
+      {
+        id: 'qh',
+        label: 'Quarts d\'heure securite',
+        value: qh,
+        unit: 'realises',
+        target: getMetricTarget(currentYearMetrics, 'quarts_heure'),
+        previousValue: qhPrev,
+        icon: Clock,
+        color: 'text-orange-600',
+        bgColor: 'bg-orange-50',
+      },
+      {
+        id: 'form',
+        label: 'Formations securite',
+        value: form,
+        unit: 'sessions',
+        target: getMetricTarget(currentYearMetrics, 'formations'),
+        previousValue: formPrev,
+        icon: Users,
+        color: 'text-purple-600',
+        bgColor: 'bg-purple-50',
+      },
+    ];
+  }, [currentYearMetrics, previousYearMetrics]);
+
+  // Build monthly data from metrics
+  const monthlyData: MonthlyMetric[] = useMemo(() => {
+    const monthsInData = Array.from(
+      new Set(currentYearMetrics.map((m) => Number(m.month)))
+    ).sort((a, b) => a - b);
+
+    return monthsInData.map((month) => {
+      const monthRows = currentYearMetrics.filter(
+        (m) => Number(m.month) === month
+      );
+      return {
+        month: MONTH_NAMES[month] || String(month),
+        accidents_travail: getMetricValue(monthRows, 'accidents_travail'),
+        situations_dangereuses: getMetricValue(monthRows, 'situations_dangereuses'),
+        quarts_heure: getMetricValue(monthRows, 'quarts_heure'),
+        visites_securite: getMetricValue(monthRows, 'visites_securite'),
+        formations: getMetricValue(monthRows, 'formations'),
+        jours_sans_accident: getMetricValue(monthRows, 'jours_sans_accident'),
+      };
+    });
+  }, [currentYearMetrics]);
+
+  // Build action stats from action_plans
+  const actionStats: ActionItem[] = useMemo(() => {
+    const totalPlans = actionPlans.length;
+    const closedPlans = actionPlans.filter((a) => a.status === 'cloture').length;
+    const inProgressPlans = actionPlans.filter((a) => a.status === 'en_cours').length;
+
+    const totalSD = sumMetric(currentYearMetrics, 'situations_dangereuses');
+    const sdTarget = getMetricTarget(currentYearMetrics, 'situations_dangereuses') || Math.max(totalSD, 1);
+
+    const totalFormations = sumMetric(currentYearMetrics, 'formations');
+    const formTarget = getMetricTarget(currentYearMetrics, 'formations') || Math.max(totalFormations, 1);
+
+    const totalVisites = sumMetric(currentYearMetrics, 'visites_securite');
+    const visitesTarget = getMetricTarget(currentYearMetrics, 'visites_securite') || Math.max(totalVisites, 1);
+
+    return [
+      {
+        id: '1',
+        label: 'Plans d\'actions clotures',
+        value: closedPlans,
+        total: totalPlans || 1,
+        color: 'bg-emerald-500',
+      },
+      {
+        id: '2',
+        label: 'Actions en cours',
+        value: inProgressPlans,
+        total: totalPlans || 1,
+        color: 'bg-blue-500',
+      },
+      {
+        id: '3',
+        label: 'Formations realisees',
+        value: totalFormations,
+        total: formTarget,
+        color: 'bg-purple-500',
+      },
+      {
+        id: '4',
+        label: 'Visites securite effectuees',
+        value: totalVisites,
+        total: visitesTarget,
+        color: 'bg-orange-500',
+      },
+      {
+        id: '5',
+        label: 'Situations dangereuses traitees',
+        value: totalSD,
+        total: sdTarget,
+        color: 'bg-cyan-500',
+      },
+    ];
+  }, [actionPlans, currentYearMetrics]);
+
+  // Build top risks from safety_reports
+  const topRisks = useMemo(() => {
+    const severityCounts: Record<string, number> = {};
+    safetyReports.forEach((r) => {
+      const sev = String(r.severity || 'autres');
+      severityCounts[sev] = (severityCounts[sev] || 0) + 1;
+    });
+
+    const totalReports = safetyReports.length || 1;
+    const sorted = Object.entries(severityCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 7);
+
+    return sorted.map(([label, count], idx) => ({
+      label: label.charAt(0).toUpperCase() + label.slice(1),
+      count,
+      percentage: Math.round((count / totalReports) * 100),
+      color: RISK_COLORS[idx] || 'bg-gray-400',
+    }));
+  }, [safetyReports]);
+
+  // Compute summary metrics
+  const summaryMetrics = useMemo(() => {
+    const totalAT = sumMetric(currentYearMetrics, 'accidents_travail');
+    const prevAT = sumMetric(previousYearMetrics, 'accidents_travail');
+    const totalPresquAcc = sumMetric(currentYearMetrics, 'presqu_accidents');
+    const totalFormationHrs = sumMetric(currentYearMetrics, 'heures_formation');
+    const formHrsTarget = getMetricTarget(currentYearMetrics, 'heures_formation');
+    const totalVisites = sumMetric(currentYearMetrics, 'visites_securite');
+    const visitesTarget = getMetricTarget(currentYearMetrics, 'visites_securite');
+    const closedActions = actionPlans.filter((a) => a.status === 'cloture').length;
+    const inProgressActions = actionPlans.filter((a) => a.status === 'en_cours').length;
+    const totalDocs = sumMetric(currentYearMetrics, 'documents_maj');
+    const docsTarget = getMetricTarget(currentYearMetrics, 'documents_maj');
+
+    return [
+      {
+        label: 'Accidents du travail',
+        value: String(totalAT),
+        subtext: `vs ${prevAT} l'an dernier`,
+        icon: Flame,
+        color: 'text-red-600',
+        bg: 'bg-red-50',
+      },
+      {
+        label: 'Presqu\'accidents',
+        value: String(totalPresquAcc),
+        subtext: 'declares et traites',
+        icon: AlertTriangle,
+        color: 'text-amber-600',
+        bg: 'bg-amber-50',
+      },
+      {
+        label: 'Heures de formation',
+        value: totalFormationHrs > 0 ? `${totalFormationHrs}h` : '0h',
+        subtext: formHrsTarget > 0 ? `objectif ${formHrsTarget}h` : '',
+        icon: Users,
+        color: 'text-purple-600',
+        bg: 'bg-purple-50',
+      },
+      {
+        label: 'Visites securite',
+        value: String(totalVisites),
+        subtext: visitesTarget > 0 ? `objectif ${visitesTarget}` : '',
+        icon: HardHat,
+        color: 'text-blue-600',
+        bg: 'bg-blue-50',
+      },
+      {
+        label: 'Actions correctives',
+        value: String(closedActions + inProgressActions),
+        subtext: `${inProgressActions} en cours`,
+        icon: Target,
+        color: 'text-emerald-600',
+        bg: 'bg-emerald-50',
+      },
+      {
+        label: 'Documents mis a jour',
+        value: String(totalDocs),
+        subtext: docsTarget > 0 ? `sur ${docsTarget} prevus` : '',
+        icon: FileText,
+        color: 'text-cyan-600',
+        bg: 'bg-cyan-50',
+      },
+    ];
+  }, [currentYearMetrics, previousYearMetrics, actionPlans]);
+
+  const isLoading = loadingMetrics || loadingActions || loadingReports;
+
+  const maxBarValue = monthlyData.length > 0
+    ? Math.max(
+        ...monthlyData.map((d) =>
+          Math.max(d.situations_dangereuses, d.quarts_heure, d.visites_securite)
+        ),
+        1
+      )
+    : 1;
+
+  if (isLoading) {
+    return <LoadingState message="Chargement du tableau de bord SSE..." />;
+  }
+
+  if (!rawMetrics || metrics.length === 0) {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
+          <div>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-card bg-primary/10">
+                <Activity size={20} className="text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-text-primary">
+                  Tableau de Bord SSE
+                </h1>
+                <p className="text-sm text-text-secondary mt-0.5">
+                  Indicateurs Sante, Securite et Environnement
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <EmptyState
+          message="Aucune donnee SSE disponible"
+          description="Les indicateurs apparaitront ici une fois les premieres donnees saisies dans le systeme."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -209,17 +524,16 @@ export default function TableauSSEPage() {
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in-up"
         style={{ animationDelay: '60ms' }}
       >
-        {DEMO_KPIS.map((kpi) => {
+        {kpis.map((kpi) => {
           const KpiIcon = kpi.icon;
           const trend = kpi.value - kpi.previousValue;
           const isPositiveTrend =
             kpi.id === 'sd' || kpi.id === 'qh' || kpi.id === 'form' || kpi.id === 'jsa'
               ? trend > 0
               : trend < 0;
-          const progressPercent = Math.min(
-            (kpi.value / kpi.target) * 100,
-            100
-          );
+          const progressPercent = kpi.target > 0
+            ? Math.min((kpi.value / kpi.target) * 100, 100)
+            : 0;
 
           return (
             <div
@@ -327,7 +641,7 @@ export default function TableauSSEPage() {
           </div>
 
           <div className="space-y-4">
-            {DEMO_MONTHLY_DATA.map((data) => (
+            {monthlyData.map((data) => (
               <div key={data.month}>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-xs font-medium text-text-primary w-10">
@@ -377,7 +691,7 @@ export default function TableauSSEPage() {
           </h2>
 
           <div className="space-y-3">
-            {DEMO_TOP_RISKS.map((risk) => (
+            {topRisks.map((risk) => (
               <div key={risk.label}>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-text-secondary">
@@ -407,7 +721,7 @@ export default function TableauSSEPage() {
 
           <div className="mt-4 pt-3 border-t border-border-light">
             <p className="text-xs text-text-muted">
-              Total : 32 risques identifies sur la periode
+              Total : {safetyReports.length} risques identifies sur la periode
             </p>
           </div>
         </div>
@@ -430,7 +744,7 @@ export default function TableauSSEPage() {
           </div>
 
           <div className="space-y-4">
-            {DEMO_ACTION_STATS.map((action) => {
+            {actionStats.map((action) => {
               const percentage = Math.round(
                 (action.value / action.total) * 100
               );
@@ -483,56 +797,7 @@ export default function TableauSSEPage() {
           </h2>
 
           <div className="grid grid-cols-2 gap-4">
-            {[
-              {
-                label: 'Accidents du travail',
-                value: '2',
-                subtext: 'vs 5 l\'an dernier',
-                icon: Flame,
-                color: 'text-red-600',
-                bg: 'bg-red-50',
-              },
-              {
-                label: 'Presqu\'accidents',
-                value: '4',
-                subtext: 'declares et traites',
-                icon: AlertTriangle,
-                color: 'text-amber-600',
-                bg: 'bg-amber-50',
-              },
-              {
-                label: 'Heures de formation',
-                value: '248h',
-                subtext: 'objectif 320h',
-                icon: Users,
-                color: 'text-purple-600',
-                bg: 'bg-purple-50',
-              },
-              {
-                label: 'Visites securite',
-                value: '51',
-                subtext: 'objectif 60',
-                icon: HardHat,
-                color: 'text-blue-600',
-                bg: 'bg-blue-50',
-              },
-              {
-                label: 'Actions correctives',
-                value: '42',
-                subtext: '18 en cours',
-                icon: Target,
-                color: 'text-emerald-600',
-                bg: 'bg-emerald-50',
-              },
-              {
-                label: 'Documents mis a jour',
-                value: '14',
-                subtext: 'sur 18 prevus',
-                icon: FileText,
-                color: 'text-cyan-600',
-                bg: 'bg-cyan-50',
-              },
-            ].map((metric) => {
+            {summaryMetrics.map((metric) => {
               const MetricIcon = metric.icon;
               return (
                 <div
@@ -605,17 +870,17 @@ export default function TableauSSEPage() {
               </tr>
             </thead>
             <tbody>
-              {DEMO_MONTHLY_DATA.map((row, index) => (
+              {monthlyData.map((row, index) => (
                 <tr
                   key={row.month}
                   className={cn(
                     'border-b border-border-light hover:bg-gray-50 transition-colors',
-                    index === DEMO_MONTHLY_DATA.length - 1 && 'bg-primary-50/30 font-medium'
+                    index === monthlyData.length - 1 && 'bg-primary-50/30 font-medium'
                   )}
                 >
                   <td className="px-5 py-3 font-medium text-text-primary">
                     {row.month}
-                    {index === DEMO_MONTHLY_DATA.length - 1 && (
+                    {index === monthlyData.length - 1 && (
                       <span className="ml-2 text-[10px] text-primary font-bold">
                         En cours
                       </span>
@@ -669,23 +934,23 @@ export default function TableauSSEPage() {
                 </td>
                 <td className="text-center px-3 py-3">
                   <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-100 text-red-700 text-xs font-bold">
-                    {DEMO_MONTHLY_DATA.reduce((s, d) => s + d.accidents_travail, 0)}
+                    {monthlyData.reduce((s, d) => s + d.accidents_travail, 0)}
                   </span>
                 </td>
                 <td className="text-center px-3 py-3 text-text-primary text-xs">
-                  {DEMO_MONTHLY_DATA.reduce((s, d) => s + d.situations_dangereuses, 0)}
+                  {monthlyData.reduce((s, d) => s + d.situations_dangereuses, 0)}
                 </td>
                 <td className="text-center px-3 py-3 text-text-primary text-xs">
-                  {DEMO_MONTHLY_DATA.reduce((s, d) => s + d.quarts_heure, 0)}
+                  {monthlyData.reduce((s, d) => s + d.quarts_heure, 0)}
                 </td>
                 <td className="text-center px-3 py-3 text-text-primary text-xs">
-                  {DEMO_MONTHLY_DATA.reduce((s, d) => s + d.visites_securite, 0)}
+                  {monthlyData.reduce((s, d) => s + d.visites_securite, 0)}
                 </td>
                 <td className="text-center px-3 py-3 text-text-primary text-xs">
-                  {DEMO_MONTHLY_DATA.reduce((s, d) => s + d.formations, 0)}
+                  {monthlyData.reduce((s, d) => s + d.formations, 0)}
                 </td>
                 <td className="text-center px-3 py-3 text-emerald-600 text-xs">
-                  {DEMO_MONTHLY_DATA.reduce((s, d) => s + d.jours_sans_accident, 0)}
+                  {monthlyData.reduce((s, d) => s + d.jours_sans_accident, 0)}
                 </td>
               </tr>
             </tfoot>

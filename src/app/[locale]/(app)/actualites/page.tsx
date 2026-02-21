@@ -5,17 +5,12 @@ import { useState } from 'react';
 import { Search, Plus, Clock, MessageCircle } from 'lucide-react';
 import { cn, getCategoryBadgeClass, formatRelativeDate } from '@/lib/utils';
 import { getAvatarGradient, getInitials } from '@/lib/utils';
-
-interface Article {
-  id: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  category: { name: string; type: string; color: string };
-  author: { first_name: string; last_name: string };
-  published_at: string;
-  comments_count: number;
-}
+import { Link } from '@/i18n/routing';
+import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
+import { useToast } from '@/components/ui/Toast';
+import { Modal } from '@/components/ui/Modal';
+import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { createArticle } from '@/lib/actions';
 
 const CATEGORIES = [
   { name: 'Toutes', type: 'all', color: '#0052CC' },
@@ -26,82 +21,62 @@ const CATEGORIES = [
   { name: 'Blog', type: 'blog', color: '#6B21A8' },
 ];
 
-const DEMO_ARTICLES: Article[] = [
-  {
-    id: '1',
-    title: 'Nouvelle politique sécurité 2025 : les changements majeurs à connaître',
-    excerpt: 'Découvrez les nouvelles mesures de sécurité mises en place pour tous les chantiers INNOVTEC. Cette mise à jour concerne l\'ensemble des collaborateurs terrain et bureau.',
-    content: '',
-    category: { name: 'QSE', type: 'qse', color: '#D14900' },
-    author: { first_name: 'Maria', last_name: 'Silva' },
-    published_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    comments_count: 5,
-  },
-  {
-    id: '2',
-    title: 'REX : Chantier fibre optique Bordeaux Métropole - Retour complet',
-    excerpt: 'Retour d\'expérience détaillé sur le déploiement FTTH dans le secteur de Mérignac. Points positifs, axes d\'amélioration et recommandations pour les prochains chantiers.',
-    content: '',
-    category: { name: 'REX', type: 'rex', color: '#00875A' },
-    author: { first_name: 'Jean', last_name: 'Dupont' },
-    published_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    comments_count: 12,
-  },
-  {
-    id: '3',
-    title: 'Planning des formations Q1 2025 maintenant disponible',
-    excerpt: 'Le programme complet de formations du premier trimestre est désormais en ligne. Habilitations électriques, CACES, SST : découvrez les sessions et inscrivez-vous.',
-    content: '',
-    category: { name: 'Info', type: 'info', color: '#0052CC' },
-    author: { first_name: 'Sophie', last_name: 'Martin' },
-    published_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    comments_count: 3,
-  },
-  {
-    id: '4',
-    title: 'Rappel : Port des EPI obligatoire - Nouvelles consignes',
-    excerpt: 'Suite aux résultats des dernières inspections terrain, rappel impératif sur les équipements de protection individuelle. Nouvelles consignes pour les casques et gilets.',
-    content: '',
-    category: { name: 'Sécurité', type: 'securite', color: '#FF5630' },
-    author: { first_name: 'Pierre', last_name: 'Oliveira' },
-    published_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    comments_count: 8,
-  },
-  {
-    id: '5',
-    title: 'Bienvenue aux nouveaux collaborateurs de janvier 2025',
-    excerpt: 'INNOVTEC Réseaux accueille 4 nouveaux membres dans ses équipes ce mois-ci. Découvrez leurs profils et souhaitons-leur la bienvenue !',
-    content: '',
-    category: { name: 'Blog', type: 'blog', color: '#6B21A8' },
-    author: { first_name: 'Ana', last_name: 'Costa' },
-    published_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    comments_count: 15,
-  },
-  {
-    id: '6',
-    title: 'Mise à jour du protocole de consignation électrique',
-    excerpt: 'Le protocole de consignation a été mis à jour suite aux retours terrain. Tous les chefs d\'équipe doivent prendre connaissance de ces modifications avant le 31 janvier.',
-    content: '',
-    category: { name: 'QSE', type: 'qse', color: '#D14900' },
-    author: { first_name: 'Maria', last_name: 'Silva' },
-    published_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    comments_count: 6,
-  },
-];
-
 export default function ActualitesPage() {
   const t = useTranslations('news');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
 
-  const filteredArticles = DEMO_ARTICLES.filter((article) => {
-    const matchesCategory = selectedCategory === 'all' || article.category.type === selectedCategory;
+  const { data: articles, loading, refetch } = useSupabaseQuery(
+    (supabase) =>
+      supabase
+        .from('articles')
+        .select('*, category:article_categories(*), author:profiles!articles_author_id_fkey(*)')
+        .order('published_at', { ascending: false }),
+  );
+
+  const { data: categories } = useSupabaseQuery(
+    (supabase) =>
+      supabase.from('article_categories').select('*').order('name'),
+  );
+
+  const filteredArticles = (articles || []).filter((article: Record<string, any>) => {
+    const category = article.category as { type?: string } | null;
+    const matchesCategory = selectedCategory === 'all' || category?.type === selectedCategory;
+    const title = (article.title as string) || '';
+    const excerpt = (article.excerpt as string) || '';
     const matchesSearch =
       searchQuery === '' ||
-      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+      title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      excerpt.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSaving(true);
+    const formData = new FormData(e.currentTarget);
+    try {
+      await createArticle({
+        title: formData.get('title') as string,
+        content: formData.get('content') as string,
+        excerpt: formData.get('excerpt') as string,
+        category_id: formData.get('category_id') as string || undefined,
+        status: formData.get('status') as string || 'draft',
+      });
+      toast('Article créé avec succès', 'success');
+      setShowCreateModal(false);
+      refetch();
+    } catch {
+      toast('Erreur lors de la création', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <LoadingState />;
 
   return (
     <div className="space-y-6">
@@ -113,7 +88,7 @@ export default function ActualitesPage() {
             {filteredArticles.length} article{filteredArticles.length > 1 ? 's' : ''}
           </p>
         </div>
-        <button className="btn-primary flex items-center gap-2 w-fit">
+        <button onClick={() => setShowCreateModal(true)} className="btn-primary flex items-center gap-2 w-fit">
           <Plus size={16} />
           {t('newArticle')}
         </button>
@@ -151,66 +126,100 @@ export default function ActualitesPage() {
       </div>
 
       {/* Articles grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-stagger">
-        {filteredArticles.map((article) => {
-          const gradient = getAvatarGradient(article.author.first_name + article.author.last_name);
-          const initials = getInitials(article.author.first_name, article.author.last_name);
+      {filteredArticles.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-stagger">
+          {filteredArticles.map((article: Record<string, any>) => {
+            const author = article.author as { first_name: string; last_name: string } | null;
+            const category = article.category as { name: string; type: string; color: string } | null;
+            const firstName = author?.first_name || '';
+            const lastName = author?.last_name || '';
+            const gradient = getAvatarGradient(firstName + lastName);
+            const initials = getInitials(firstName, lastName);
 
-          return (
-            <article
-              key={article.id}
-              className="card group overflow-hidden hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
-            >
-              {/* Color header bar */}
-              <div
-                className="h-1.5"
-                style={{ backgroundColor: article.category.color }}
-              />
-
-              <div className="p-5">
-                <span className={`badge ${getCategoryBadgeClass(article.category.type)} mb-3`}>
-                  {article.category.name}
-                </span>
-
-                <h2 className="text-base font-bold text-text-primary group-hover:text-primary transition-colors line-clamp-2 mb-2">
-                  {article.title}
-                </h2>
-
-                <p className="text-sm text-text-secondary line-clamp-3 mb-4">
-                  {article.excerpt}
-                </p>
-
-                <div className="flex items-center justify-between pt-3 border-t border-border-light">
-                  <div className="flex items-center gap-2">
-                    <div className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[10px] font-bold text-white`}>
-                      {initials}
+            return (
+              <Link key={article.id as string} href={`/actualites/${article.id}`}>
+                <article className="card group overflow-hidden hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 cursor-pointer">
+                  <div
+                    className="h-1.5"
+                    style={{ backgroundColor: category?.color || '#0052CC' }}
+                  />
+                  <div className="p-5">
+                    <span className={`badge ${getCategoryBadgeClass(category?.type || 'info')} mb-3`}>
+                      {category?.name || 'Info'}
+                    </span>
+                    <h2 className="text-base font-bold text-text-primary group-hover:text-primary transition-colors line-clamp-2 mb-2">
+                      {article.title as string}
+                    </h2>
+                    <p className="text-sm text-text-secondary line-clamp-3 mb-4">
+                      {article.excerpt as string}
+                    </p>
+                    <div className="flex items-center justify-between pt-3 border-t border-border-light">
+                      <div className="flex items-center gap-2">
+                        <div className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[10px] font-bold text-white`}>
+                          {initials}
+                        </div>
+                        <span className="text-xs font-medium text-text-secondary">
+                          {firstName} {lastName}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-text-muted">
+                        <span className="flex items-center gap-1">
+                          <Clock size={12} />
+                          {article.published_at ? formatRelativeDate(article.published_at as string) : '-'}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-xs font-medium text-text-secondary">
-                      {article.author.first_name} {article.author.last_name}
-                    </span>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-text-muted">
-                    <span className="flex items-center gap-1">
-                      <MessageCircle size={12} />
-                      {article.comments_count}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock size={12} />
-                      {formatRelativeDate(article.published_at)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </article>
-          );
-        })}
-      </div>
-
-      {filteredArticles.length === 0 && (
-        <div className="text-center py-16">
-          <p className="text-text-muted text-sm">{t('noArticles')}</p>
+                </article>
+              </Link>
+            );
+          })}
         </div>
+      ) : (
+        <EmptyState message={t('noArticles')} description="Créez votre premier article en cliquant sur le bouton ci-dessus." />
       )}
+
+      {/* Create Modal */}
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Nouvel article" size="lg">
+        <form onSubmit={handleCreate} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Titre *</label>
+            <input name="title" required className="input w-full" placeholder="Titre de l'article" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Résumé</label>
+            <input name="excerpt" className="input w-full" placeholder="Résumé court" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Contenu *</label>
+            <textarea name="content" required rows={6} className="input w-full" placeholder="Contenu de l'article..." />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Catégorie</label>
+              <select name="category_id" className="input w-full">
+                <option value="">-- Sélectionner --</option>
+                {(categories || []).map((cat: Record<string, any>) => (
+                  <option key={cat.id as string} value={cat.id as string}>{cat.name as string}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Statut</label>
+              <select name="status" className="input w-full">
+                <option value="draft">Brouillon</option>
+                <option value="published">Publié</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-border-light">
+            <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">Annuler</button>
+            <button type="submit" disabled={saving} className="btn-primary">
+              {saving ? 'Enregistrement...' : 'Créer l\'article'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

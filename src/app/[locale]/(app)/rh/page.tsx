@@ -3,9 +3,6 @@
 import { useState } from 'react';
 import {
   Users,
-  UserPlus,
-  UserMinus,
-  TrendingDown,
   CalendarDays,
   Receipt,
   FolderOpen,
@@ -19,21 +16,16 @@ import {
   ArrowDownRight,
   FileText,
   Briefcase,
+  Plus,
 } from 'lucide-react';
 import { cn, getAvatarGradient, getInitials } from '@/lib/utils';
+import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
+import { createLeaveRequest, updateLeaveRequestStatus } from '@/lib/actions';
+import { Modal } from '@/components/ui/Modal';
+import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { useToast } from '@/components/ui/Toast';
 
 type LeaveStatus = 'approuve' | 'en_attente' | 'refuse';
-
-interface LeaveRequest {
-  id: string;
-  employee: { first_name: string; last_name: string };
-  type: string;
-  start_date: string;
-  end_date: string;
-  days: number;
-  status: LeaveStatus;
-  submitted_at: string;
-}
 
 interface QuickLink {
   label: string;
@@ -45,92 +37,26 @@ interface QuickLink {
 }
 
 const LEAVE_STATUS_CONFIG: Record<LeaveStatus, { label: string; icon: typeof CheckCircle2; color: string }> = {
-  approuve: { label: 'Approuvé', icon: CheckCircle2, color: 'text-success bg-emerald-50' },
+  approuve: { label: 'Approuv\u00e9', icon: CheckCircle2, color: 'text-success bg-emerald-50' },
   en_attente: { label: 'En attente', icon: Clock, color: 'text-amber-600 bg-amber-50' },
-  refuse: { label: 'Refusé', icon: XCircle, color: 'text-danger bg-red-50' },
+  refuse: { label: 'Refus\u00e9', icon: XCircle, color: 'text-danger bg-red-50' },
 };
 
-const DEMO_LEAVE_REQUESTS: LeaveRequest[] = [
-  {
-    id: '1',
-    employee: { first_name: 'Thomas', last_name: 'Ferreira' },
-    type: 'Congés payés',
-    start_date: '2026-03-02',
-    end_date: '2026-03-06',
-    days: 5,
-    status: 'en_attente',
-    submitted_at: '2026-02-17',
-  },
-  {
-    id: '2',
-    employee: { first_name: 'Carlos', last_name: 'Santos' },
-    type: 'RTT',
-    start_date: '2026-02-27',
-    end_date: '2026-02-27',
-    days: 1,
-    status: 'approuve',
-    submitted_at: '2026-02-14',
-  },
-  {
-    id: '3',
-    employee: { first_name: 'Isabelle', last_name: 'Dubois' },
-    type: 'Congés payés',
-    start_date: '2026-02-24',
-    end_date: '2026-02-28',
-    days: 5,
-    status: 'approuve',
-    submitted_at: '2026-02-10',
-  },
-  {
-    id: '4',
-    employee: { first_name: 'Miguel', last_name: 'Rodrigues' },
-    type: 'Congé maladie',
-    start_date: '2026-02-18',
-    end_date: '2026-02-19',
-    days: 2,
-    status: 'approuve',
-    submitted_at: '2026-02-18',
-  },
-  {
-    id: '5',
-    employee: { first_name: 'Jean', last_name: 'Dupont' },
-    type: 'Congés payés',
-    start_date: '2026-04-13',
-    end_date: '2026-04-24',
-    days: 10,
-    status: 'en_attente',
-    submitted_at: '2026-02-15',
-  },
-  {
-    id: '6',
-    employee: { first_name: 'Claire', last_name: 'Petit' },
-    type: 'RTT',
-    start_date: '2026-03-14',
-    end_date: '2026-03-14',
-    days: 1,
-    status: 'refuse',
-    submitted_at: '2026-02-12',
-  },
-  {
-    id: '7',
-    employee: { first_name: 'Pierre', last_name: 'Oliveira' },
-    type: 'Congé formation',
-    start_date: '2026-03-10',
-    end_date: '2026-03-12',
-    days: 3,
-    status: 'en_attente',
-    submitted_at: '2026-02-16',
-  },
-];
+const LEAVE_TYPE_LABELS: Record<string, string> = {
+  conge_paye: 'Cong\u00e9s pay\u00e9s',
+  rtt: 'RTT',
+  maladie: 'Cong\u00e9 maladie',
+  sans_solde: 'Sans solde',
+  autre: 'Autre',
+};
 
 const QUICK_LINKS: QuickLink[] = [
   {
-    label: 'Demandes de congés',
-    description: 'Gérer les demandes de congés et absences',
+    label: 'Demandes de cong\u00e9s',
+    description: 'G\u00e9rer les demandes de cong\u00e9s et absences',
     icon: CalendarDays,
     color: 'text-primary',
     bg: 'bg-primary-50',
-    count: 3,
   },
   {
     label: 'Notes de frais',
@@ -138,11 +64,10 @@ const QUICK_LINKS: QuickLink[] = [
     icon: Receipt,
     color: 'text-accent',
     bg: 'bg-accent-50',
-    count: 5,
   },
   {
     label: 'Documents administratifs',
-    description: 'Accéder à vos bulletins de paie et contrats',
+    description: 'Acc\u00e9der \u00e0 vos bulletins de paie et contrats',
     icon: FolderOpen,
     color: 'text-success',
     bg: 'bg-emerald-50',
@@ -153,7 +78,6 @@ const QUICK_LINKS: QuickLink[] = [
     icon: MessageSquare,
     color: 'text-purple-600',
     bg: 'bg-purple-50',
-    count: 1,
   },
 ];
 
@@ -168,69 +92,192 @@ interface RecentActivity {
 
 const RECENT_ACTIVITIES: RecentActivity[] = [
   { id: '1', type: 'Bulletin de paie', description: 'Bulletin de paie janvier 2026 disponible', date: '2026-02-05', icon: FileText, color: 'text-primary' },
-  { id: '2', type: 'Contrat', description: 'Avenant au contrat de travail signé', date: '2026-02-01', icon: Briefcase, color: 'text-success' },
-  { id: '3', type: 'Formation', description: 'Attestation AIPR ajoutée au dossier', date: '2026-01-28', icon: FileText, color: 'text-accent' },
-  { id: '4', type: 'Entretien', description: 'Entretien annuel planifié le 15 mars', date: '2026-01-25', icon: MessageSquare, color: 'text-purple-600' },
+  { id: '2', type: 'Contrat', description: 'Avenant au contrat de travail sign\u00e9', date: '2026-02-01', icon: Briefcase, color: 'text-success' },
+  { id: '3', type: 'Formation', description: 'Attestation AIPR ajout\u00e9e au dossier', date: '2026-01-28', icon: FileText, color: 'text-accent' },
+  { id: '4', type: 'Entretien', description: 'Entretien annuel planifi\u00e9 le 15 mars', date: '2026-01-25', icon: MessageSquare, color: 'text-purple-600' },
 ];
+
+function getDayCount(start: string, end: string): number {
+  const s = new Date(start);
+  const e = new Date(end);
+  const diff = Math.ceil((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(diff + 1, 1);
+}
 
 export default function RHPage() {
   const [leaveFilter, setLeaveFilter] = useState<'all' | LeaveStatus>('all');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  const filteredRequests = DEMO_LEAVE_REQUESTS.filter(
-    (req) => leaveFilter === 'all' || req.status === leaveFilter
+  // Fetch leave requests with user/approver profiles
+  const { data: leaveRequests, loading: loadingLeaves, refetch: refetchLeaves } = useSupabaseQuery(
+    (supabase) =>
+      supabase
+        .from('leave_requests')
+        .select('*, user:profiles!leave_requests_user_id_fkey(*), approver:profiles!leave_requests_approved_by_fkey(*)')
+        .order('created_at', { ascending: false }),
   );
+
+  // Fetch expense reports for KPI
+  const { data: expenseReports, loading: loadingExpenses } = useSupabaseQuery(
+    (supabase) =>
+      supabase
+        .from('expense_reports')
+        .select('*')
+        .order('submitted_at', { ascending: false }),
+  );
+
+  // Fetch active profiles count for KPI
+  const { data: activeProfiles, loading: loadingProfiles } = useSupabaseQuery(
+    (supabase) =>
+      supabase
+        .from('profiles')
+        .select('id')
+        .eq('is_active', true),
+  );
+
+  const allLeaveRequests = (leaveRequests || []) as Record<string, any>[];
+  const allExpenseReports = (expenseReports || []) as Record<string, any>[];
+  const allActiveProfiles = (activeProfiles || []) as Record<string, any>[];
+
+  const filteredRequests = allLeaveRequests.filter(
+    (req) => leaveFilter === 'all' || (req.status as string) === leaveFilter,
+  );
+
+  // Compute KPIs from real data
+  const totalEffectifs = allActiveProfiles.length;
+  const pendingLeaves = allLeaveRequests.filter((r) => (r.status as string) === 'en_attente').length;
+  const pendingExpenses = allExpenseReports.filter((r) => (r.status as string) === 'en_attente').length;
+  const approvedLeavesThisMonth = allLeaveRequests.filter((r) => {
+    if ((r.status as string) !== 'approuve') return false;
+    const createdAt = r.created_at as string;
+    if (!createdAt) return false;
+    const d = new Date(createdAt);
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
+
+  // Dynamic quick link counts from real data
+  const quickLinksWithCounts = QUICK_LINKS.map((link) => {
+    if (link.label === 'Demandes de cong\u00e9s') {
+      return { ...link, count: pendingLeaves || undefined };
+    }
+    if (link.label === 'Notes de frais') {
+      return { ...link, count: pendingExpenses || undefined };
+    }
+    return link;
+  });
 
   const kpis = [
     {
       label: 'Effectifs total',
-      value: '47',
+      value: String(totalEffectifs),
       sublabel: 'collaborateurs actifs',
       icon: Users,
       color: 'text-primary',
       bg: 'bg-primary-50',
-      trend: '+3',
+      trend: `${totalEffectifs}`,
       trendUp: true,
     },
     {
-      label: 'Entrées du mois',
-      value: '2',
-      sublabel: 'nouveaux collaborateurs',
-      icon: UserPlus,
-      color: 'text-success',
-      bg: 'bg-emerald-50',
-      trend: '+2',
-      trendUp: true,
-    },
-    {
-      label: 'Sorties du mois',
-      value: '1',
-      sublabel: 'départ ce mois',
-      icon: UserMinus,
-      color: 'text-danger',
-      bg: 'bg-red-50',
-      trend: '-1',
+      label: 'Cong\u00e9s en attente',
+      value: String(pendingLeaves),
+      sublabel: 'demandes \u00e0 traiter',
+      icon: Clock,
+      color: 'text-amber-600',
+      bg: 'bg-amber-50',
+      trend: `${pendingLeaves}`,
       trendUp: false,
     },
     {
-      label: 'Taux d\'absentéisme',
-      value: '3.2%',
-      sublabel: 'moyenne mensuelle',
-      icon: TrendingDown,
-      color: 'text-amber-600',
-      bg: 'bg-amber-50',
-      trend: '-0.5%',
+      label: 'Cong\u00e9s approuv\u00e9s',
+      value: String(approvedLeavesThisMonth),
+      sublabel: 'ce mois-ci',
+      icon: CheckCircle2,
+      color: 'text-success',
+      bg: 'bg-emerald-50',
+      trend: `+${approvedLeavesThisMonth}`,
       trendUp: true,
     },
+    {
+      label: 'Notes de frais',
+      value: String(allExpenseReports.length),
+      sublabel: `dont ${pendingExpenses} en attente`,
+      icon: Receipt,
+      color: 'text-accent',
+      bg: 'bg-accent-50',
+      trend: `${pendingExpenses} en attente`,
+      trendUp: false,
+    },
   ];
+
+  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSaving(true);
+    const formData = new FormData(e.currentTarget);
+    try {
+      await createLeaveRequest({
+        type: formData.get('type') as string,
+        start_date: formData.get('start_date') as string,
+        end_date: formData.get('end_date') as string,
+        reason: (formData.get('reason') as string) || undefined,
+      });
+      toast('Demande de cong\u00e9 cr\u00e9\u00e9e avec succ\u00e8s', 'success');
+      setShowCreateModal(false);
+      refetchLeaves();
+    } catch {
+      toast('Erreur lors de la cr\u00e9ation de la demande', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleApprove = async (id: string) => {
+    setActionLoading(id);
+    try {
+      await updateLeaveRequestStatus(id, 'approuve');
+      toast('Demande approuv\u00e9e', 'success');
+      refetchLeaves();
+    } catch {
+      toast("Erreur lors de l'approbation", 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    setActionLoading(id);
+    try {
+      await updateLeaveRequestStatus(id, 'refuse');
+      toast('Demande refus\u00e9e', 'success');
+      refetchLeaves();
+    } catch {
+      toast('Erreur lors du refus', 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const isLoading = loadingLeaves || loadingExpenses || loadingProfiles;
+
+  if (isLoading) return <LoadingState />;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="animate-fade-in-up">
-        <h1 className="text-2xl font-bold text-text-primary">Ressources Humaines</h1>
-        <p className="text-sm text-text-secondary mt-1">
-          Tableau de bord RH et gestion administrative
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
+        <div>
+          <h1 className="text-2xl font-bold text-text-primary">Ressources Humaines</h1>
+          <p className="text-sm text-text-secondary mt-1">
+            Tableau de bord RH et gestion administrative
+          </p>
+        </div>
+        <button onClick={() => setShowCreateModal(true)} className="btn-primary flex items-center gap-2 w-fit">
+          <Plus size={16} />
+          Nouvelle demande de cong&eacute;
+        </button>
       </div>
 
       {/* KPI Cards */}
@@ -258,7 +305,7 @@ export default function RHPage() {
                 <span className={cn('text-xs font-semibold', kpi.trendUp ? 'text-success' : 'text-danger')}>
                   {kpi.trend}
                 </span>
-                <span className="text-xs text-text-muted ml-1">vs mois précédent</span>
+                <span className="text-xs text-text-muted ml-1">ce mois</span>
               </div>
             </div>
           );
@@ -267,9 +314,9 @@ export default function RHPage() {
 
       {/* Quick Links */}
       <div className="animate-fade-in-up" style={{ animationDelay: '180ms' }}>
-        <h2 className="text-base font-bold text-text-primary mb-4">Accès rapide</h2>
+        <h2 className="text-base font-bold text-text-primary mb-4">Acc&egrave;s rapide</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {QUICK_LINKS.map((link) => {
+          {quickLinksWithCounts.map((link) => {
             const Icon = link.icon;
             return (
               <div
@@ -291,7 +338,7 @@ export default function RHPage() {
                 </h3>
                 <p className="text-xs text-text-secondary mt-1">{link.description}</p>
                 <div className="flex items-center gap-1 mt-3 text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                  Accéder
+                  Acc&eacute;der
                   <ChevronRight size={14} />
                 </div>
               </div>
@@ -306,7 +353,7 @@ export default function RHPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
               <CalendarDays size={18} className="text-primary" />
-              Demandes de congés récentes
+              Demandes de cong&eacute;s r&eacute;centes
             </h2>
             <div className="flex items-center gap-1">
               {(['all', 'en_attente', 'approuve', 'refuse'] as const).map((filter) => (
@@ -326,47 +373,86 @@ export default function RHPage() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            {filteredRequests.map((request) => {
-              const statusConfig = LEAVE_STATUS_CONFIG[request.status];
-              const StatusIcon = statusConfig.icon;
-              const gradient = getAvatarGradient(request.employee.first_name + request.employee.last_name);
-              const initials = getInitials(request.employee.first_name, request.employee.last_name);
+          {allLeaveRequests.length > 0 ? (
+            <div className="space-y-2">
+              {filteredRequests.map((request) => {
+                const status = (request.status as LeaveStatus) || 'en_attente';
+                const statusConfig = LEAVE_STATUS_CONFIG[status];
+                const StatusIcon = statusConfig.icon;
+                const user = request.user as Record<string, any> | null;
+                const firstName = (user?.first_name as string) || '';
+                const lastName = (user?.last_name as string) || '';
+                const gradient = getAvatarGradient(firstName + lastName);
+                const initials = firstName && lastName ? getInitials(firstName, lastName) : '?';
+                const leaveType = LEAVE_TYPE_LABELS[(request.type as string) || ''] || (request.type as string) || '';
+                const startDate = request.start_date as string;
+                const endDate = request.end_date as string;
+                const days = startDate && endDate ? getDayCount(startDate, endDate) : 1;
+                const requestId = request.id as string;
+                const isActionPending = actionLoading === requestId;
 
-              return (
-                <div
-                  key={request.id}
-                  className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  <div className={`flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-white text-xs font-bold shrink-0`}>
-                    {initials}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-text-primary">
-                        {request.employee.first_name} {request.employee.last_name}
-                      </span>
-                      <span className="text-xs text-text-muted">
-                        {request.type}
+                return (
+                  <div
+                    key={requestId}
+                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-white text-xs font-bold shrink-0`}>
+                      {initials}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-text-primary">
+                          {firstName} {lastName}
+                        </span>
+                        <span className="text-xs text-text-muted">
+                          {leaveType}
+                        </span>
+                      </div>
+                      <div className="text-xs text-text-secondary mt-0.5">
+                        Du {startDate ? new Date(startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '—'} au {endDate ? new Date(endDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'} ({days} jour{days > 1 ? 's' : ''})
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {status === 'en_attente' && (
+                        <>
+                          <button
+                            onClick={() => handleApprove(requestId)}
+                            disabled={isActionPending}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 hover:bg-emerald-100 text-success transition-colors disabled:opacity-50"
+                            title="Approuver"
+                          >
+                            <CheckCircle2 size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleReject(requestId)}
+                            disabled={isActionPending}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-danger transition-colors disabled:opacity-50"
+                            title="Refuser"
+                          >
+                            <XCircle size={14} />
+                          </button>
+                        </>
+                      )}
+                      <span className={cn('badge flex items-center gap-1', statusConfig.color)}>
+                        <StatusIcon size={12} />
+                        {statusConfig.label}
                       </span>
                     </div>
-                    <div className="text-xs text-text-secondary mt-0.5">
-                      Du {new Date(request.start_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} au {new Date(request.end_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })} ({request.days} jour{request.days > 1 ? 's' : ''})
-                    </div>
                   </div>
-                  <span className={cn('badge flex items-center gap-1', statusConfig.color)}>
-                    <StatusIcon size={12} />
-                    {statusConfig.label}
-                  </span>
+                );
+              })}
+
+              {filteredRequests.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-text-muted text-sm">Aucune demande de cong&eacute; trouv&eacute;e pour ce filtre</p>
                 </div>
-              );
-            })}
-          </div>
-
-          {filteredRequests.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-text-muted text-sm">Aucune demande de congé trouvée</p>
+              )}
             </div>
+          ) : (
+            <EmptyState
+              message="Aucune demande de cong\u00e9"
+              description="Les demandes de cong\u00e9s appara\u00eetront ici une fois soumises."
+            />
           )}
         </div>
 
@@ -374,7 +460,7 @@ export default function RHPage() {
         <div className="card p-5 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
           <h2 className="text-base font-bold text-text-primary flex items-center gap-2 mb-4">
             <AlertCircle size={18} className="text-accent" />
-            Activité récente
+            Activit&eacute; r&eacute;cente
           </h2>
 
           <div className="space-y-3">
@@ -405,6 +491,43 @@ export default function RHPage() {
           </button>
         </div>
       </div>
+
+      {/* Create Leave Request Modal */}
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Nouvelle demande de cong\u00e9" size="md">
+        <form onSubmit={handleCreate} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Type de cong&eacute; *</label>
+            <select name="type" required className="input w-full">
+              <option value="">-- S&eacute;lectionner --</option>
+              <option value="conge_paye">Cong&eacute;s pay&eacute;s</option>
+              <option value="rtt">RTT</option>
+              <option value="maladie">Cong&eacute; maladie</option>
+              <option value="sans_solde">Sans solde</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Date de d&eacute;but *</label>
+              <input name="start_date" type="date" required className="input w-full" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Date de fin *</label>
+              <input name="end_date" type="date" required className="input w-full" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Motif</label>
+            <textarea name="reason" rows={3} className="input w-full" placeholder="Pr&eacute;cisez le motif de votre demande..." />
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-border-light">
+            <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">Annuler</button>
+            <button type="submit" disabled={saving} className="btn-primary">
+              {saving ? 'Envoi en cours...' : 'Soumettre la demande'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

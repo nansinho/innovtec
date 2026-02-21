@@ -8,7 +8,6 @@ import {
   AlertTriangle,
   MapPin,
   Calendar,
-  User,
   Filter,
   ChevronRight,
   Clock,
@@ -18,180 +17,52 @@ import {
   FileWarning,
 } from 'lucide-react';
 import { cn, getStatusColor, getSeverityColor, getAvatarGradient, getInitials } from '@/lib/utils';
-
-// --- Types ---
-interface SituationDangereuse {
-  id: string;
-  reference: string;
-  title: string;
-  description: string;
-  severity: 'faible' | 'moyen' | 'eleve' | 'critique';
-  status: 'en_cours' | 'cloture' | 'en_retard';
-  reporter: { first_name: string; last_name: string };
-  location: string;
-  chantier: string;
-  date: string;
-  date_cloture?: string;
-  actions_count: number;
-}
-
-// --- Demo Data ---
-const DEMO_SITUATIONS: SituationDangereuse[] = [
-  {
-    id: '1',
-    reference: 'SD-2026-042',
-    title: 'Absence de blindage dans tranchee profonde',
-    description:
-      'Tranchee de plus de 1m30 de profondeur sans blindage ni talutage. Risque d\'eboulement important suite aux intemperies recentes.',
-    severity: 'critique',
-    status: 'en_cours',
-    reporter: { first_name: 'Jean', last_name: 'Dupont' },
-    location: 'Rue Victor Hugo, Merignac',
-    chantier: 'FTTH Merignac Lot 3',
-    date: '2026-02-18',
-    actions_count: 3,
-  },
-  {
-    id: '2',
-    reference: 'SD-2026-041',
-    title: 'Cable electrique aerien non signale a proximite',
-    description:
-      'Ligne electrique BT a moins de 3m de la zone de travail de la nacelle. Aucune signalisation ni protection en place. Risque electrique majeur.',
-    severity: 'eleve',
-    status: 'en_cours',
-    reporter: { first_name: 'Thomas', last_name: 'Ferreira' },
-    location: 'Avenue de la Republique, Pessac',
-    chantier: 'Reseau Gaz Pessac Centre',
-    date: '2026-02-17',
-    actions_count: 2,
-  },
-  {
-    id: '3',
-    reference: 'SD-2026-040',
-    title: 'Echafaudage non conforme - barres manquantes',
-    description:
-      'Echafaudage monte sans garde-corps intermediaire et sans plinthe. Non conforme a la norme NF EN 12811.',
-    severity: 'eleve',
-    status: 'cloture',
-    reporter: { first_name: 'Pierre', last_name: 'Oliveira' },
-    location: 'Zone Industrielle, Begles',
-    chantier: 'NRO Begles Sud',
-    date: '2026-02-15',
-    date_cloture: '2026-02-16',
-    actions_count: 4,
-  },
-  {
-    id: '4',
-    reference: 'SD-2026-039',
-    title: 'Balisage insuffisant en bord de route',
-    description:
-      'Zone de travaux en bord de chaussee avec balisage minimal. Cones espaces de plus de 10m, pas de panneau de signalisation avancee. Debit vehicules important.',
-    severity: 'moyen',
-    status: 'cloture',
-    reporter: { first_name: 'Miguel', last_name: 'Rodrigues' },
-    location: 'RD1010, Gradignan',
-    chantier: 'FTTH Gradignan Est',
-    date: '2026-02-12',
-    date_cloture: '2026-02-13',
-    actions_count: 2,
-  },
-  {
-    id: '5',
-    reference: 'SD-2026-038',
-    title: 'Produit chimique sans fiche de securite',
-    description:
-      'Utilisation d\'un solvant de nettoyage sans FDS disponible sur le chantier. L\'etiquetage du produit est partiellement illisible.',
-    severity: 'moyen',
-    status: 'en_retard',
-    reporter: { first_name: 'Claire', last_name: 'Petit' },
-    location: 'Entrepot Central, Bordeaux',
-    chantier: 'Maintenance Reseau Bordeaux',
-    date: '2026-02-05',
-    actions_count: 1,
-  },
-  {
-    id: '6',
-    reference: 'SD-2026-037',
-    title: 'Sol glissant non signale dans local technique',
-    description:
-      'Fuite d\'eau ayant rendu le sol du local technique glissant. Aucun panneau d\'avertissement ni nettoyage effectue.',
-    severity: 'faible',
-    status: 'cloture',
-    reporter: { first_name: 'Carlos', last_name: 'Santos' },
-    location: 'NRO Cenon, Rue Camille Pelletan',
-    chantier: 'Maintenance NRO Rive Droite',
-    date: '2026-02-03',
-    date_cloture: '2026-02-03',
-    actions_count: 1,
-  },
-  {
-    id: '7',
-    reference: 'SD-2026-036',
-    title: 'Engin de chantier stationne pres d\'une fouille ouverte',
-    description:
-      'Mini-pelle stationnee a moins de 2m du bord d\'une fouille ouverte sans calage. Risque de basculement dans la tranchee.',
-    severity: 'critique',
-    status: 'en_retard',
-    reporter: { first_name: 'Jean', last_name: 'Dupont' },
-    location: 'Lotissement Les Pins, Le Bouscat',
-    chantier: 'FTTH Le Bouscat Lot 1',
-    date: '2026-01-28',
-    actions_count: 5,
-  },
-  {
-    id: '8',
-    reference: 'SD-2026-035',
-    title: 'EPI non porte : casque et gilet haute visibilite',
-    description:
-      'Deux techniciens observes sans casque ni gilet HV lors d\'une intervention en bord de route. Rappel immediat effectue sur place.',
-    severity: 'moyen',
-    status: 'cloture',
-    reporter: { first_name: 'Maria', last_name: 'Silva' },
-    location: 'Boulevard Pierre 1er, Bordeaux',
-    chantier: 'Fibre Bordeaux Bastide',
-    date: '2026-01-25',
-    date_cloture: '2026-01-26',
-    actions_count: 2,
-  },
-];
+import { Link } from '@/i18n/routing';
+import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
+import { useToast } from '@/components/ui/Toast';
+import { Modal } from '@/components/ui/Modal';
+import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { createSafetyReport } from '@/lib/actions';
 
 // --- Helpers ---
-function getSeverityLabel(severity: SituationDangereuse['severity']) {
-  const map = {
+function getSeverityLabel(severity: string) {
+  const map: Record<string, string> = {
     faible: 'Faible',
     moyen: 'Moyen',
-    eleve: 'Eleve',
+    eleve: 'Elevé',
     critique: 'Critique',
   };
-  return map[severity];
+  return map[severity] || severity;
 }
 
-function getSeverityIcon(severity: SituationDangereuse['severity']) {
-  const map = {
+function getSeverityIcon(severity: string) {
+  const map: Record<string, typeof AlertCircle> = {
     faible: AlertCircle,
     moyen: AlertTriangle,
     eleve: TriangleAlert,
     critique: FileWarning,
   };
-  return map[severity];
+  return map[severity] || AlertCircle;
 }
 
-function getStatusLabel(status: SituationDangereuse['status']) {
-  const map = {
+function getStatusLabel(status: string) {
+  const map: Record<string, string> = {
     en_cours: 'En cours',
-    cloture: 'Cloture',
+    cloture: 'Cloturé',
     en_retard: 'En retard',
+    annule: 'Annulé',
   };
-  return map[status];
+  return map[status] || status;
 }
 
-function getStatusIcon(status: SituationDangereuse['status']) {
-  const map = {
+function getStatusIcon(status: string) {
+  const map: Record<string, typeof Clock> = {
     en_cours: Clock,
     cloture: CheckCircle2,
     en_retard: AlertTriangle,
+    annule: AlertCircle,
   };
-  return map[status];
+  return map[status] || Clock;
 }
 
 // --- Component ---
@@ -200,27 +71,65 @@ export default function SituationsDangereusesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [severityFilter, setSeverityFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
 
-  const filteredSituations = DEMO_SITUATIONS.filter((sd) => {
-    const matchesSeverity =
-      severityFilter === 'all' || sd.severity === severityFilter;
-    const matchesStatus =
-      statusFilter === 'all' || sd.status === statusFilter;
+  const { data: reports, loading, refetch } = useSupabaseQuery(
+    (supabase) =>
+      supabase
+        .from('safety_reports')
+        .select('*, reporter:profiles!safety_reports_reporter_id_fkey(*), assignee:profiles!safety_reports_assigned_to_fkey(*)')
+        .order('created_at', { ascending: false }),
+  );
+
+  const allReports = (reports || []) as Record<string, any>[];
+
+  const filteredSituations = allReports.filter((sd) => {
+    const severity = (sd.severity as string) || '';
+    const status = (sd.status as string) || '';
+    const title = (sd.title as string) || '';
+    const description = (sd.description as string) || '';
+    const location = (sd.location as string) || '';
+    const matchesSeverity = severityFilter === 'all' || severity === severityFilter;
+    const matchesStatus = statusFilter === 'all' || status === statusFilter;
     const matchesSearch =
       searchQuery === '' ||
-      sd.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      sd.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      sd.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      sd.chantier.toLowerCase().includes(searchQuery.toLowerCase());
+      title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      location.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSeverity && matchesStatus && matchesSearch;
   });
 
   const stats = {
-    total: DEMO_SITUATIONS.length,
-    en_cours: DEMO_SITUATIONS.filter((s) => s.status === 'en_cours').length,
-    en_retard: DEMO_SITUATIONS.filter((s) => s.status === 'en_retard').length,
-    critique: DEMO_SITUATIONS.filter((s) => s.severity === 'critique').length,
+    total: allReports.length,
+    en_cours: allReports.filter((s) => s.status === 'en_cours').length,
+    en_retard: allReports.filter((s) => s.status === 'en_retard').length,
+    critique: allReports.filter((s) => s.severity === 'critique').length,
   };
+
+  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSaving(true);
+    const formData = new FormData(e.currentTarget);
+    try {
+      await createSafetyReport({
+        title: formData.get('title') as string,
+        description: formData.get('description') as string || undefined,
+        location: formData.get('location') as string || undefined,
+        severity: formData.get('severity') as string || undefined,
+      });
+      toast('Déclaration créée avec succès', 'success');
+      setShowCreateModal(false);
+      refetch();
+    } catch {
+      toast('Erreur lors de la création', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <LoadingState />;
 
   return (
     <div className="space-y-6">
@@ -236,14 +145,17 @@ export default function SituationsDangereusesPage() {
                 Situations Dangereuses
               </h1>
               <p className="text-sm text-text-secondary mt-0.5">
-                Declaration et suivi des situations dangereuses sur les chantiers
+                Déclaration et suivi des situations dangereuses sur les chantiers
               </p>
             </div>
           </div>
         </div>
-        <button className="btn-primary flex items-center gap-2 w-fit bg-danger hover:bg-danger-dark">
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="btn-primary flex items-center gap-2 w-fit bg-danger hover:bg-danger-dark"
+        >
           <Plus size={16} />
-          Nouvelle declaration
+          Nouvelle déclaration
         </button>
       </div>
 
@@ -253,7 +165,7 @@ export default function SituationsDangereusesPage() {
         style={{ animationDelay: '60ms' }}
       >
         {[
-          { label: 'Total declarations', value: stats.total, color: 'text-text-primary', bg: 'bg-gray-50', borderColor: 'border-l-gray-400' },
+          { label: 'Total déclarations', value: stats.total, color: 'text-text-primary', bg: 'bg-gray-50', borderColor: 'border-l-gray-400' },
           { label: 'En cours', value: stats.en_cours, color: 'text-blue-600', bg: 'bg-blue-50', borderColor: 'border-l-blue-500' },
           { label: 'En retard', value: stats.en_retard, color: 'text-red-600', bg: 'bg-red-50', borderColor: 'border-l-red-500' },
           { label: 'Critiques', value: stats.critique, color: 'text-red-700', bg: 'bg-red-50', borderColor: 'border-l-red-700' },
@@ -282,7 +194,7 @@ export default function SituationsDangereusesPage() {
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
             <input
               type="text"
-              placeholder="Rechercher par reference, titre, lieu ou chantier..."
+              placeholder="Rechercher par titre, description ou lieu..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="input pl-9"
@@ -295,13 +207,13 @@ export default function SituationsDangereusesPage() {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-medium text-text-secondary uppercase tracking-wide mr-1">
               <Filter size={12} className="inline mr-1" />
-              Gravite :
+              Gravité :
             </span>
             {[
               { label: 'Toutes', value: 'all' },
               { label: 'Faible', value: 'faible' },
               { label: 'Moyen', value: 'moyen' },
-              { label: 'Eleve', value: 'eleve' },
+              { label: 'Elevé', value: 'eleve' },
               { label: 'Critique', value: 'critique' },
             ].map((s) => (
               <button
@@ -329,8 +241,9 @@ export default function SituationsDangereusesPage() {
             {[
               { label: 'Tous', value: 'all' },
               { label: 'En cours', value: 'en_cours' },
-              { label: 'Cloture', value: 'cloture' },
+              { label: 'Cloturé', value: 'cloture' },
               { label: 'En retard', value: 'en_retard' },
+              { label: 'Annulé', value: 'annule' },
             ].map((s) => (
               <button
                 key={s.value}
@@ -353,135 +266,172 @@ export default function SituationsDangereusesPage() {
 
       {/* Results count */}
       <p className="text-sm text-text-secondary">
-        {filteredSituations.length} declaration{filteredSituations.length > 1 ? 's' : ''}
+        {filteredSituations.length} déclaration{filteredSituations.length > 1 ? 's' : ''}
       </p>
 
       {/* Situations list */}
-      <div className="space-y-3 animate-stagger">
-        {filteredSituations.map((sd) => {
-          const SeverityIcon = getSeverityIcon(sd.severity);
-          const StatusIcon = getStatusIcon(sd.status);
-          const gradient = getAvatarGradient(
-            sd.reporter.first_name + sd.reporter.last_name
-          );
-          const initials = getInitials(
-            sd.reporter.first_name,
-            sd.reporter.last_name
-          );
+      {allReports.length > 0 ? (
+        <div className="space-y-3 animate-stagger">
+          {filteredSituations.map((sd) => {
+            const severity = (sd.severity as string) || 'faible';
+            const status = (sd.status as string) || 'en_cours';
+            const title = (sd.title as string) || '';
+            const description = (sd.description as string) || '';
+            const location = (sd.location as string) || '';
+            const createdAt = (sd.created_at as string) || '';
+            const reporter = sd.reporter as { first_name: string; last_name: string } | null;
+            const firstName = reporter?.first_name || '';
+            const lastName = reporter?.last_name || '';
+            const SeverityIcon = getSeverityIcon(severity);
+            const StatusIcon = getStatusIcon(status);
+            const gradient = getAvatarGradient(firstName + lastName);
+            const initials = firstName && lastName ? getInitials(firstName, lastName) : '?';
 
-          return (
-            <div
-              key={sd.id}
-              className="card group p-0 overflow-hidden hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
-            >
-              <div className="flex items-stretch">
-                {/* Severity color bar */}
-                <div
-                  className={cn(
-                    'w-1.5 shrink-0',
-                    sd.severity === 'critique' && 'bg-red-600',
-                    sd.severity === 'eleve' && 'bg-orange-500',
-                    sd.severity === 'moyen' && 'bg-amber-500',
-                    sd.severity === 'faible' && 'bg-blue-500'
-                  )}
-                />
+            return (
+              <Link key={sd.id as string} href={`/qse/situations-dangereuses/${sd.id}`}>
+                <div className="card group p-0 overflow-hidden hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 cursor-pointer mb-3">
+                  <div className="flex items-stretch">
+                    {/* Severity color bar */}
+                    <div
+                      className={cn(
+                        'w-1.5 shrink-0',
+                        severity === 'critique' && 'bg-red-600',
+                        severity === 'eleve' && 'bg-orange-500',
+                        severity === 'moyen' && 'bg-amber-500',
+                        severity === 'faible' && 'bg-blue-500'
+                      )}
+                    />
 
-                <div className="flex-1 p-5">
-                  <div className="flex flex-col lg:flex-row lg:items-start gap-4">
-                    {/* Main content */}
-                    <div className="flex-1 min-w-0">
-                      {/* Badges row */}
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className="text-[10px] font-mono font-bold text-text-muted bg-gray-100 px-1.5 py-0.5 rounded">
-                          {sd.reference}
-                        </span>
-                        <span
-                          className={cn(
-                            'badge gap-1 text-[10px] border',
-                            getSeverityColor(sd.severity)
-                          )}
-                        >
-                          <SeverityIcon size={10} />
-                          {getSeverityLabel(sd.severity)}
-                        </span>
-                        <span
-                          className={cn(
-                            'badge gap-1 text-[10px]',
-                            getStatusColor(sd.status)
-                          )}
-                        >
-                          <StatusIcon size={10} />
-                          {getStatusLabel(sd.status)}
-                        </span>
-                      </div>
-
-                      {/* Title */}
-                      <h3 className="text-base font-bold text-text-primary group-hover:text-primary transition-colors">
-                        {sd.title}
-                      </h3>
-                      <p className="text-sm text-text-secondary mt-1 line-clamp-2">
-                        {sd.description}
-                      </p>
-
-                      {/* Meta */}
-                      <div className="flex items-center gap-4 mt-3 flex-wrap">
-                        <div className="flex items-center gap-1.5">
-                          <div
-                            className={`flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[8px] font-bold text-white`}
-                          >
-                            {initials}
+                    <div className="flex-1 p-5">
+                      <div className="flex flex-col lg:flex-row lg:items-start gap-4">
+                        {/* Main content */}
+                        <div className="flex-1 min-w-0">
+                          {/* Badges row */}
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <span
+                              className={cn(
+                                'badge gap-1 text-[10px] border',
+                                getSeverityColor(severity)
+                              )}
+                            >
+                              <SeverityIcon size={10} />
+                              {getSeverityLabel(severity)}
+                            </span>
+                            <span
+                              className={cn(
+                                'badge gap-1 text-[10px]',
+                                getStatusColor(status)
+                              )}
+                            >
+                              <StatusIcon size={10} />
+                              {getStatusLabel(status)}
+                            </span>
                           </div>
-                          <span className="text-xs text-text-secondary">
-                            {sd.reporter.first_name} {sd.reporter.last_name}
-                          </span>
-                        </div>
-                        <span className="flex items-center gap-1 text-xs text-text-muted">
-                          <MapPin size={11} />
-                          {sd.location}
-                        </span>
-                        <span className="flex items-center gap-1 text-xs text-text-muted">
-                          <Calendar size={11} />
-                          {new Date(sd.date).toLocaleDateString('fr-FR', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                        </span>
-                        <span className="text-xs text-text-muted">
-                          {sd.chantier}
-                        </span>
-                      </div>
-                    </div>
 
-                    {/* Right side */}
-                    <div className="flex items-center gap-3 shrink-0 lg:pt-2">
-                      <div className="text-center">
-                        <p className="text-lg font-bold text-text-primary">
-                          {sd.actions_count}
-                        </p>
-                        <p className="text-[10px] text-text-muted">action{sd.actions_count > 1 ? 's' : ''}</p>
+                          {/* Title */}
+                          <h3 className="text-base font-bold text-text-primary group-hover:text-primary transition-colors">
+                            {title}
+                          </h3>
+                          <p className="text-sm text-text-secondary mt-1 line-clamp-2">
+                            {description}
+                          </p>
+
+                          {/* Meta */}
+                          <div className="flex items-center gap-4 mt-3 flex-wrap">
+                            <div className="flex items-center gap-1.5">
+                              <div
+                                className={`flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[8px] font-bold text-white`}
+                              >
+                                {initials}
+                              </div>
+                              <span className="text-xs text-text-secondary">
+                                {firstName} {lastName}
+                              </span>
+                            </div>
+                            {location && (
+                              <span className="flex items-center gap-1 text-xs text-text-muted">
+                                <MapPin size={11} />
+                                {location}
+                              </span>
+                            )}
+                            {createdAt && (
+                              <span className="flex items-center gap-1 text-xs text-text-muted">
+                                <Calendar size={11} />
+                                {new Date(createdAt).toLocaleDateString('fr-FR', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric',
+                                })}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Right side */}
+                        <div className="flex items-center gap-3 shrink-0 lg:pt-2">
+                          <ChevronRight
+                            size={16}
+                            className="text-text-muted"
+                          />
+                        </div>
                       </div>
-                      <ChevronRight
-                        size={16}
-                        className="text-text-muted"
-                      />
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+              </Link>
+            );
+          })}
 
-      {filteredSituations.length === 0 && (
-        <div className="text-center py-16">
-          <AlertTriangle size={40} className="text-text-muted mx-auto mb-3" />
-          <p className="text-text-muted text-sm">
-            Aucune situation dangereuse trouvee pour ces criteres
-          </p>
+          {filteredSituations.length === 0 && (
+            <div className="text-center py-16">
+              <AlertTriangle size={40} className="text-text-muted mx-auto mb-3" />
+              <p className="text-text-muted text-sm">
+                Aucune situation dangereuse trouvée pour ces critères
+              </p>
+            </div>
+          )}
         </div>
+      ) : (
+        <EmptyState
+          message="Aucune situation dangereuse"
+          description="Créez votre première déclaration en cliquant sur le bouton ci-dessus."
+        />
       )}
+
+      {/* Create Modal */}
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Nouvelle déclaration" size="lg">
+        <form onSubmit={handleCreate} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Titre *</label>
+            <input name="title" required className="input w-full" placeholder="Titre de la situation dangereuse" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Description</label>
+            <textarea name="description" rows={3} className="input w-full" placeholder="Décrivez la situation dangereuse en détail..." />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Lieu</label>
+              <input name="location" className="input w-full" placeholder="Lieu de la situation" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Gravité</label>
+              <select name="severity" className="input w-full">
+                <option value="faible">Faible</option>
+                <option value="moyen">Moyen</option>
+                <option value="eleve">Elevé</option>
+                <option value="critique">Critique</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-border-light">
+            <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">Annuler</button>
+            <button type="submit" disabled={saving} className="btn-primary bg-danger hover:bg-danger-dark">
+              {saving ? 'Enregistrement...' : 'Créer la déclaration'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

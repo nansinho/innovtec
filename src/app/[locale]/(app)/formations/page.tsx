@@ -13,27 +13,18 @@ import {
   Award,
   Filter,
   ChevronRight,
+  Plus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Link } from '@/i18n/routing';
+import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
+import { useToast } from '@/components/ui/Toast';
+import { Modal } from '@/components/ui/Modal';
+import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { createFormation, enrollInFormation } from '@/lib/actions';
 
 type FormationType = 'presentiel' | 'elearning' | 'mixte';
-type FormationStatus = 'disponible' | 'inscrit' | 'en_cours' | 'termine' | 'complet';
-
-interface Formation {
-  id: string;
-  title: string;
-  description: string;
-  type: FormationType;
-  category: string;
-  duration_hours: number;
-  instructor: string;
-  status: FormationStatus;
-  max_participants: number;
-  current_participants: number;
-  next_session: string;
-  progress?: number;
-  certification?: string;
-}
+type FormationStatus = 'planifiee' | 'en_cours' | 'terminee' | 'annulee';
 
 const TYPE_CONFIG: Record<FormationType, { label: string; icon: typeof Monitor; color: string; bg: string }> = {
   presentiel: { label: 'Présentiel', icon: MapPin, color: '#0052CC', bg: 'bg-blue-50 text-blue-700' },
@@ -42,197 +33,111 @@ const TYPE_CONFIG: Record<FormationType, { label: string; icon: typeof Monitor; 
 };
 
 const STATUS_CONFIG: Record<FormationStatus, { label: string; color: string }> = {
-  disponible: { label: 'Disponible', color: 'bg-blue-50 text-blue-700' },
-  inscrit: { label: 'Inscrit', color: 'bg-amber-50 text-amber-700' },
+  planifiee: { label: 'Planifiée', color: 'bg-blue-50 text-blue-700' },
   en_cours: { label: 'En cours', color: 'bg-primary-50 text-primary' },
-  termine: { label: 'Terminée', color: 'bg-emerald-50 text-emerald-700' },
-  complet: { label: 'Complet', color: 'bg-gray-100 text-gray-500' },
+  terminee: { label: 'Terminée', color: 'bg-emerald-50 text-emerald-700' },
+  annulee: { label: 'Annulée', color: 'bg-gray-100 text-gray-500' },
 };
 
-const CATEGORIES = [
-  'Toutes',
-  'Sécurité',
-  'Habilitations',
-  'CACES',
-  'Management',
-  'Technique',
-  'Qualité',
-];
+const CATEGORIES = ['Toutes', 'Sécurité', 'Habilitations', 'CACES', 'Management', 'Technique', 'Qualité'];
 
-const DEMO_FORMATIONS: Formation[] = [
-  {
-    id: '1',
-    title: 'Habilitation Électrique B1V/B2V',
-    description: 'Formation initiale aux habilitations électriques pour travaux en basse tension. Inclut les règles de sécurité, les procédures de consignation et les gestes de premiers secours.',
-    type: 'presentiel',
-    category: 'Habilitations',
-    duration_hours: 21,
-    instructor: 'Formateur APAVE',
-    status: 'en_cours',
-    max_participants: 12,
-    current_participants: 10,
-    next_session: '2026-03-10',
-    progress: 65,
-    certification: 'NF C 18-510',
-  },
-  {
-    id: '2',
-    title: 'CACES Nacelle R486 - Cat. A et B',
-    description: 'Conduite en sécurité des PEMP (Plateformes Élévatrices Mobiles de Personnes). Formation théorique et pratique avec évaluation finale.',
-    type: 'presentiel',
-    category: 'CACES',
-    duration_hours: 14,
-    instructor: 'Centre AFPA Bordeaux',
-    status: 'inscrit',
-    max_participants: 8,
-    current_participants: 6,
-    next_session: '2026-03-24',
-    progress: 0,
-    certification: 'CACES R486',
-  },
-  {
-    id: '3',
-    title: 'SST - Sauveteur Secouriste du Travail',
-    description: 'Formation aux premiers secours en milieu professionnel. Réactions adaptées en cas d\'accident, alerter et secourir une victime.',
-    type: 'presentiel',
-    category: 'Sécurité',
-    duration_hours: 14,
-    instructor: 'Croix-Rouge Formation',
-    status: 'disponible',
-    max_participants: 10,
-    current_participants: 4,
-    next_session: '2026-04-07',
-    certification: 'Certificat SST',
-  },
-  {
-    id: '4',
-    title: 'Sensibilisation aux risques amiante SS4',
-    description: 'Formation à la prévention du risque amiante pour les activités en sous-section 4. Reconnaissance des matériaux amiantés et procédures de protection.',
-    type: 'mixte',
-    category: 'Sécurité',
-    duration_hours: 7,
-    instructor: 'Maria Silva',
-    status: 'disponible',
-    max_participants: 15,
-    current_participants: 3,
-    next_session: '2026-03-15',
-    certification: 'Attestation SS4',
-  },
-  {
-    id: '5',
-    title: 'Management d\'équipe terrain',
-    description: 'Développer ses compétences de chef d\'équipe : communication, gestion des conflits, organisation du travail quotidien, leadership opérationnel.',
-    type: 'mixte',
-    category: 'Management',
-    duration_hours: 14,
-    instructor: 'Cabinet RH Plus',
-    status: 'disponible',
-    max_participants: 10,
-    current_participants: 7,
-    next_session: '2026-04-14',
-  },
-  {
-    id: '6',
-    title: 'AIPR - Autorisation d\'Intervention à Proximité des Réseaux',
-    description: 'Formation obligatoire pour les interventions à proximité des réseaux souterrains et aériens. Préparation à l\'examen QCM AIPR.',
-    type: 'elearning',
-    category: 'Habilitations',
-    duration_hours: 7,
-    instructor: 'Plateforme E-AIPR',
-    status: 'termine',
-    max_participants: 50,
-    current_participants: 45,
-    next_session: '2026-02-01',
-    progress: 100,
-    certification: 'AIPR Concepteur/Encadrant',
-  },
-  {
-    id: '7',
-    title: 'Qualité ISO 9001 - Fondamentaux',
-    description: 'Comprendre les exigences de la norme ISO 9001 et leur application dans le BTP. Processus qualité, audits internes et amélioration continue.',
-    type: 'elearning',
-    category: 'Qualité',
-    duration_hours: 3,
-    instructor: 'AFNOR Formation',
-    status: 'en_cours',
-    max_participants: 30,
-    current_participants: 18,
-    next_session: '2026-03-01',
-    progress: 40,
-  },
-  {
-    id: '8',
-    title: 'Techniques de soudure PEHD',
-    description: 'Maîtrise des techniques de soudure bout à bout et électrosoudure sur tubes polyéthylène haute densité pour réseaux gaz et eau.',
-    type: 'presentiel',
-    category: 'Technique',
-    duration_hours: 35,
-    instructor: 'Centre GRETA',
-    status: 'complet',
-    max_participants: 6,
-    current_participants: 6,
-    next_session: '2026-05-05',
-  },
-  {
-    id: '9',
-    title: 'CACES Pelle Hydraulique R482 - Cat. A',
-    description: 'Conduite en sécurité des engins de chantier. Formation théorique et pratique sur mini-pelle et pelle hydraulique.',
-    type: 'presentiel',
-    category: 'CACES',
-    duration_hours: 21,
-    instructor: 'Centre ECF',
-    status: 'termine',
-    max_participants: 6,
-    current_participants: 6,
-    next_session: '2026-01-20',
-    progress: 100,
-    certification: 'CACES R482 Cat. A',
-  },
-];
-
-type Tab = 'catalogue' | 'mes_formations' | 'a_venir' | 'terminees';
+type Tab = 'catalogue' | 'en_cours' | 'planifiee' | 'terminee';
 
 export default function FormationsPage() {
   const t = useTranslations('formations');
   const [activeTab, setActiveTab] = useState<Tab>('catalogue');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Toutes');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [enrolling, setEnrolling] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  const tabs: { key: Tab; label: string; count: number }[] = [
-    { key: 'catalogue', label: 'Catalogue', count: DEMO_FORMATIONS.length },
-    { key: 'mes_formations', label: 'Mes formations', count: DEMO_FORMATIONS.filter(f => ['inscrit', 'en_cours'].includes(f.status)).length },
-    { key: 'a_venir', label: 'À venir', count: DEMO_FORMATIONS.filter(f => f.status === 'inscrit').length },
-    { key: 'terminees', label: 'Terminées', count: DEMO_FORMATIONS.filter(f => f.status === 'termine').length },
-  ];
+  const { data: formations, loading, refetch } = useSupabaseQuery(
+    (supabase) =>
+      supabase
+        .from('formations')
+        .select('*')
+        .order('start_date', { ascending: false }),
+  );
 
-  const filteredFormations = DEMO_FORMATIONS.filter((formation) => {
+  const allFormations = (formations || []) as Record<string, any>[];
+
+  const filteredFormations = allFormations.filter((f) => {
+    const title = (f.title as string) || '';
+    const description = (f.description as string) || '';
+    const instructor = (f.instructor as string) || '';
+    const category = (f.category as string) || '';
+    const status = (f.status as string) || '';
+
     const matchesSearch =
       searchQuery === '' ||
-      formation.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      formation.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      formation.instructor.toLowerCase().includes(searchQuery.toLowerCase());
+      title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      instructor.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesCategory = selectedCategory === 'Toutes' || formation.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'Toutes' || category === selectedCategory;
 
     let matchesTab = true;
-    switch (activeTab) {
-      case 'mes_formations':
-        matchesTab = ['inscrit', 'en_cours'].includes(formation.status);
-        break;
-      case 'a_venir':
-        matchesTab = formation.status === 'inscrit';
-        break;
-      case 'terminees':
-        matchesTab = formation.status === 'termine';
-        break;
+    if (activeTab !== 'catalogue') {
+      matchesTab = status === activeTab;
     }
 
     return matchesSearch && matchesCategory && matchesTab;
   });
 
-  const totalHours = DEMO_FORMATIONS
-    .filter(f => ['en_cours', 'termine'].includes(f.status))
-    .reduce((sum, f) => sum + f.duration_hours, 0);
+  const totalHours = allFormations
+    .filter((f) => ['en_cours', 'terminee'].includes(f.status as string))
+    .reduce((sum, f) => sum + ((f.duration_hours as number) || 0), 0);
+
+  const tabs: { key: Tab; label: string; count: number }[] = [
+    { key: 'catalogue', label: 'Catalogue', count: allFormations.length },
+    { key: 'en_cours', label: 'En cours', count: allFormations.filter((f) => f.status === 'en_cours').length },
+    { key: 'planifiee', label: 'Planifiées', count: allFormations.filter((f) => f.status === 'planifiee').length },
+    { key: 'terminee', label: 'Terminées', count: allFormations.filter((f) => f.status === 'terminee').length },
+  ];
+
+  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSaving(true);
+    const formData = new FormData(e.currentTarget);
+    try {
+      await createFormation({
+        title: formData.get('title') as string,
+        description: formData.get('description') as string,
+        category: formData.get('category') as string || undefined,
+        type: formData.get('type') as string || undefined,
+        duration_hours: Number(formData.get('duration_hours')) || undefined,
+        max_participants: Number(formData.get('max_participants')) || undefined,
+        start_date: formData.get('start_date') as string || undefined,
+        end_date: formData.get('end_date') as string || undefined,
+        location: formData.get('location') as string || undefined,
+        instructor: formData.get('instructor') as string || undefined,
+      });
+      toast('Formation créée avec succès', 'success');
+      setShowCreateModal(false);
+      refetch();
+    } catch {
+      toast('Erreur lors de la création', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEnroll = async (formationId: string) => {
+    setEnrolling(formationId);
+    try {
+      await enrollInFormation(formationId);
+      toast('Inscription confirmée', 'success');
+      refetch();
+    } catch {
+      toast('Erreur lors de l\'inscription', 'error');
+    } finally {
+      setEnrolling(null);
+    }
+  };
+
+  if (loading) return <LoadingState />;
 
   return (
     <div className="space-y-6">
@@ -240,25 +145,27 @@ export default function FormationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Formations</h1>
-          <p className="text-sm text-text-secondary mt-1">
-            Catalogue de formations et suivi de vos parcours
-          </p>
+          <p className="text-sm text-text-secondary mt-1">Catalogue de formations et suivi de vos parcours</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-2 bg-primary-50 rounded-button">
             <Award size={16} className="text-primary" />
             <span className="text-sm font-semibold text-primary">{totalHours}h de formation</span>
           </div>
+          <button onClick={() => setShowCreateModal(true)} className="btn-primary flex items-center gap-2">
+            <Plus size={16} />
+            Nouvelle formation
+          </button>
         </div>
       </div>
 
       {/* KPI Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
         {[
-          { label: 'Formations disponibles', value: DEMO_FORMATIONS.filter(f => f.status === 'disponible').length, color: 'text-primary', bg: 'bg-primary-50' },
-          { label: 'En cours', value: DEMO_FORMATIONS.filter(f => f.status === 'en_cours').length, color: 'text-accent', bg: 'bg-accent-50' },
-          { label: 'Inscrit', value: DEMO_FORMATIONS.filter(f => f.status === 'inscrit').length, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Terminées', value: DEMO_FORMATIONS.filter(f => f.status === 'termine').length, color: 'text-success', bg: 'bg-emerald-50' },
+          { label: 'Total formations', value: allFormations.length, color: 'text-primary', bg: 'bg-primary-50' },
+          { label: 'En cours', value: allFormations.filter((f) => f.status === 'en_cours').length, color: 'text-accent', bg: 'bg-accent-50' },
+          { label: 'Planifiées', value: allFormations.filter((f) => f.status === 'planifiee').length, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: 'Terminées', value: allFormations.filter((f) => f.status === 'terminee').length, color: 'text-success', bg: 'bg-emerald-50' },
         ].map((kpi) => (
           <div key={kpi.label} className="card p-4">
             <div className="text-xs text-text-muted font-medium">{kpi.label}</div>
@@ -318,133 +225,157 @@ export default function FormationsPage() {
       </div>
 
       {/* Formations Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 animate-stagger">
-        {filteredFormations.map((formation) => {
-          const typeConfig = TYPE_CONFIG[formation.type];
-          const statusConfig = STATUS_CONFIG[formation.status];
-          const TypeIcon = typeConfig.icon;
-          const isFull = formation.status === 'complet';
-          const hasProgress = formation.progress !== undefined && formation.progress > 0;
+      {filteredFormations.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 animate-stagger">
+          {filteredFormations.map((formation) => {
+            const type = (formation.type as FormationType) || 'presentiel';
+            const status = (formation.status as FormationStatus) || 'planifiee';
+            const typeConfig = TYPE_CONFIG[type] || TYPE_CONFIG.presentiel;
+            const statusConfig = STATUS_CONFIG[status] || STATUS_CONFIG.planifiee;
+            const TypeIcon = typeConfig.icon;
 
-          return (
-            <div
-              key={formation.id}
-              className="card group overflow-hidden hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5"
-            >
-              {/* Top color bar */}
-              <div className="h-1.5" style={{ backgroundColor: typeConfig.color }} />
-
-              <div className="p-5">
-                {/* Badges */}
-                <div className="flex items-center gap-2 mb-3 flex-wrap">
-                  <span className={cn('badge', typeConfig.bg)}>
-                    <TypeIcon size={12} className="mr-1" />
-                    {typeConfig.label}
-                  </span>
-                  <span className={cn('badge', statusConfig.color)}>
-                    {statusConfig.label}
-                  </span>
-                  {formation.certification && (
-                    <span className="badge bg-amber-50 text-amber-700">
-                      <Award size={10} className="mr-1" />
-                      Certifiante
-                    </span>
-                  )}
-                </div>
-
-                {/* Title & description */}
-                <h3 className="text-base font-bold text-text-primary group-hover:text-primary transition-colors line-clamp-2 mb-2">
-                  {formation.title}
-                </h3>
-                <p className="text-sm text-text-secondary line-clamp-2 mb-4">
-                  {formation.description}
-                </p>
-
-                {/* Progress bar for enrolled/in-progress */}
-                {hasProgress && (
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-text-muted">Progression</span>
-                      <span className="font-semibold text-text-primary">{formation.progress}%</span>
+            return (
+              <Link key={formation.id as string} href={`/formations/${formation.id}`}>
+                <div className="card group overflow-hidden hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5">
+                  <div className="h-1.5" style={{ backgroundColor: typeConfig.color }} />
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 mb-3 flex-wrap">
+                      <span className={cn('badge', typeConfig.bg)}>
+                        <TypeIcon size={12} className="mr-1" />
+                        {typeConfig.label}
+                      </span>
+                      <span className={cn('badge', statusConfig.color)}>
+                        {statusConfig.label}
+                      </span>
                     </div>
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${formation.progress}%`,
-                          backgroundColor: formation.progress === 100 ? '#36B37E' : '#0052CC',
-                        }}
-                      />
+                    <h3 className="text-base font-bold text-text-primary group-hover:text-primary transition-colors line-clamp-2 mb-2">
+                      {formation.title as string}
+                    </h3>
+                    <p className="text-sm text-text-secondary line-clamp-2 mb-4">
+                      {formation.description as string}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 text-xs text-text-secondary mb-4">
+                      <div className="flex items-center gap-1.5">
+                        <Clock size={12} className="text-text-muted" />
+                        <span>{formation.duration_hours as number}h</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Users size={12} className="text-text-muted" />
+                        <span>{formation.max_participants as number || '?'} places</span>
+                      </div>
+                      {formation.category && (
+                        <div className="flex items-center gap-1.5">
+                          <BookOpen size={12} className="text-text-muted" />
+                          <span>{formation.category as string}</span>
+                        </div>
+                      )}
+                      {formation.instructor && (
+                        <div className="flex items-center gap-1.5">
+                          <Award size={12} className="text-text-muted" />
+                          <span className="truncate">{formation.instructor as string}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between pt-3 border-t border-border-light">
+                      <div className="text-xs text-text-muted">
+                        {formation.start_date
+                          ? new Date(formation.start_date as string).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+                          : 'Date à définir'}
+                      </div>
+                      {status === 'planifiee' && (
+                        <button
+                          onClick={(e) => { e.preventDefault(); handleEnroll(formation.id as string); }}
+                          disabled={enrolling === formation.id}
+                          className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1"
+                        >
+                          {enrolling === formation.id ? 'Inscription...' : "S'inscrire"}
+                          <ChevronRight size={14} />
+                        </button>
+                      )}
+                      {status === 'terminee' && (
+                        <span className="flex items-center gap-1 text-xs font-semibold text-success">
+                          <Award size={14} />
+                          Terminée
+                        </span>
+                      )}
                     </div>
                   </div>
-                )}
-
-                {/* Details */}
-                <div className="grid grid-cols-2 gap-2 text-xs text-text-secondary mb-4">
-                  <div className="flex items-center gap-1.5">
-                    <Clock size={12} className="text-text-muted" />
-                    <span>{formation.duration_hours}h de formation</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Users size={12} className="text-text-muted" />
-                    <span>{formation.current_participants}/{formation.max_participants} places</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <BookOpen size={12} className="text-text-muted" />
-                    <span>{formation.category}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Award size={12} className="text-text-muted" />
-                    <span className="truncate">{formation.instructor}</span>
-                  </div>
                 </div>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-3 border-t border-border-light">
-                  <div className="text-xs text-text-muted">
-                    Prochaine session : {new Date(formation.next_session).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </div>
-                  {formation.status === 'disponible' && (
-                    <button className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1">
-                      S&apos;inscrire
-                      <ChevronRight size={14} />
-                    </button>
-                  )}
-                  {formation.status === 'en_cours' && (
-                    <button className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1">
-                      Continuer
-                      <ChevronRight size={14} />
-                    </button>
-                  )}
-                  {formation.status === 'termine' && (
-                    <span className="flex items-center gap-1 text-xs font-semibold text-success">
-                      <Award size={14} />
-                      Validée
-                    </span>
-                  )}
-                  {isFull && (
-                    <button className="text-xs px-3 py-1.5 rounded-button border border-border text-text-muted cursor-not-allowed">
-                      Complet
-                    </button>
-                  )}
-                  {formation.status === 'inscrit' && (
-                    <span className="text-xs font-semibold text-amber-600">
-                      Inscription confirmée
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {filteredFormations.length === 0 && (
-        <div className="text-center py-16">
-          <BookOpen size={40} className="mx-auto text-text-muted mb-3" />
-          <p className="text-text-muted text-sm">Aucune formation trouvée</p>
+              </Link>
+            );
+          })}
         </div>
+      ) : (
+        <EmptyState message="Aucune formation trouvée" description="Créez une formation en cliquant sur le bouton ci-dessus." />
       )}
+
+      {/* Create Modal */}
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Nouvelle formation" size="lg">
+        <form onSubmit={handleCreate} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Titre *</label>
+            <input name="title" required className="input w-full" placeholder="Titre de la formation" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Description</label>
+            <textarea name="description" rows={3} className="input w-full" placeholder="Description..." />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Type</label>
+              <select name="type" className="input w-full">
+                <option value="presentiel">Présentiel</option>
+                <option value="elearning">E-learning</option>
+                <option value="mixte">Mixte</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Catégorie</label>
+              <select name="category" className="input w-full">
+                {CATEGORIES.filter((c) => c !== 'Toutes').map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Durée (heures)</label>
+              <input name="duration_hours" type="number" className="input w-full" placeholder="14" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Places max</label>
+              <input name="max_participants" type="number" className="input w-full" placeholder="12" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Date de début</label>
+              <input name="start_date" type="date" className="input w-full" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Date de fin</label>
+              <input name="end_date" type="date" className="input w-full" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Lieu</label>
+              <input name="location" className="input w-full" placeholder="Lieu de la formation" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Formateur</label>
+              <input name="instructor" className="input w-full" placeholder="Nom du formateur" />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-border-light">
+            <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">Annuler</button>
+            <button type="submit" disabled={saving} className="btn-primary">
+              {saving ? 'Enregistrement...' : 'Créer la formation'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

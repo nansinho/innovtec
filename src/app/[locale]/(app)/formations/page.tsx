@@ -27,19 +27,19 @@ type FormationType = 'presentiel' | 'elearning' | 'mixte';
 type FormationStatus = 'planifiee' | 'en_cours' | 'terminee' | 'annulee';
 
 const TYPE_CONFIG: Record<FormationType, { label: string; icon: typeof Monitor; color: string; bg: string }> = {
-  presentiel: { label: 'Pr\u00e9sentiel', icon: MapPin, color: '#0052CC', bg: 'bg-blue-50 text-blue-700' },
+  presentiel: { label: 'Présentiel', icon: MapPin, color: '#0052CC', bg: 'bg-blue-50 text-blue-700' },
   elearning: { label: 'E-learning', icon: Monitor, color: '#36B37E', bg: 'bg-emerald-50 text-emerald-700' },
   mixte: { label: 'Mixte', icon: Shuffle, color: '#6B21A8', bg: 'bg-purple-50 text-purple-700' },
 };
 
 const STATUS_CONFIG: Record<FormationStatus, { label: string; color: string }> = {
-  planifiee: { label: 'Planifi\u00e9e', color: 'bg-blue-50 text-blue-700' },
+  planifiee: { label: 'Planifiée', color: 'bg-blue-50 text-blue-700' },
   en_cours: { label: 'En cours', color: 'bg-primary-50 text-primary' },
-  terminee: { label: 'Termin\u00e9e', color: 'bg-emerald-50 text-emerald-700' },
-  annulee: { label: 'Annul\u00e9e', color: 'bg-gray-100 text-gray-500' },
+  terminee: { label: 'Terminée', color: 'bg-emerald-50 text-emerald-700' },
+  annulee: { label: 'Annulée', color: 'bg-gray-100 text-gray-500' },
 };
 
-const CATEGORIES = ['Toutes', 'S\u00e9curit\u00e9', 'Habilitations', 'CACES', 'Management', 'Technique', 'Qualit\u00e9'];
+const CATEGORIES = ['Toutes', 'Sécurité', 'Habilitations', 'CACES', 'Management', 'Technique', 'Qualité'];
 
 type Tab = 'catalogue' | 'en_cours' | 'planifiee' | 'terminee';
 
@@ -95,8 +95,8 @@ export default function FormationsPage() {
   const tabs: { key: Tab; label: string; count: number }[] = [
     { key: 'catalogue', label: 'Catalogue', count: allFormations.length },
     { key: 'en_cours', label: 'En cours', count: allFormations.filter((f) => f.status === 'en_cours').length },
-    { key: 'planifiee', label: 'Planifi\u00e9es', count: allFormations.filter((f) => f.status === 'planifiee').length },
-    { key: 'terminee', label: 'Termin\u00e9es', count: allFormations.filter((f) => f.status === 'terminee').length },
+    { key: 'planifiee', label: 'Planifiées', count: allFormations.filter((f) => f.status === 'planifiee').length },
+    { key: 'terminee', label: 'Terminées', count: allFormations.filter((f) => f.status === 'terminee').length },
   ];
 
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -116,11 +116,11 @@ export default function FormationsPage() {
         location: formData.get('location') as string || undefined,
         instructor: formData.get('instructor') as string || undefined,
       });
-      toast('Formation cr\u00e9\u00e9e avec succ\u00e8s', 'success');
+      toast('Formation créée avec succès', 'success');
       setShowCreateModal(false);
       refetch();
     } catch {
-      toast('Erreur lors de la cr\u00e9ation', 'error');
+      toast('Erreur lors de la création', 'error');
     } finally {
       setSaving(false);
     }
@@ -130,7 +130,7 @@ export default function FormationsPage() {
     setEnrolling(formationId);
     try {
       await enrollInFormation(formationId);
-      toast('Inscription confirm\u00e9e', 'success');
+      toast('Inscription confirmée', 'success');
       refetch();
     } catch {
       toast('Erreur lors de l\'inscription', 'error');
@@ -166,8 +166,8 @@ export default function FormationsPage() {
         {[
           { label: 'Total formations', value: allFormations.length, color: 'text-primary', bg: 'bg-primary-50' },
           { label: 'En cours', value: allFormations.filter((f) => f.status === 'en_cours').length, color: 'text-accent', bg: 'bg-accent-50' },
-          { label: 'Planifi\u00e9es', value: allFormations.filter((f) => f.status === 'planifiee').length, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Termin\u00e9es', value: allFormations.filter((f) => f.status === 'terminee').length, color: 'text-success', bg: 'bg-emerald-50' },
+          { label: 'Planifiées', value: allFormations.filter((f) => f.status === 'planifiee').length, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: 'Terminées', value: allFormations.filter((f) => f.status === 'terminee').length, color: 'text-success', bg: 'bg-emerald-50' },
         ].map((kpi) => (
           <div key={kpi.label} className="card p-4">
             <div className="text-xs text-text-muted font-medium">{kpi.label}</div>
@@ -282,7 +282,7 @@ export default function FormationsPage() {
                       <div className="text-xs text-text-muted">
                         {formation.start_date
                           ? new Date(formation.start_date as string).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
-                          : 'Date \u00e0 d\u00e9finir'}
+                          : 'Date à définir'}
                       </div>
                       {status === 'planifiee' && (
                         <button
@@ -297,7 +297,7 @@ export default function FormationsPage() {
                       {status === 'terminee' && (
                         <span className="flex items-center gap-1 text-xs font-semibold text-success">
                           <Award size={14} />
-                          Termin\u00e9e
+                          Terminée
                         </span>
                       )}
                     </div>
@@ -308,7 +308,7 @@ export default function FormationsPage() {
           })}
         </div>
       ) : (
-        <EmptyState message="Aucune formation trouv\u00e9e" description="Cr\u00e9ez une formation en cliquant sur le bouton ci-dessus." />
+        <EmptyState message="Aucune formation trouvée" description="Créez une formation en cliquant sur le bouton ci-dessus." />
       )}
 
       {/* Create Modal */}
@@ -326,13 +326,13 @@ export default function FormationsPage() {
             <div>
               <label className="block text-sm font-medium text-text-primary mb-1">Type</label>
               <select name="type" className="input w-full">
-                <option value="presentiel">Pr\u00e9sentiel</option>
+                <option value="presentiel">Présentiel</option>
                 <option value="elearning">E-learning</option>
                 <option value="mixte">Mixte</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">Cat\u00e9gorie</label>
+              <label className="block text-sm font-medium text-text-primary mb-1">Catégorie</label>
               <select name="category" className="input w-full">
                 {CATEGORIES.filter((c) => c !== 'Toutes').map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -342,7 +342,7 @@ export default function FormationsPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">Dur\u00e9e (heures)</label>
+              <label className="block text-sm font-medium text-text-primary mb-1">Durée (heures)</label>
               <input name="duration_hours" type="number" className="input w-full" placeholder="14" />
             </div>
             <div>
@@ -352,7 +352,7 @@ export default function FormationsPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">Date de d\u00e9but</label>
+              <label className="block text-sm font-medium text-text-primary mb-1">Date de début</label>
               <input name="start_date" type="date" className="input w-full" />
             </div>
             <div>
@@ -373,7 +373,7 @@ export default function FormationsPage() {
           <div className="flex justify-end gap-3 pt-4 border-t border-border-light">
             <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">Annuler</button>
             <button type="submit" disabled={saving} className="btn-primary">
-              {saving ? 'Enregistrement...' : 'Cr\u00e9er la formation'}
+              {saving ? 'Enregistrement...' : 'Créer la formation'}
             </button>
           </div>
         </form>

@@ -34,7 +34,7 @@ function getPriorityConfig(priority: string) {
 function getColumnConfig(status: string) {
   const map: Record<string, { title: string; icon: typeof Clock; color: string }> = {
     en_cours: { title: 'En cours', icon: Clock, color: 'text-blue-600' },
-    cloture: { title: 'Cl\u00f4tur\u00e9', icon: CheckCircle2, color: 'text-emerald-600' },
+    cloture: { title: 'Clôturé', icon: CheckCircle2, color: 'text-emerald-600' },
     en_retard: { title: 'En retard', icon: AlertTriangle, color: 'text-red-600' },
   };
   return map[status] || map.en_cours;
@@ -99,11 +99,11 @@ export default function PlansActionsPage() {
         responsible_id: formData.get('responsible_id') as string || undefined,
         team_id: formData.get('team_id') as string || undefined,
       });
-      toast("Plan d'action cr\u00e9\u00e9 avec succ\u00e8s", 'success');
+      toast("Plan d'action créé avec succès", 'success');
       setShowCreateModal(false);
       refetch();
     } catch {
-      toast('Erreur lors de la cr\u00e9ation', 'error');
+      toast('Erreur lors de la création', 'error');
     } finally {
       setSaving(false);
     }
@@ -216,7 +216,7 @@ export default function PlansActionsPage() {
                                   : 'text-text-muted'
                               )}>
                                 <Calendar size={10} />
-                                {action.status === 'cloture' ? 'Termin\u00e9' : daysRemaining < 0 ? `${Math.abs(daysRemaining)}j en retard` : daysRemaining === 0 ? "Aujourd'hui" : `${daysRemaining}j restants`}
+                                {action.status === 'cloture' ? 'Terminé' : daysRemaining < 0 ? `${Math.abs(daysRemaining)}j en retard` : daysRemaining === 0 ? "Aujourd'hui" : `${daysRemaining}j restants`}
                               </span>
                             )}
                           </div>
@@ -235,7 +235,7 @@ export default function PlansActionsPage() {
           })}
         </div>
       ) : (
-        <EmptyState message="Aucun plan d'action" description="Cr\u00e9ez votre premier plan d'action en cliquant sur le bouton ci-dessus." />
+        <EmptyState message="Aucun plan d'action" description="Créez votre premier plan d'action en cliquant sur le bouton ci-dessus." />
       )}
 
       {/* Create Modal */}
@@ -247,11 +247,11 @@ export default function PlansActionsPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1">Description</label>
-            <textarea name="description" rows={3} className="input w-full" placeholder="Description d\u00e9taill\u00e9e..." />
+            <textarea name="description" rows={3} className="input w-full" placeholder="Description détaillée..." />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">Priorit\u00e9</label>
+              <label className="block text-sm font-medium text-text-primary mb-1">Priorité</label>
               <select name="priority" className="input w-full">
                 <option value="normale">Normale</option>
                 <option value="basse">Basse</option>
@@ -260,7 +260,7 @@ export default function PlansActionsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">\u00c9ch\u00e9ance</label>
+              <label className="block text-sm font-medium text-text-primary mb-1">Échéance</label>
               <input name="due_date" type="date" className="input w-full" />
             </div>
           </div>
@@ -268,16 +268,16 @@ export default function PlansActionsPage() {
             <div>
               <label className="block text-sm font-medium text-text-primary mb-1">Responsable</label>
               <select name="responsible_id" className="input w-full">
-                <option value="">-- S\u00e9lectionner --</option>
+                <option value="">-- Sélectionner --</option>
                 {(profiles || []).map((p: Record<string, any>) => (
                   <option key={p.id as string} value={p.id as string}>{p.first_name as string} {p.last_name as string}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">\u00c9quipe</label>
+              <label className="block text-sm font-medium text-text-primary mb-1">Équipe</label>
               <select name="team_id" className="input w-full">
-                <option value="">-- S\u00e9lectionner --</option>
+                <option value="">-- Sélectionner --</option>
                 {(teams || []).map((t: Record<string, any>) => (
                   <option key={t.id as string} value={t.id as string}>{t.name as string}</option>
                 ))}
@@ -287,7 +287,7 @@ export default function PlansActionsPage() {
           <div className="flex justify-end gap-3 pt-4 border-t border-border-light">
             <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">Annuler</button>
             <button type="submit" disabled={saving} className="btn-primary">
-              {saving ? 'Enregistrement...' : "Cr\u00e9er le plan d'action"}
+              {saving ? 'Enregistrement...' : "Créer le plan d'action"}
             </button>
           </div>
         </form>

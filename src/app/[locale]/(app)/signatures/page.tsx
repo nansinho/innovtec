@@ -29,13 +29,13 @@ const STATUS_CONFIG: Record<SignatureStatus, { label: string; icon: typeof Clock
     badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
   },
   signe: {
-    label: 'Sign\u00e9',
+    label: 'Signé',
     icon: CheckCircle2,
     color: 'text-success',
     badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   },
   refuse: {
-    label: 'Refus\u00e9',
+    label: 'Refusé',
     icon: XCircle,
     color: 'text-danger',
     badgeColor: 'bg-red-50 text-red-700 border-red-200',
@@ -100,8 +100,8 @@ export default function SignaturesPage() {
   const tabs: { key: Tab; label: string; count: number; color: string }[] = [
     { key: 'all', label: 'Toutes', count: allRequests.length, color: 'text-text-primary' },
     { key: 'en_attente', label: 'En attente', count: pendingCount, color: 'text-amber-600' },
-    { key: 'signe', label: 'Sign\u00e9s', count: signedCount, color: 'text-success' },
-    { key: 'refuse', label: 'Refus\u00e9s', count: refusedCount, color: 'text-danger' },
+    { key: 'signe', label: 'Signés', count: signedCount, color: 'text-success' },
+    { key: 'refuse', label: 'Refusés', count: refusedCount, color: 'text-danger' },
   ];
 
   const filteredSignatures = allRequests.filter((req) => {
@@ -115,7 +115,7 @@ export default function SignaturesPage() {
     setSigning(true);
     try {
       await signDocument(itemId, 'signature_placeholder');
-      toast('Document sign\u00e9 avec succ\u00e8s', 'success');
+      toast('Document signé avec succès', 'success');
       refetch();
     } catch {
       toast('Erreur lors de la signature', 'error');
@@ -127,8 +127,8 @@ export default function SignaturesPage() {
   const handleReject = async (itemId: string) => {
     setRejecting(true);
     try {
-      await rejectDocument(itemId, 'Refus\u00e9 par le signataire');
-      toast('Document refus\u00e9', 'success');
+      await rejectDocument(itemId, 'Refusé par le signataire');
+      toast('Document refusé', 'success');
       refetch();
     } catch {
       toast('Erreur lors du refus', 'error');
@@ -144,7 +144,7 @@ export default function SignaturesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Signatures \u00e9lectroniques</h1>
+          <h1 className="text-2xl font-bold text-text-primary">Signatures électroniques</h1>
           <p className="text-sm text-text-secondary mt-1">
             {pendingCount} document{pendingCount > 1 ? 's' : ''} en attente de signature
           </p>
@@ -160,8 +160,8 @@ export default function SignaturesPage() {
         {[
           { label: 'Total', value: allRequests.length, icon: FileText, color: 'text-primary', bg: 'bg-primary-50' },
           { label: 'En attente', value: pendingCount, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Sign\u00e9s', value: signedCount, icon: CheckCircle2, color: 'text-success', bg: 'bg-emerald-50' },
-          { label: 'Refus\u00e9s', value: refusedCount, icon: XCircle, color: 'text-danger', bg: 'bg-red-50' },
+          { label: 'Signés', value: signedCount, icon: CheckCircle2, color: 'text-success', bg: 'bg-emerald-50' },
+          { label: 'Refusés', value: refusedCount, icon: XCircle, color: 'text-danger', bg: 'bg-red-50' },
         ].map((card) => {
           const Icon = card.icon;
           return (
@@ -281,7 +281,7 @@ export default function SignaturesPage() {
                             isOverdue ? 'text-danger font-semibold' : 'text-text-muted'
                           )}>
                             <CalendarDays size={12} />
-                            {isOverdue ? 'En retard - ' : '\u00c9ch\u00e9ance : '}
+                            {isOverdue ? 'En retard - ' : 'Échéance : '}
                             {new Date(dueDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                           </div>
                         )}
@@ -303,7 +303,7 @@ export default function SignaturesPage() {
                                     itemStatus === 'refuse' ? '#FF5630' :
                                     '#DFE1E6',
                                 }}
-                                title={`${signer.first_name} ${signer.last_name} - ${itemStatus === 'signe' ? 'Sign\u00e9' : itemStatus === 'refuse' ? 'Refus\u00e9' : 'En attente'}`}
+                                title={`${signer.first_name} ${signer.last_name} - ${itemStatus === 'signe' ? 'Signé' : itemStatus === 'refuse' ? 'Refusé' : 'En attente'}`}
                               />
                             );
                           })}
@@ -318,7 +318,7 @@ export default function SignaturesPage() {
             {filteredSignatures.length === 0 && (
               <div className="text-center py-16">
                 <PenTool size={40} className="mx-auto text-text-muted mb-3" />
-                <p className="text-text-muted text-sm">Aucune demande de signature trouv\u00e9e</p>
+                <p className="text-text-muted text-sm">Aucune demande de signature trouvée</p>
               </div>
             )}
           </div>
@@ -340,7 +340,7 @@ export default function SignaturesPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <FileText size={20} className="text-primary" />
-                    <h3 className="text-base font-bold text-text-primary">D\u00e9tails du document</h3>
+                    <h3 className="text-base font-bold text-text-primary">Détails du document</h3>
                   </div>
 
                   <div className="space-y-4">
@@ -364,7 +364,7 @@ export default function SignaturesPage() {
                       </div>
                       {createdAt && (
                         <div>
-                          <span className="text-text-muted">Cr\u00e9\u00e9 le</span>
+                          <span className="text-text-muted">Créé le</span>
                           <p className="font-medium text-text-primary mt-0.5">
                             {new Date(createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                           </p>
@@ -372,7 +372,7 @@ export default function SignaturesPage() {
                       )}
                       {dueDate && (
                         <div>
-                          <span className="text-text-muted">\u00c9ch\u00e9ance</span>
+                          <span className="text-text-muted">Échéance</span>
                           <p className="font-medium text-text-primary mt-0.5">
                             {new Date(dueDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                           </p>
@@ -459,14 +459,14 @@ export default function SignaturesPage() {
               <div className="text-center py-12">
                 <PenTool size={32} className="mx-auto text-text-muted mb-3" />
                 <p className="text-sm text-text-muted">
-                  S\u00e9lectionnez un document pour voir les d\u00e9tails
+                  Sélectionnez un document pour voir les détails
                 </p>
               </div>
             )}
           </div>
         </div>
       ) : (
-        <EmptyState message="Aucune demande de signature" description="Les demandes de signature appara\u00eetront ici une fois cr\u00e9\u00e9es." />
+        <EmptyState message="Aucune demande de signature" description="Les demandes de signature apparaîtront ici une fois créées." />
       )}
     </div>
   );

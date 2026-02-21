@@ -76,7 +76,7 @@ export default function TrombinoscopePage() {
             className="input w-auto"
           >
             {teamNames.map((team) => (
-              <option key={team} value={team}>{team === 'all' ? 'Toutes les \u00e9quipes' : team}</option>
+              <option key={team} value={team}>{team === 'all' ? 'Toutes les équipes' : team}</option>
             ))}
           </select>
           <div className="flex rounded-button border border-border overflow-hidden">

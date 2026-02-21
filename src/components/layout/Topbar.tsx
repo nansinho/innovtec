@@ -81,7 +81,7 @@ export function Topbar() {
         <Search size={16} />
         <span className="flex-1 text-left">{t('searchPlaceholder')}</span>
         <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded-md border border-border bg-white px-1.5 py-0.5 text-[11px] font-medium text-text-muted">
-          <span className="text-xs">\u2318</span>K
+          <span className="text-xs">⌘</span>K
         </kbd>
       </button>
 
@@ -91,7 +91,7 @@ export function Topbar() {
         <button
           onClick={switchLocale}
           className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-text-secondary hover:bg-gray-100 transition-colors"
-          title={locale === 'fr' ? 'Mudar para Portugu\u00eas' : 'Passer en Fran\u00e7ais'}
+          title={locale === 'fr' ? 'Mudar para Português' : 'Passer en Français'}
         >
           <Globe size={16} />
           <span className="hidden sm:inline uppercase">{locale}</span>

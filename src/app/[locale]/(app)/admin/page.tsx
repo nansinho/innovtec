@@ -89,10 +89,10 @@ export default function AdminPage() {
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
       await updateUserRole(userId, newRole);
-      toast('R\u00f4le mis \u00e0 jour avec succ\u00e8s', 'success');
+      toast('Rôle mis à jour avec succès', 'success');
       refetch();
     } catch {
-      toast('Erreur lors de la mise \u00e0 jour du r\u00f4le', 'error');
+      toast('Erreur lors de la mise à jour du rôle', 'error');
     }
     setOpenMenuId(null);
   };
@@ -101,12 +101,12 @@ export default function AdminPage() {
     try {
       await updateUserStatus(userId, !currentStatus);
       toast(
-        !currentStatus ? 'Utilisateur activ\u00e9' : 'Utilisateur d\u00e9sactiv\u00e9',
+        !currentStatus ? 'Utilisateur activé' : 'Utilisateur désactivé',
         'success'
       );
       refetch();
     } catch {
-      toast('Erreur lors de la mise \u00e0 jour', 'error');
+      toast('Erreur lors de la mise à jour', 'error');
     }
     setOpenMenuId(null);
   };
@@ -126,12 +126,12 @@ export default function AdminPage() {
         role: formData.get('role') as string,
         team_id: formData.get('team_id') as string || undefined,
       });
-      toast('Profil mis \u00e0 jour avec succ\u00e8s', 'success');
+      toast('Profil mis à jour avec succès', 'success');
       setShowEditModal(false);
       setEditingUser(null);
       refetch();
     } catch {
-      toast('Erreur lors de la mise \u00e0 jour', 'error');
+      toast('Erreur lors de la mise à jour', 'error');
     } finally {
       setSaving(false);
     }
@@ -156,7 +156,7 @@ export default function AdminPage() {
           <div>
             <h1 className="text-2xl font-bold text-text-primary">Administration</h1>
             <p className="text-sm text-text-secondary mt-0.5">
-              Gestion des utilisateurs et des r\u00f4les
+              Gestion des utilisateurs et des rôles
             </p>
           </div>
         </div>
@@ -203,7 +203,7 @@ export default function AdminPage() {
             onChange={(e) => setRoleFilter(e.target.value)}
             className="input w-auto text-sm"
           >
-            <option value="all">Tous les r\u00f4les</option>
+            <option value="all">Tous les rôles</option>
             {ROLE_OPTIONS.map((r) => (
               <option key={r.value} value={r.value}>{r.label}</option>
             ))}
@@ -239,10 +239,10 @@ export default function AdminPage() {
                     Contact
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-text-secondary uppercase tracking-wide">
-                    \u00c9quipe
+                    Équipe
                   </th>
                   <th className="text-center px-4 py-3 text-xs font-bold text-text-secondary uppercase tracking-wide">
-                    R\u00f4le
+                    Rôle
                   </th>
                   <th className="text-center px-4 py-3 text-xs font-bold text-text-secondary uppercase tracking-wide">
                     Statut
@@ -295,7 +295,7 @@ export default function AdminPage() {
                             <div className="font-semibold text-text-primary">
                               {firstName} {lastName}
                             </div>
-                            <div className="text-xs text-text-muted">{position || '\u2014'}</div>
+                            <div className="text-xs text-text-muted">{position || '—'}</div>
                           </div>
                         </div>
                       </td>
@@ -322,7 +322,7 @@ export default function AdminPage() {
                             {team.name}
                           </span>
                         ) : (
-                          <span className="text-xs text-text-muted">\u2014</span>
+                          <span className="text-xs text-text-muted">—</span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-center">
@@ -357,7 +357,7 @@ export default function AdminPage() {
                               </button>
                               <div className="border-t border-border-light my-1" />
                               <div className="px-4 py-1.5 text-[10px] font-bold text-text-muted uppercase tracking-wide">
-                                Changer le r\u00f4le
+                                Changer le rôle
                               </div>
                               {ROLE_OPTIONS.map((r) => (
                                 <button
@@ -385,7 +385,7 @@ export default function AdminPage() {
                                 )}
                               >
                                 {isActive ? <XCircle size={14} /> : <CheckCircle2 size={14} />}
-                                {isActive ? 'D\u00e9sactiver' : 'Activer'}
+                                {isActive ? 'Désactiver' : 'Activer'}
                               </button>
                             </div>
                           )}
@@ -399,7 +399,7 @@ export default function AdminPage() {
           </div>
         </div>
       ) : (
-        <EmptyState message="Aucun utilisateur trouv\u00e9" description="Modifiez vos filtres pour voir les utilisateurs." />
+        <EmptyState message="Aucun utilisateur trouvé" description="Modifiez vos filtres pour voir les utilisateurs." />
       )}
 
       {/* Edit Modal */}
@@ -408,7 +408,7 @@ export default function AdminPage() {
           <form onSubmit={handleEditSave} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-text-primary mb-1">Pr\u00e9nom *</label>
+                <label className="block text-sm font-medium text-text-primary mb-1">Prénom *</label>
                 <input name="first_name" required className="input w-full" defaultValue={editingUser.first_name as string} />
               </div>
               <div>
@@ -426,13 +426,13 @@ export default function AdminPage() {
                 <input name="position" className="input w-full" defaultValue={(editingUser.position as string) || ''} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-primary mb-1">T\u00e9l\u00e9phone</label>
+                <label className="block text-sm font-medium text-text-primary mb-1">Téléphone</label>
                 <input name="phone" className="input w-full" defaultValue={(editingUser.phone as string) || ''} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-text-primary mb-1">R\u00f4le</label>
+                <label className="block text-sm font-medium text-text-primary mb-1">Rôle</label>
                 <select name="role" className="input w-full" defaultValue={(editingUser.role as string) || 'collaborateur'}>
                   {ROLE_OPTIONS.map((r) => (
                     <option key={r.value} value={r.value}>{r.label}</option>
@@ -440,9 +440,9 @@ export default function AdminPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-primary mb-1">\u00c9quipe</label>
+                <label className="block text-sm font-medium text-text-primary mb-1">Équipe</label>
                 <select name="team_id" className="input w-full" defaultValue={(editingUser.team_id as string) || ''}>
-                  <option value="">-- S\u00e9lectionner --</option>
+                  <option value="">-- Sélectionner --</option>
                   {allTeams.map((t) => (
                     <option key={t.id as string} value={t.id as string}>{t.name as string}</option>
                   ))}

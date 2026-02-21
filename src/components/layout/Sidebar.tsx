@@ -153,7 +153,7 @@ export function Sidebar() {
         </div>
         <div>
           <h1 className="text-sm font-bold text-white tracking-wide">INNOVTEC</h1>
-          <p className="text-[10px] text-white/50 font-medium tracking-widest uppercase">R\u00e9seaux</p>
+          <p className="text-[10px] text-white/50 font-medium tracking-widest uppercase">Réseaux</p>
         </div>
       </div>
 

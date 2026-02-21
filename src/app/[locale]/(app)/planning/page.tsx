@@ -23,10 +23,10 @@ type ViewMode = 'week' | 'month';
 
 const EVENT_TYPE_CONFIG: Record<EventType, { label: string; color: string; bg: string; border: string }> = {
   formation: { label: 'Formation', color: '#0052CC', bg: 'bg-blue-50', border: 'border-l-[#0052CC]' },
-  reunion: { label: 'R\u00e9union', color: '#6B21A8', bg: 'bg-purple-50', border: 'border-l-purple-700' },
+  reunion: { label: 'Réunion', color: '#6B21A8', bg: 'bg-purple-50', border: 'border-l-purple-700' },
   visite: { label: 'Visite', color: '#FF6B35', bg: 'bg-orange-50', border: 'border-l-orange-500' },
   deadline: { label: 'Deadline', color: '#FF5630', bg: 'bg-red-50', border: 'border-l-red-500' },
-  conge: { label: 'Cong\u00e9', color: '#36B37E', bg: 'bg-emerald-50', border: 'border-l-emerald-500' },
+  conge: { label: 'Congé', color: '#36B37E', bg: 'bg-emerald-50', border: 'border-l-emerald-500' },
 };
 
 function getWeekDates(baseDate: Date): Date[] {
@@ -72,8 +72,8 @@ function formatTime(dateStr: string): string {
 
 const DAY_NAMES_SHORT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 const MONTH_NAMES = [
-  'Janvier', 'F\u00e9vrier', 'Mars', 'Avril', 'Mai', 'Juin',
-  'Juillet', 'Ao\u00fbt', 'Septembre', 'Octobre', 'Novembre', 'D\u00e9cembre',
+  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
 ];
 
 export default function PlanningPage() {
@@ -154,11 +154,11 @@ export default function PlanningPage() {
         location: (formData.get('location') as string) || undefined,
         team_id: (formData.get('team_id') as string) || undefined,
       });
-      toast('\u00c9v\u00e9nement cr\u00e9\u00e9 avec succ\u00e8s', 'success');
+      toast('Événement créé avec succès', 'success');
       setShowCreateModal(false);
       refetch();
     } catch {
-      toast('Erreur lors de la cr\u00e9ation', 'error');
+      toast('Erreur lors de la création', 'error');
     } finally {
       setSaving(false);
     }
@@ -177,14 +177,14 @@ export default function PlanningPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Planning d&apos;\u00e9quipe</h1>
+          <h1 className="text-2xl font-bold text-text-primary">Planning d&apos;équipe</h1>
           <p className="text-sm text-text-secondary mt-1">
-            {filteredEvents.length} \u00e9v\u00e9nement{filteredEvents.length > 1 ? 's' : ''} planifi\u00e9{filteredEvents.length > 1 ? 's' : ''}
+            {filteredEvents.length} événement{filteredEvents.length > 1 ? 's' : ''} planifié{filteredEvents.length > 1 ? 's' : ''}
           </p>
         </div>
         <button onClick={() => setShowCreateModal(true)} className="btn-primary flex items-center gap-2 w-fit">
           <Plus size={16} />
-          Nouvel \u00e9v\u00e9nement
+          Nouvel événement
         </button>
       </div>
 
@@ -246,7 +246,7 @@ export default function PlanningPage() {
             onChange={(e) => setSelectedTeam(e.target.value)}
             className="input w-auto text-sm"
           >
-            <option value="all">Toutes les \u00e9quipes</option>
+            <option value="all">Toutes les équipes</option>
             {allTeams.map((team) => (
               <option key={team.id as string} value={team.id as string}>{team.name as string}</option>
             ))}
@@ -276,8 +276,8 @@ export default function PlanningPage() {
 
       {allEvents.length === 0 ? (
         <EmptyState
-          message="Aucun \u00e9v\u00e9nement"
-          description="Cr\u00e9ez votre premier \u00e9v\u00e9nement en cliquant sur le bouton ci-dessus."
+          message="Aucun événement"
+          description="Créez votre premier événement en cliquant sur le bouton ci-dessus."
         />
       ) : (
         <>
@@ -442,7 +442,7 @@ export default function PlanningPage() {
           <div className="card p-5 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
             <h2 className="text-base font-bold text-text-primary mb-4 flex items-center gap-2">
               <Calendar size={18} className="text-primary" />
-              Prochains \u00e9v\u00e9nements
+              Prochains événements
             </h2>
             <div className="space-y-3">
               {filteredEvents
@@ -515,15 +515,15 @@ export default function PlanningPage() {
       )}
 
       {/* Create Modal */}
-      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Nouvel \u00e9v\u00e9nement" size="lg">
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Nouvel événement" size="lg">
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1">Titre *</label>
-            <input name="title" required className="input w-full" placeholder="Titre de l'\u00e9v\u00e9nement" />
+            <input name="title" required className="input w-full" placeholder="Titre de l'événement" />
           </div>
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1">Description</label>
-            <textarea name="description" rows={3} className="input w-full" placeholder="Description d\u00e9taill\u00e9e..." />
+            <textarea name="description" rows={3} className="input w-full" placeholder="Description détaillée..." />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -535,9 +535,9 @@ export default function PlanningPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">\u00c9quipe</label>
+              <label className="block text-sm font-medium text-text-primary mb-1">Équipe</label>
               <select name="team_id" className="input w-full">
-                <option value="">-- S\u00e9lectionner --</option>
+                <option value="">-- Sélectionner --</option>
                 {allTeams.map((team) => (
                   <option key={team.id as string} value={team.id as string}>{team.name as string}</option>
                 ))}
@@ -546,7 +546,7 @@ export default function PlanningPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">Date de d\u00e9but *</label>
+              <label className="block text-sm font-medium text-text-primary mb-1">Date de début *</label>
               <input name="start_date" type="datetime-local" required className="input w-full" />
             </div>
             <div>
@@ -556,12 +556,12 @@ export default function PlanningPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1">Lieu</label>
-            <input name="location" className="input w-full" placeholder="Lieu de l'\u00e9v\u00e9nement" />
+            <input name="location" className="input w-full" placeholder="Lieu de l'événement" />
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t border-border-light">
             <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">Annuler</button>
             <button type="submit" disabled={saving} className="btn-primary">
-              {saving ? 'Enregistrement...' : 'Cr\u00e9er l\'\u00e9v\u00e9nement'}
+              {saving ? 'Enregistrement...' : 'Créer l\'événement'}
             </button>
           </div>
         </form>

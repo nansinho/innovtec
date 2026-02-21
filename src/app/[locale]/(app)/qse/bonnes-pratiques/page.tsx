@@ -27,7 +27,7 @@ const CATEGORIES = [
   { name: 'QSE', value: 'qse', color: '#D14900' },
   { name: 'REX', value: 'rex', color: '#00875A' },
   { name: 'Info', value: 'info', color: '#0052CC' },
-  { name: 'S\u00e9curit\u00e9', value: 'securite', color: '#FF5630' },
+  { name: 'Sécurité', value: 'securite', color: '#FF5630' },
   { name: 'Blog', value: 'blog', color: '#6B21A8' },
 ];
 
@@ -84,7 +84,7 @@ export default function BonnesPratiquesPage() {
         category_id: formData.get('category_id') as string || undefined,
         status: 'published',
       });
-      toast('Bonne pratique partag\u00e9e avec succ\u00e8s', 'success');
+      toast('Bonne pratique partagée avec succès', 'success');
       setShowCreateModal(false);
       refetch();
     } catch {
@@ -170,7 +170,7 @@ export default function BonnesPratiquesPage() {
 
       {/* Results count */}
       <p className="text-sm text-text-secondary">
-        {filteredArticles.length} article{filteredArticles.length > 1 ? 's' : ''} trouv\u00e9{filteredArticles.length > 1 ? 's' : ''}
+        {filteredArticles.length} article{filteredArticles.length > 1 ? 's' : ''} trouvé{filteredArticles.length > 1 ? 's' : ''}
       </p>
 
       {/* Articles grid */}
@@ -269,7 +269,7 @@ export default function BonnesPratiquesPage() {
         </div>
       ) : (
         <EmptyState
-          message="Aucune bonne pratique trouv\u00e9e pour ces crit\u00e8res"
+          message="Aucune bonne pratique trouvée pour ces critères"
           description="Essayez de modifier vos filtres ou partagez une nouvelle bonne pratique."
         />
       )}
@@ -282,17 +282,17 @@ export default function BonnesPratiquesPage() {
             <input name="title" required className="input w-full" placeholder="Titre de la bonne pratique" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-text-primary mb-1">R\u00e9sum\u00e9</label>
-            <input name="excerpt" className="input w-full" placeholder="R\u00e9sum\u00e9 court de la pratique" />
+            <label className="block text-sm font-medium text-text-primary mb-1">Résumé</label>
+            <input name="excerpt" className="input w-full" placeholder="Résumé court de la pratique" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-text-primary mb-1">Description d\u00e9taill\u00e9e *</label>
-            <textarea name="content" required rows={6} className="input w-full" placeholder="D\u00e9crivez la bonne pratique en d\u00e9tail..." />
+            <label className="block text-sm font-medium text-text-primary mb-1">Description détaillée *</label>
+            <textarea name="content" required rows={6} className="input w-full" placeholder="Décrivez la bonne pratique en détail..." />
           </div>
           <div>
-            <label className="block text-sm font-medium text-text-primary mb-1">Cat\u00e9gorie</label>
+            <label className="block text-sm font-medium text-text-primary mb-1">Catégorie</label>
             <select name="category_id" className="input w-full">
-              <option value="">-- S\u00e9lectionner --</option>
+              <option value="">-- Sélectionner --</option>
               {(categories || []).map((cat: Record<string, any>) => (
                 <option key={cat.id as string} value={cat.id as string}>{cat.name as string}</option>
               ))}

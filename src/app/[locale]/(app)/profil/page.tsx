@@ -114,11 +114,11 @@ export default function ProfilePage() {
     if (!file || !user) return;
 
     if (!file.type.startsWith('image/')) {
-      toast('Veuillez s\u00e9lectionner une image', 'error');
+      toast('Veuillez sélectionner une image', 'error');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast('L\'image ne doit pas d\u00e9passer 5 Mo', 'error');
+      toast('L\'image ne doit pas dépasser 5 Mo', 'error');
       return;
     }
 
@@ -126,7 +126,7 @@ export default function ProfilePage() {
     try {
       const supabase = createClient();
       const fileExt = file.name.split('.').pop();
-      const filePath = `avatars/${user.id}.${fileExt}`;
+      const filePath = `${user.id}/avatar.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -146,9 +146,9 @@ export default function ProfilePage() {
       if (updateError) throw updateError;
 
       await refetch();
-      toast('Photo de profil mise \u00e0 jour', 'success');
+      toast('Photo de profil mise à jour', 'success');
     } catch {
-      toast('Erreur lors du t\u00e9l\u00e9chargement de la photo', 'error');
+      toast('Erreur lors du téléchargement de la photo', 'error');
     } finally {
       setUploadingAvatar(false);
     }

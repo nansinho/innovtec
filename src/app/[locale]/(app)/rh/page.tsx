@@ -37,23 +37,23 @@ interface QuickLink {
 }
 
 const LEAVE_STATUS_CONFIG: Record<LeaveStatus, { label: string; icon: typeof CheckCircle2; color: string }> = {
-  approuve: { label: 'Approuv\u00e9', icon: CheckCircle2, color: 'text-success bg-emerald-50' },
+  approuve: { label: 'Approuvé', icon: CheckCircle2, color: 'text-success bg-emerald-50' },
   en_attente: { label: 'En attente', icon: Clock, color: 'text-amber-600 bg-amber-50' },
-  refuse: { label: 'Refus\u00e9', icon: XCircle, color: 'text-danger bg-red-50' },
+  refuse: { label: 'Refusé', icon: XCircle, color: 'text-danger bg-red-50' },
 };
 
 const LEAVE_TYPE_LABELS: Record<string, string> = {
-  conge_paye: 'Cong\u00e9s pay\u00e9s',
+  conge_paye: 'Congés payés',
   rtt: 'RTT',
-  maladie: 'Cong\u00e9 maladie',
+  maladie: 'Congé maladie',
   sans_solde: 'Sans solde',
   autre: 'Autre',
 };
 
 const QUICK_LINKS: QuickLink[] = [
   {
-    label: 'Demandes de cong\u00e9s',
-    description: 'G\u00e9rer les demandes de cong\u00e9s et absences',
+    label: 'Demandes de congés',
+    description: 'Gérer les demandes de congés et absences',
     icon: CalendarDays,
     color: 'text-primary',
     bg: 'bg-primary-50',
@@ -67,7 +67,7 @@ const QUICK_LINKS: QuickLink[] = [
   },
   {
     label: 'Documents administratifs',
-    description: 'Acc\u00e9der \u00e0 vos bulletins de paie et contrats',
+    description: 'Accéder à vos bulletins de paie et contrats',
     icon: FolderOpen,
     color: 'text-success',
     bg: 'bg-emerald-50',
@@ -92,9 +92,9 @@ interface RecentActivity {
 
 const RECENT_ACTIVITIES: RecentActivity[] = [
   { id: '1', type: 'Bulletin de paie', description: 'Bulletin de paie janvier 2026 disponible', date: '2026-02-05', icon: FileText, color: 'text-primary' },
-  { id: '2', type: 'Contrat', description: 'Avenant au contrat de travail sign\u00e9', date: '2026-02-01', icon: Briefcase, color: 'text-success' },
-  { id: '3', type: 'Formation', description: 'Attestation AIPR ajout\u00e9e au dossier', date: '2026-01-28', icon: FileText, color: 'text-accent' },
-  { id: '4', type: 'Entretien', description: 'Entretien annuel planifi\u00e9 le 15 mars', date: '2026-01-25', icon: MessageSquare, color: 'text-purple-600' },
+  { id: '2', type: 'Contrat', description: 'Avenant au contrat de travail signé', date: '2026-02-01', icon: Briefcase, color: 'text-success' },
+  { id: '3', type: 'Formation', description: 'Attestation AIPR ajoutée au dossier', date: '2026-01-28', icon: FileText, color: 'text-accent' },
+  { id: '4', type: 'Entretien', description: 'Entretien annuel planifié le 15 mars', date: '2026-01-25', icon: MessageSquare, color: 'text-purple-600' },
 ];
 
 function getDayCount(start: string, end: string): number {
@@ -161,7 +161,7 @@ export default function RHPage() {
 
   // Dynamic quick link counts from real data
   const quickLinksWithCounts = QUICK_LINKS.map((link) => {
-    if (link.label === 'Demandes de cong\u00e9s') {
+    if (link.label === 'Demandes de congés') {
       return { ...link, count: pendingLeaves || undefined };
     }
     if (link.label === 'Notes de frais') {
@@ -182,9 +182,9 @@ export default function RHPage() {
       trendUp: true,
     },
     {
-      label: 'Cong\u00e9s en attente',
+      label: 'Congés en attente',
       value: String(pendingLeaves),
-      sublabel: 'demandes \u00e0 traiter',
+      sublabel: 'demandes à traiter',
       icon: Clock,
       color: 'text-amber-600',
       bg: 'bg-amber-50',
@@ -192,7 +192,7 @@ export default function RHPage() {
       trendUp: false,
     },
     {
-      label: 'Cong\u00e9s approuv\u00e9s',
+      label: 'Congés approuvés',
       value: String(approvedLeavesThisMonth),
       sublabel: 'ce mois-ci',
       icon: CheckCircle2,
@@ -224,11 +224,11 @@ export default function RHPage() {
         end_date: formData.get('end_date') as string,
         reason: (formData.get('reason') as string) || undefined,
       });
-      toast('Demande de cong\u00e9 cr\u00e9\u00e9e avec succ\u00e8s', 'success');
+      toast('Demande de congé créée avec succès', 'success');
       setShowCreateModal(false);
       refetchLeaves();
     } catch {
-      toast('Erreur lors de la cr\u00e9ation de la demande', 'error');
+      toast('Erreur lors de la création de la demande', 'error');
     } finally {
       setSaving(false);
     }
@@ -238,7 +238,7 @@ export default function RHPage() {
     setActionLoading(id);
     try {
       await updateLeaveRequestStatus(id, 'approuve');
-      toast('Demande approuv\u00e9e', 'success');
+      toast('Demande approuvée', 'success');
       refetchLeaves();
     } catch {
       toast("Erreur lors de l'approbation", 'error');
@@ -251,7 +251,7 @@ export default function RHPage() {
     setActionLoading(id);
     try {
       await updateLeaveRequestStatus(id, 'refuse');
-      toast('Demande refus\u00e9e', 'success');
+      toast('Demande refusée', 'success');
       refetchLeaves();
     } catch {
       toast('Erreur lors du refus', 'error');
@@ -450,8 +450,8 @@ export default function RHPage() {
             </div>
           ) : (
             <EmptyState
-              message="Aucune demande de cong\u00e9"
-              description="Les demandes de cong\u00e9s appara\u00eetront ici une fois soumises."
+              message="Aucune demande de congé"
+              description="Les demandes de congés apparaîtront ici une fois soumises."
             />
           )}
         </div>
@@ -493,7 +493,7 @@ export default function RHPage() {
       </div>
 
       {/* Create Leave Request Modal */}
-      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Nouvelle demande de cong\u00e9" size="md">
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Nouvelle demande de congé" size="md">
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1">Type de cong&eacute; *</label>

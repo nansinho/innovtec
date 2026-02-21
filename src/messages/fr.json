@@ -30,7 +30,11 @@
     "settings": "Paramètres",
     "logout": "Déconnexion",
     "profile": "Mon profil",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "error": "Une erreur est survenue",
+    "success": "Opération réussie",
+    "noData": "Aucune donnée disponible",
+    "retry": "Réessayer"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -50,10 +54,11 @@
     "documents": "Documents",
     "gallery": "Galerie",
     "blog": "Blog",
-    "search": "Recherche"
+    "search": "Recherche",
+    "profile": "Profil"
   },
   "dashboard": {
-    "welcome": "Bonjour, {name} 👋",
+    "welcome": "Bonjour, {name}",
     "welcomeSubtitle": "Voici un résumé de votre journée",
     "quickAccess": "Accès rapides",
     "kpiTitle": "Indicateurs SSE",
@@ -172,6 +177,56 @@
     "rememberMe": "Se souvenir de moi",
     "forgotPassword": "Mot de passe oublié ?",
     "loginButton": "Se connecter",
-    "loggingIn": "Connexion en cours..."
+    "loggingIn": "Connexion en cours...",
+    "invalidCredentials": "Email ou mot de passe incorrect",
+    "emailNotConfirmed": "Veuillez confirmer votre email",
+    "noAccount": "Pas encore de compte ?",
+    "registerLink": "Créer un compte",
+    "hasAccount": "Déjà un compte ?",
+    "loginLink": "Se connecter",
+    "registerTitle": "Créer un compte",
+    "registerSubtitle": "Rejoignez l'intranet INNOVTEC",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "confirmPassword": "Confirmer le mot de passe",
+    "registerButton": "Créer mon compte",
+    "registering": "Création en cours...",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères",
+    "passwordHint": "Minimum 8 caractères",
+    "emailAlreadyUsed": "Cet email est déjà utilisé",
+    "registrationSuccess": "Compte créé ! Vérifiez votre email pour confirmer votre inscription.",
+    "forgotPasswordTitle": "Mot de passe oublié",
+    "forgotPasswordSubtitle": "Entrez votre email pour recevoir un lien de réinitialisation",
+    "sendResetLink": "Envoyer le lien",
+    "sending": "Envoi en cours...",
+    "resetEmailSent": "Un email de réinitialisation a été envoyé. Vérifiez votre boîte de réception.",
+    "backToLogin": "Retour à la connexion"
+  },
+  "profile": {
+    "title": "Mon profil",
+    "personalInfo": "Informations personnelles",
+    "security": "Sécurité",
+    "preferences": "Préférences",
+    "changePassword": "Changer le mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe",
+    "updateProfile": "Mettre à jour",
+    "updatePassword": "Mettre à jour le mot de passe",
+    "phone": "Téléphone",
+    "position": "Poste",
+    "team": "Équipe",
+    "role": "Rôle",
+    "language": "Langue",
+    "profileUpdated": "Profil mis à jour avec succès",
+    "passwordUpdated": "Mot de passe mis à jour avec succès"
+  },
+  "errors": {
+    "pageNotFound": "Page non trouvée",
+    "pageNotFoundDescription": "La page que vous cherchez n'existe pas ou a été déplacée.",
+    "goHome": "Retour à l'accueil",
+    "somethingWentWrong": "Quelque chose s'est mal passé",
+    "tryAgain": "Réessayer"
   }
 }

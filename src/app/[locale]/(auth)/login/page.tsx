@@ -3,20 +3,44 @@
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Eye, EyeOff, LogIn, Zap } from 'lucide-react';
+import { Link, useRouter } from '@/i18n/routing';
+import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
   const t = useTranslations('auth');
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // TODO: Implement Supabase auth
-    setTimeout(() => setIsLoading(false), 2000);
+    setError(null);
+
+    const supabase = createClient();
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError) {
+      if (authError.message === 'Invalid login credentials') {
+        setError(t('invalidCredentials'));
+      } else if (authError.message === 'Email not confirmed') {
+        setError(t('emailNotConfirmed'));
+      } else {
+        setError(authError.message);
+      }
+      setIsLoading(false);
+      return;
+    }
+
+    router.push('/');
+    router.refresh();
   };
 
   return (
@@ -37,6 +61,12 @@ export default function LoginPage() {
           <h2 className="text-2xl font-bold text-text-primary">{t('loginTitle')}</h2>
           <p className="text-sm text-text-secondary mt-2">{t('loginSubtitle')}</p>
         </div>
+
+        {error && (
+          <div className="mb-6 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Email */}
@@ -93,9 +123,9 @@ export default function LoginPage() {
               />
               <span className="text-sm text-text-secondary">{t('rememberMe')}</span>
             </label>
-            <button type="button" className="text-sm font-medium text-primary hover:text-primary-dark transition-colors">
+            <Link href="/forgot-password" className="text-sm font-medium text-primary hover:text-primary-dark transition-colors">
               {t('forgotPassword')}
-            </button>
+            </Link>
           </div>
 
           {/* Submit */}
@@ -117,6 +147,15 @@ export default function LoginPage() {
             )}
           </button>
         </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm text-text-secondary">
+            {t('noAccount')}{' '}
+            <Link href="/register" className="font-medium text-primary hover:text-primary-dark transition-colors">
+              {t('registerLink')}
+            </Link>
+          </p>
+        </div>
       </div>
 
       <p className="text-center text-xs text-text-muted mt-6">

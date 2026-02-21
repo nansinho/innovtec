@@ -1,17 +1,22 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { Sun, Cloud, Thermometer } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
+import { Sun } from 'lucide-react';
+import { useCurrentUser } from '@/lib/hooks/use-supabase-query';
 
 export function WelcomeBanner() {
   const t = useTranslations('dashboard');
+  const locale = useLocale();
+  const { user } = useCurrentUser();
 
-  const today = new Date().toLocaleDateString('fr-FR', {
+  const today = new Date().toLocaleDateString(locale === 'pt' ? 'pt-BR' : 'fr-FR', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   });
+
+  const displayName = user ? user.first_name : '...';
 
   return (
     <div className="relative overflow-hidden rounded-card bg-gradient-to-r from-primary via-primary to-primary-light p-6 md:p-8 text-white animate-fade-in-up">
@@ -25,7 +30,7 @@ export function WelcomeBanner() {
       <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">
-            {t('welcome', { name: 'Nicolas' })}
+            {t('welcome', { name: displayName })}
           </h1>
           <p className="mt-1 text-white/70 text-sm md:text-base">
             {t('welcomeSubtitle')}

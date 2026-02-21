@@ -4,6 +4,8 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
+import { getInitials, getAvatarGradient } from '@/lib/utils';
+import { useCurrentUser } from '@/lib/hooks/use-supabase-query';
 import {
   LayoutDashboard,
   Newspaper,
@@ -22,8 +24,11 @@ import {
   Image,
   ChevronDown,
   Zap,
+  LogOut,
 } from 'lucide-react';
 import { useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from '@/i18n/routing';
 
 interface NavItem {
   label: string;
@@ -34,13 +39,23 @@ interface NavItem {
 
 export function Sidebar() {
   const t = useTranslations('nav');
+  const tCommon = useTranslations('common');
   const pathname = usePathname();
+  const router = useRouter();
+  const { user } = useCurrentUser();
   const [expandedSections, setExpandedSections] = useState<string[]>(['qse']);
 
   const toggleSection = (key: string) => {
     setExpandedSections((prev) =>
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
     );
+  };
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
   };
 
   const navItems: NavItem[] = [
@@ -109,6 +124,14 @@ export function Sidebar() {
     if (href === '/') return cleanPath === '/';
     return cleanPath.startsWith(href);
   };
+
+  const displayName = user
+    ? `${user.first_name} ${user.last_name}`
+    : 'Utilisateur';
+  const roleLabel = user?.role || 'Collaborateur';
+  const initials = user
+    ? getInitials(user.first_name, user.last_name)
+    : 'IN';
 
   return (
     <aside className="hidden w-[260px] flex-shrink-0 lg:flex lg:flex-col bg-gradient-to-b from-sidebar to-sidebar-light shadow-sidebar">
@@ -194,13 +217,25 @@ export function Sidebar() {
       {/* Footer */}
       <div className="border-t border-white/10 p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-light text-xs font-bold text-white">
-            IN
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white truncate">Utilisateur</p>
-            <p className="text-xs text-white/50 truncate">Directeur</p>
-          </div>
+          <Link href="/profil" className="flex-1 flex items-center gap-3 min-w-0">
+            <div className={cn(
+              'flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white flex-shrink-0',
+              user ? getAvatarGradient(displayName) : 'from-primary to-primary-light'
+            )}>
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-white truncate">{displayName}</p>
+              <p className="text-xs text-white/50 truncate capitalize">{roleLabel}</p>
+            </div>
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+            title={tCommon('logout')}
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </div>
     </aside>

@@ -1,16 +1,24 @@
 'use client';
 
 import { useTranslations, useLocale } from 'next-intl';
-import { useRouter, usePathname } from '@/i18n/routing';
-import { Bell, Search, Settings, Menu, Globe } from 'lucide-react';
-import { useState } from 'react';
+import { useRouter, usePathname, Link } from '@/i18n/routing';
+import { Bell, Search, Settings, Menu, Globe, LogOut, User } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { useCurrentUser } from '@/lib/hooks/use-supabase-query';
+import { createClient } from '@/lib/supabase/client';
+import { cn } from '@/lib/utils';
+import { getInitials, getAvatarGradient } from '@/lib/utils';
 
 export function Topbar() {
   const t = useTranslations('common');
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const { user } = useCurrentUser();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const switchLocale = () => {
     const newLocale = locale === 'fr' ? 'pt' : 'fr';
@@ -18,9 +26,43 @@ export function Topbar() {
   };
 
   const openSearch = () => {
-    // Dispatch custom event to open search modal
     window.dispatchEvent(new CustomEvent('open-search'));
   };
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
+  };
+
+  // Fetch notification count
+  useEffect(() => {
+    if (!user) return;
+    const supabase = createClient();
+    supabase
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('is_read', false)
+      .then(({ count }) => {
+        setNotificationCount(count || 0);
+      });
+  }, [user]);
+
+  // Close user menu on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const displayName = user ? `${user.first_name} ${user.last_name}` : '';
+  const initials = user ? getInitials(user.first_name, user.last_name) : '';
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-white/80 backdrop-blur-md px-4 md:px-6 shadow-topbar">
@@ -59,15 +101,62 @@ export function Topbar() {
         {/* Notifications */}
         <button className="relative flex h-9 w-9 items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
           <Bell size={18} className="text-text-secondary" />
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[10px] font-bold text-white">
-            3
-          </span>
+          {notificationCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[10px] font-bold text-white">
+              {notificationCount > 9 ? '9+' : notificationCount}
+            </span>
+          )}
         </button>
 
-        {/* Settings */}
-        <button className="flex h-9 w-9 items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
-          <Settings size={18} className="text-text-secondary" />
-        </button>
+        {/* User menu */}
+        <div className="relative" ref={userMenuRef}>
+          <button
+            onClick={() => setUserMenuOpen(!userMenuOpen)}
+            className="flex h-9 w-9 items-center justify-center rounded-full hover:ring-2 hover:ring-primary/20 transition-all"
+          >
+            <div className={cn(
+              'flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white',
+              user ? getAvatarGradient(displayName) : 'from-primary to-primary-light'
+            )}>
+              {initials || <User size={14} />}
+            </div>
+          </button>
+
+          {userMenuOpen && (
+            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-border bg-white shadow-lg py-1 animate-fade-in">
+              {user && (
+                <div className="px-4 py-3 border-b border-border">
+                  <p className="text-sm font-semibold text-text-primary">{displayName}</p>
+                  <p className="text-xs text-text-muted">{user.email}</p>
+                </div>
+              )}
+              <Link
+                href="/profil"
+                onClick={() => setUserMenuOpen(false)}
+                className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary hover:bg-gray-50 transition-colors"
+              >
+                <User size={16} />
+                {t('profile')}
+              </Link>
+              <Link
+                href="/profil"
+                onClick={() => setUserMenuOpen(false)}
+                className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary hover:bg-gray-50 transition-colors"
+              >
+                <Settings size={16} />
+                {t('settings')}
+              </Link>
+              <div className="border-t border-border my-1" />
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <LogOut size={16} />
+                {t('logout')}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

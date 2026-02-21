@@ -2,11 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { Search, Plus, Clock, MessageCircle } from 'lucide-react';
+import { Search, Plus, Clock } from 'lucide-react';
 import { cn, getCategoryBadgeClass, formatRelativeDate } from '@/lib/utils';
 import { getAvatarGradient, getInitials } from '@/lib/utils';
 import { Link } from '@/i18n/routing';
-import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
+import { useSupabaseQuery, useRealtimeSubscription } from '@/lib/hooks/use-supabase-query';
 import { useToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
 import { LoadingState, EmptyState } from '@/components/ui/DataStates';
@@ -17,7 +17,7 @@ const CATEGORIES = [
   { name: 'QSE', type: 'qse', color: '#D14900' },
   { name: 'REX', type: 'rex', color: '#00875A' },
   { name: 'Info', type: 'info', color: '#0052CC' },
-  { name: 'Sécurité', type: 'securite', color: '#FF5630' },
+  { name: 'S\u00e9curit\u00e9', type: 'securite', color: '#FF5630' },
   { name: 'Blog', type: 'blog', color: '#6B21A8' },
 ];
 
@@ -41,6 +41,8 @@ export default function ActualitesPage() {
     (supabase) =>
       supabase.from('article_categories').select('*').order('name'),
   );
+
+  useRealtimeSubscription('articles', refetch);
 
   const filteredArticles = (articles || []).filter((article: Record<string, any>) => {
     const category = article.category as { type?: string } | null;
@@ -66,11 +68,11 @@ export default function ActualitesPage() {
         category_id: formData.get('category_id') as string || undefined,
         status: formData.get('status') as string || 'draft',
       });
-      toast('Article créé avec succès', 'success');
+      toast('Article cr\u00e9\u00e9 avec succ\u00e8s', 'success');
       setShowCreateModal(false);
       refetch();
     } catch {
-      toast('Erreur lors de la création', 'error');
+      toast('Erreur lors de la cr\u00e9ation', 'error');
     } finally {
       setSaving(false);
     }
@@ -100,7 +102,7 @@ export default function ActualitesPage() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
-            placeholder={t('categories') + '...'}
+            placeholder="Rechercher un article..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="input pl-9"
@@ -129,7 +131,7 @@ export default function ActualitesPage() {
       {filteredArticles.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-stagger">
           {filteredArticles.map((article: Record<string, any>) => {
-            const author = article.author as { first_name: string; last_name: string } | null;
+            const author = article.author as { first_name: string; last_name: string; avatar_url?: string } | null;
             const category = article.category as { name: string; type: string; color: string } | null;
             const firstName = author?.first_name || '';
             const lastName = author?.last_name || '';
@@ -155,9 +157,17 @@ export default function ActualitesPage() {
                     </p>
                     <div className="flex items-center justify-between pt-3 border-t border-border-light">
                       <div className="flex items-center gap-2">
-                        <div className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[10px] font-bold text-white`}>
-                          {initials}
-                        </div>
+                        {author?.avatar_url ? (
+                          <img
+                            src={author.avatar_url}
+                            alt={`${firstName} ${lastName}`}
+                            className="h-7 w-7 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[10px] font-bold text-white`}>
+                            {initials}
+                          </div>
+                        )}
                         <span className="text-xs font-medium text-text-secondary">
                           {firstName} {lastName}
                         </span>
@@ -176,7 +186,7 @@ export default function ActualitesPage() {
           })}
         </div>
       ) : (
-        <EmptyState message={t('noArticles')} description="Créez votre premier article en cliquant sur le bouton ci-dessus." />
+        <EmptyState message={t('noArticles')} description="Cr\u00e9ez votre premier article en cliquant sur le bouton ci-dessus." />
       )}
 
       {/* Create Modal */}
@@ -187,8 +197,8 @@ export default function ActualitesPage() {
             <input name="title" required className="input w-full" placeholder="Titre de l'article" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-text-primary mb-1">Résumé</label>
-            <input name="excerpt" className="input w-full" placeholder="Résumé court" />
+            <label className="block text-sm font-medium text-text-primary mb-1">R\u00e9sum\u00e9</label>
+            <input name="excerpt" className="input w-full" placeholder="R\u00e9sum\u00e9 court" />
           </div>
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1">Contenu *</label>
@@ -196,9 +206,9 @@ export default function ActualitesPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">Catégorie</label>
+              <label className="block text-sm font-medium text-text-primary mb-1">Cat\u00e9gorie</label>
               <select name="category_id" className="input w-full">
-                <option value="">-- Sélectionner --</option>
+                <option value="">-- S\u00e9lectionner --</option>
                 {(categories || []).map((cat: Record<string, any>) => (
                   <option key={cat.id as string} value={cat.id as string}>{cat.name as string}</option>
                 ))}
@@ -208,14 +218,14 @@ export default function ActualitesPage() {
               <label className="block text-sm font-medium text-text-primary mb-1">Statut</label>
               <select name="status" className="input w-full">
                 <option value="draft">Brouillon</option>
-                <option value="published">Publié</option>
+                <option value="published">Publi\u00e9</option>
               </select>
             </div>
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t border-border-light">
             <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">Annuler</button>
             <button type="submit" disabled={saving} className="btn-primary">
-              {saving ? 'Enregistrement...' : 'Créer l\'article'}
+              {saving ? 'Enregistrement...' : 'Cr\u00e9er l\'article'}
             </button>
           </div>
         </form>

@@ -81,17 +81,17 @@ export function Topbar() {
         <Search size={16} />
         <span className="flex-1 text-left">{t('searchPlaceholder')}</span>
         <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded-md border border-border bg-white px-1.5 py-0.5 text-[11px] font-medium text-text-muted">
-          <span className="text-xs">⌘</span>K
+          <span className="text-xs">\u2318</span>K
         </kbd>
       </button>
 
       {/* Right actions */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         {/* Language toggle */}
         <button
           onClick={switchLocale}
           className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-text-secondary hover:bg-gray-100 transition-colors"
-          title={locale === 'fr' ? 'Mudar para Português' : 'Passer en Français'}
+          title={locale === 'fr' ? 'Mudar para Portugu\u00eas' : 'Passer en Fran\u00e7ais'}
         >
           <Globe size={16} />
           <span className="hidden sm:inline uppercase">{locale}</span>
@@ -107,17 +107,29 @@ export function Topbar() {
           )}
         </button>
 
-        {/* User menu */}
+        {/* User menu - avatar more visible */}
         <div className="relative" ref={userMenuRef}>
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
-            className="flex h-9 w-9 items-center justify-center rounded-full hover:ring-2 hover:ring-primary/20 transition-all"
+            className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-gray-100 transition-all"
           >
-            <div className={cn(
-              'flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white',
-              user ? getAvatarGradient(displayName) : 'from-primary to-primary-light'
-            )}>
-              {initials || <User size={14} />}
+            {user?.avatar_url ? (
+              <img
+                src={user.avatar_url}
+                alt={displayName}
+                className="h-9 w-9 rounded-full object-cover ring-2 ring-primary/20 shadow-sm"
+              />
+            ) : (
+              <div className={cn(
+                'flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white ring-2 ring-primary/20 shadow-sm',
+                user ? getAvatarGradient(displayName) : 'from-primary to-primary-light'
+              )}>
+                {initials || <User size={14} />}
+              </div>
+            )}
+            <div className="hidden md:block text-left">
+              <p className="text-xs font-semibold text-text-primary leading-tight">{displayName}</p>
+              <p className="text-[10px] text-text-muted leading-tight">{getRoleLabel(user?.role)}</p>
             </div>
           </button>
 

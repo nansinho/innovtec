@@ -10,13 +10,12 @@ import {
   Clock,
   CheckCircle2,
   AlertTriangle,
-  ArrowRight,
   Target,
   Filter,
 } from 'lucide-react';
 import { cn, getAvatarGradient, getInitials } from '@/lib/utils';
 import { Link } from '@/i18n/routing';
-import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
+import { useSupabaseQuery, useRealtimeSubscription } from '@/lib/hooks/use-supabase-query';
 import { useToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
 import { LoadingState, EmptyState } from '@/components/ui/DataStates';
@@ -35,7 +34,7 @@ function getPriorityConfig(priority: string) {
 function getColumnConfig(status: string) {
   const map: Record<string, { title: string; icon: typeof Clock; color: string }> = {
     en_cours: { title: 'En cours', icon: Clock, color: 'text-blue-600' },
-    cloture: { title: 'Cloturé', icon: CheckCircle2, color: 'text-emerald-600' },
+    cloture: { title: 'Cl\u00f4tur\u00e9', icon: CheckCircle2, color: 'text-emerald-600' },
     en_retard: { title: 'En retard', icon: AlertTriangle, color: 'text-red-600' },
   };
   return map[status] || map.en_cours;
@@ -71,6 +70,8 @@ export default function PlansActionsPage() {
     (supabase) => supabase.from('teams').select('id, name').order('name'),
   );
 
+  useRealtimeSubscription('action_plans', refetch);
+
   const allPlans = (plans || []) as Record<string, any>[];
 
   const filteredActions = allPlans.filter((action) => {
@@ -98,11 +99,11 @@ export default function PlansActionsPage() {
         responsible_id: formData.get('responsible_id') as string || undefined,
         team_id: formData.get('team_id') as string || undefined,
       });
-      toast("Plan d'action créé avec succès", 'success');
+      toast("Plan d'action cr\u00e9\u00e9 avec succ\u00e8s", 'success');
       setShowCreateModal(false);
       refetch();
     } catch {
-      toast('Erreur lors de la création', 'error');
+      toast('Erreur lors de la cr\u00e9ation', 'error');
     } finally {
       setSaving(false);
     }
@@ -173,7 +174,7 @@ export default function PlansActionsPage() {
                 </div>
                 <div className="space-y-3">
                   {colActions.map((action) => {
-                    const responsible = action.responsible as { first_name: string; last_name: string } | null;
+                    const responsible = action.responsible as { first_name: string; last_name: string; avatar_url?: string } | null;
                     const priority = (action.priority as string) || 'normale';
                     const priorityConfig = getPriorityConfig(priority);
                     const firstName = responsible?.first_name || '';
@@ -198,9 +199,13 @@ export default function PlansActionsPage() {
                           <p className="text-xs text-text-secondary line-clamp-2 mb-3">{action.description as string}</p>
                           <div className="flex items-center justify-between pt-2 border-t border-border-light">
                             <div className="flex items-center gap-1.5">
-                              <div className={`flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[8px] font-bold text-white`}>
-                                {initials}
-                              </div>
+                              {responsible?.avatar_url ? (
+                                <img src={responsible.avatar_url} alt={`${firstName} ${lastName}`} className="h-5 w-5 rounded-full object-cover" />
+                              ) : (
+                                <div className={`flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[8px] font-bold text-white`}>
+                                  {initials}
+                                </div>
+                              )}
                               <span className="text-[10px] text-text-secondary">{firstName} {lastName}</span>
                             </div>
                             {daysRemaining !== null && (
@@ -211,7 +216,7 @@ export default function PlansActionsPage() {
                                   : 'text-text-muted'
                               )}>
                                 <Calendar size={10} />
-                                {action.status === 'cloture' ? 'Terminé' : daysRemaining < 0 ? `${Math.abs(daysRemaining)}j en retard` : daysRemaining === 0 ? "Aujourd'hui" : `${daysRemaining}j restants`}
+                                {action.status === 'cloture' ? 'Termin\u00e9' : daysRemaining < 0 ? `${Math.abs(daysRemaining)}j en retard` : daysRemaining === 0 ? "Aujourd'hui" : `${daysRemaining}j restants`}
                               </span>
                             )}
                           </div>
@@ -230,7 +235,7 @@ export default function PlansActionsPage() {
           })}
         </div>
       ) : (
-        <EmptyState message="Aucun plan d'action" description="Créez votre premier plan d'action en cliquant sur le bouton ci-dessus." />
+        <EmptyState message="Aucun plan d'action" description="Cr\u00e9ez votre premier plan d'action en cliquant sur le bouton ci-dessus." />
       )}
 
       {/* Create Modal */}
@@ -242,11 +247,11 @@ export default function PlansActionsPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1">Description</label>
-            <textarea name="description" rows={3} className="input w-full" placeholder="Description détaillée..." />
+            <textarea name="description" rows={3} className="input w-full" placeholder="Description d\u00e9taill\u00e9e..." />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">Priorité</label>
+              <label className="block text-sm font-medium text-text-primary mb-1">Priorit\u00e9</label>
               <select name="priority" className="input w-full">
                 <option value="normale">Normale</option>
                 <option value="basse">Basse</option>
@@ -255,7 +260,7 @@ export default function PlansActionsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">Échéance</label>
+              <label className="block text-sm font-medium text-text-primary mb-1">\u00c9ch\u00e9ance</label>
               <input name="due_date" type="date" className="input w-full" />
             </div>
           </div>
@@ -263,16 +268,16 @@ export default function PlansActionsPage() {
             <div>
               <label className="block text-sm font-medium text-text-primary mb-1">Responsable</label>
               <select name="responsible_id" className="input w-full">
-                <option value="">-- Sélectionner --</option>
+                <option value="">-- S\u00e9lectionner --</option>
                 {(profiles || []).map((p: Record<string, any>) => (
                   <option key={p.id as string} value={p.id as string}>{p.first_name as string} {p.last_name as string}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">Équipe</label>
+              <label className="block text-sm font-medium text-text-primary mb-1">\u00c9quipe</label>
               <select name="team_id" className="input w-full">
-                <option value="">-- Sélectionner --</option>
+                <option value="">-- S\u00e9lectionner --</option>
                 {(teams || []).map((t: Record<string, any>) => (
                   <option key={t.id as string} value={t.id as string}>{t.name as string}</option>
                 ))}
@@ -282,7 +287,7 @@ export default function PlansActionsPage() {
           <div className="flex justify-end gap-3 pt-4 border-t border-border-light">
             <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">Annuler</button>
             <button type="submit" disabled={saving} className="btn-primary">
-              {saving ? 'Enregistrement...' : "Créer le plan d'action"}
+              {saving ? 'Enregistrement...' : "Cr\u00e9er le plan d'action"}
             </button>
           </div>
         </form>

@@ -16,26 +16,30 @@ import {
 } from 'lucide-react';
 import { cn, getAvatarGradient, getInitials } from '@/lib/utils';
 import { Link } from '@/i18n/routing';
-import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
+import { useSupabaseQuery, useRealtimeSubscription } from '@/lib/hooks/use-supabase-query';
+import { useToast } from '@/components/ui/Toast';
+import { Modal } from '@/components/ui/Modal';
 import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { createArticle } from '@/lib/actions';
 
-// --- Category filter config ---
 const CATEGORIES = [
   { name: 'Toutes', value: 'all', color: '#0052CC' },
   { name: 'QSE', value: 'qse', color: '#D14900' },
   { name: 'REX', value: 'rex', color: '#00875A' },
   { name: 'Info', value: 'info', color: '#0052CC' },
-  { name: 'Securite', value: 'securite', color: '#FF5630' },
+  { name: 'S\u00e9curit\u00e9', value: 'securite', color: '#FF5630' },
   { name: 'Blog', value: 'blog', color: '#6B21A8' },
 ];
 
-// --- Component ---
 export default function BonnesPratiquesPage() {
   const t = useTranslations('qse');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
 
-  const { data: articles, loading } = useSupabaseQuery(
+  const { data: articles, loading, refetch } = useSupabaseQuery(
     (supabase) =>
       supabase
         .from('articles')
@@ -43,6 +47,13 @@ export default function BonnesPratiquesPage() {
         .eq('status', 'published')
         .order('published_at', { ascending: false }),
   );
+
+  const { data: categories } = useSupabaseQuery(
+    (supabase) =>
+      supabase.from('article_categories').select('*').order('name'),
+  );
+
+  useRealtimeSubscription('articles', refetch);
 
   const allArticles = (articles || []) as Record<string, any>[];
 
@@ -60,6 +71,28 @@ export default function BonnesPratiquesPage() {
       content.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSaving(true);
+    const formData = new FormData(e.currentTarget);
+    try {
+      await createArticle({
+        title: formData.get('title') as string,
+        content: formData.get('content') as string,
+        excerpt: formData.get('excerpt') as string,
+        category_id: formData.get('category_id') as string || undefined,
+        status: 'published',
+      });
+      toast('Bonne pratique partag\u00e9e avec succ\u00e8s', 'success');
+      setShowCreateModal(false);
+      refetch();
+    } catch {
+      toast('Erreur lors du partage', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (loading) return <LoadingState />;
 
@@ -82,7 +115,10 @@ export default function BonnesPratiquesPage() {
             </div>
           </div>
         </div>
-        <button className="btn-accent flex items-center gap-2 w-fit">
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="btn-accent flex items-center gap-2 w-fit"
+        >
           <Plus size={16} />
           Partager une pratique
         </button>
@@ -134,7 +170,7 @@ export default function BonnesPratiquesPage() {
 
       {/* Results count */}
       <p className="text-sm text-text-secondary">
-        {filteredArticles.length} article{filteredArticles.length > 1 ? 's' : ''} trouve{filteredArticles.length > 1 ? 's' : ''}
+        {filteredArticles.length} article{filteredArticles.length > 1 ? 's' : ''} trouv\u00e9{filteredArticles.length > 1 ? 's' : ''}
       </p>
 
       {/* Articles grid */}
@@ -147,49 +183,25 @@ export default function BonnesPratiquesPage() {
             const lastName = author?.last_name || '';
             const gradient = getAvatarGradient(firstName + lastName);
             const initials = getInitials(firstName, lastName);
-            const hasImage = !!(article.cover_image_url as string);
             const catColor = category?.color || '#0052CC';
             const catName = category?.name || 'Info';
 
             return (
               <Link key={article.id as string} href={`/actualites/${article.id}`}>
                 <article className="card group overflow-hidden hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 cursor-pointer">
-                  {/* Image placeholder */}
-                  {hasImage ? (
-                    <div className="relative h-40 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                      <ImageIcon size={32} className="text-gray-300" />
-                      <div className="absolute top-3 right-3">
-                        <button className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-text-secondary hover:text-primary transition-colors shadow-sm">
-                          <Bookmark size={13} />
-                        </button>
-                      </div>
-                      <div className="absolute bottom-3 left-3">
-                        <span
-                          className="badge text-white text-[10px] shadow-sm"
-                          style={{ backgroundColor: catColor }}
-                        >
-                          {catName}
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div
-                      className="h-2"
-                      style={{ backgroundColor: catColor }}
-                    />
-                  )}
-
+                  <div
+                    className="h-1.5"
+                    style={{ backgroundColor: catColor }}
+                  />
                   <div className="p-5">
-                    {!hasImage && (
-                      <div className="flex items-center gap-2 mb-2">
-                        <span
-                          className="badge text-white text-[10px]"
-                          style={{ backgroundColor: catColor }}
-                        >
-                          {catName}
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2 mb-2">
+                      <span
+                        className="badge text-white text-[10px]"
+                        style={{ backgroundColor: catColor }}
+                      >
+                        {catName}
+                      </span>
+                    </div>
 
                     <h2 className="text-base font-bold text-text-primary group-hover:text-primary transition-colors line-clamp-2 mb-2">
                       {article.title as string}
@@ -218,7 +230,7 @@ export default function BonnesPratiquesPage() {
                     <div className="flex items-center justify-between pt-3 border-t border-border-light">
                       <div className="flex items-center gap-2">
                         <div
-                          className={`flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[9px] font-bold text-white`}
+                          className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[10px] font-bold text-white`}
                         >
                           {initials}
                         </div>
@@ -257,10 +269,43 @@ export default function BonnesPratiquesPage() {
         </div>
       ) : (
         <EmptyState
-          message="Aucune bonne pratique trouvee pour ces criteres"
+          message="Aucune bonne pratique trouv\u00e9e pour ces crit\u00e8res"
           description="Essayez de modifier vos filtres ou partagez une nouvelle bonne pratique."
         />
       )}
+
+      {/* Create Modal */}
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Partager une bonne pratique" size="lg">
+        <form onSubmit={handleCreate} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Titre *</label>
+            <input name="title" required className="input w-full" placeholder="Titre de la bonne pratique" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">R\u00e9sum\u00e9</label>
+            <input name="excerpt" className="input w-full" placeholder="R\u00e9sum\u00e9 court de la pratique" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Description d\u00e9taill\u00e9e *</label>
+            <textarea name="content" required rows={6} className="input w-full" placeholder="D\u00e9crivez la bonne pratique en d\u00e9tail..." />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Cat\u00e9gorie</label>
+            <select name="category_id" className="input w-full">
+              <option value="">-- S\u00e9lectionner --</option>
+              {(categories || []).map((cat: Record<string, any>) => (
+                <option key={cat.id as string} value={cat.id as string}>{cat.name as string}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-border-light">
+            <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">Annuler</button>
+            <button type="submit" disabled={saving} className="btn-primary">
+              {saving ? 'Partage en cours...' : 'Partager la pratique'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

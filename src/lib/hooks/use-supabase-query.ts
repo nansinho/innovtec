@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 interface UseQueryOptions {
@@ -41,6 +41,49 @@ export function useSupabaseQuery<T = any>(
   return { data, error, loading, refetch };
 }
 
+/**
+ * Subscribe to real-time changes on a Supabase table.
+ * Calls `onUpdate` whenever an INSERT, UPDATE, or DELETE occurs.
+ */
+export function useRealtimeSubscription(
+  table: string,
+  onUpdate: () => void,
+  options: { event?: 'INSERT' | 'UPDATE' | 'DELETE' | '*'; filter?: string } = {}
+) {
+  const onUpdateRef = useRef(onUpdate);
+  onUpdateRef.current = onUpdate;
+
+  useEffect(() => {
+    const supabase = createClient();
+    const event = options.event || '*';
+
+    const channelConfig: Record<string, unknown> = {
+      event,
+      schema: 'public',
+      table,
+    };
+    if (options.filter) {
+      channelConfig.filter = options.filter;
+    }
+
+    const channel = supabase
+      .channel(`realtime-${table}-${Math.random().toString(36).slice(2)}`)
+      .on(
+        'postgres_changes' as any,
+        channelConfig as any,
+        () => {
+          onUpdateRef.current();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [table, options.event, options.filter]);
+}
+
 export function useCurrentUser() {
   const [user, setUser] = useState<{
     id: string;
@@ -78,7 +121,6 @@ export function useCurrentUser() {
         .maybeSingle();
 
       if (!profile) {
-        // Profile missing — auto-create it
         const { data: newProfile } = await supabase
           .from('profiles')
           .upsert({
@@ -111,6 +153,8 @@ export function useCurrentUser() {
 
     return () => subscription.unsubscribe();
   }, [refetch]);
+
+  useRealtimeSubscription('profiles', refetch);
 
   return { user, loading, refetch };
 }

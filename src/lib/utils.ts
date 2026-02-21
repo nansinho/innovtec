@@ -127,6 +127,19 @@ export function getRoleBadgeClass(role: string | null | undefined): string {
   return map[role || ''] || 'badge-role-collaborateur';
 }
 
+export function calculateSeniority(startDate: string | null): { years: number; months: number } | null {
+  if (!startDate) return null;
+  const start = new Date(startDate);
+  const now = new Date();
+  let years = now.getFullYear() - start.getFullYear();
+  let months = now.getMonth() - start.getMonth();
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+  return { years, months };
+}
+
 export function getEventColor(type: string): string {
   const map: Record<string, string> = {
     formation: '#0052CC',

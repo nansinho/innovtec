@@ -26,3 +26,9 @@ CREATE POLICY "diplomas_admin" ON diplomas
 DROP POLICY IF EXISTS "experiences_admin" ON experiences;
 CREATE POLICY "experiences_admin" ON experiences
   FOR ALL USING (public.is_admin());
+
+-- 4) Add missing policy: users must always be able to read their own profile
+-- The existing profiles_select only allows reading where is_active=true,
+-- but doesn't guarantee a user can read their own row
+CREATE POLICY "profiles_select_own" ON profiles
+  FOR SELECT USING (id = auth.uid());

@@ -632,3 +632,47 @@ export async function upsertSSEMetric(data: {
   revalidatePath('/qse/tableau-sse');
   return metric;
 }
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+export async function markNotificationAsRead(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function markAllNotificationsAsRead() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Non authentifié');
+  const { error } = await supabase
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('user_id', user.id)
+    .eq('is_read', false);
+  if (error) throw error;
+}
+
+export async function deleteNotification(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('notifications')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function clearAllNotifications() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Non authentifié');
+  const { error } = await supabase
+    .from('notifications')
+    .delete()
+    .eq('user_id', user.id);
+  if (error) throw error;
+}

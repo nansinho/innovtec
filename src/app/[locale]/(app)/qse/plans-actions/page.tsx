@@ -112,7 +112,14 @@ export default function PlansActionsPage() {
 
   const columns: string[] = ['en_cours', 'cloture', 'en_retard'];
 
-  if (loading) return <PageSkeleton variant="kanban" />;
+  const stats = {
+    total: allPlans.length,
+    en_cours: allPlans.filter((a) => a.status === 'en_cours').length,
+    cloture: allPlans.filter((a) => a.status === 'cloture').length,
+    en_retard: allPlans.filter((a) => a.status === 'en_retard').length,
+  };
+
+  if (loading) return <PageSkeleton variant="kanban" overlapping />;
 
   return (
     <div className="space-y-6">
@@ -120,12 +127,34 @@ export default function PlansActionsPage() {
         icon={Target}
         title="Plans d'Actions"
         subtitle="Suivi et gestion des plans d'actions QSE"
+        overlapping
       >
         <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
           <Plus size={16} />
           Nouveau plan d&apos;action
         </button>
       </PageBanner>
+
+      {/* Stats - overlapping the banner */}
+      <div className="-mt-20 relative z-10 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            { label: 'Total', value: stats.total, color: 'text-text-primary', borderColor: 'border-l-gray-400' },
+            { label: 'En cours', value: stats.en_cours, color: 'text-blue-600', borderColor: 'border-l-blue-500' },
+            { label: 'Clôturés', value: stats.cloture, color: 'text-emerald-600', borderColor: 'border-l-emerald-500' },
+            { label: 'En retard', value: stats.en_retard, color: 'text-red-600', borderColor: 'border-l-red-500' },
+          ].map((stat, i) => (
+            <div
+              key={stat.label}
+              className={cn('bg-white rounded-2xl border border-white/80 p-4 border-l-4 opacity-0 animate-fade-in-up', stat.borderColor)}
+              style={{ animationDelay: `${i * 80}ms`, boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' }}
+            >
+              <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">{stat.label}</p>
+              <p className={cn('text-2xl font-bold mt-1', stat.color)}>{stat.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Search + Filters */}
       <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>

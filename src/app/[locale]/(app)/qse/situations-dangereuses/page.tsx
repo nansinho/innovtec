@@ -130,7 +130,7 @@ export default function SituationsDangereusesPage() {
     }
   };
 
-  if (loading) return <PageSkeleton variant="table" />;
+  if (loading) return <PageSkeleton variant="table" overlapping />;
 
   return (
     <div className="space-y-6">
@@ -138,6 +138,7 @@ export default function SituationsDangereusesPage() {
         icon={AlertTriangle}
         title="Situations Dangereuses"
         subtitle="Déclaration et suivi des situations dangereuses sur les chantiers"
+        overlapping
       >
         <button
           onClick={() => setShowCreateModal(true)}
@@ -149,29 +150,29 @@ export default function SituationsDangereusesPage() {
         </button>
       </PageBanner>
 
-      {/* Stats */}
-      <div
-        className="grid grid-cols-2 sm:grid-cols-4 gap-4 animate-fade-in-up"
-        style={{ animationDelay: '60ms' }}
-      >
-        {[
-          { label: 'Total déclarations', value: stats.total, color: 'text-text-primary', bg: 'bg-gray-50', borderColor: 'border-l-gray-400' },
-          { label: 'En cours', value: stats.en_cours, color: 'text-blue-600', bg: 'bg-blue-50', borderColor: 'border-l-blue-500' },
-          { label: 'En retard', value: stats.en_retard, color: 'text-red-600', bg: 'bg-red-50', borderColor: 'border-l-red-500' },
-          { label: 'Critiques', value: stats.critique, color: 'text-red-700', bg: 'bg-red-50', borderColor: 'border-l-red-700' },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className={cn('card-elevated p-4 border-l-4', stat.borderColor)}
-          >
-            <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
-              {stat.label}
-            </p>
-            <p className={cn('text-2xl font-bold mt-1', stat.color)}>
-              {stat.value}
-            </p>
-          </div>
-        ))}
+      {/* Stats - overlapping the banner */}
+      <div className="-mt-20 relative z-10 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            { label: 'Total déclarations', value: stats.total, color: 'text-text-primary', bg: 'bg-gray-50', borderColor: 'border-l-gray-400' },
+            { label: 'En cours', value: stats.en_cours, color: 'text-blue-600', bg: 'bg-blue-50', borderColor: 'border-l-blue-500' },
+            { label: 'En retard', value: stats.en_retard, color: 'text-red-600', bg: 'bg-red-50', borderColor: 'border-l-red-500' },
+            { label: 'Critiques', value: stats.critique, color: 'text-red-700', bg: 'bg-red-50', borderColor: 'border-l-red-700' },
+          ].map((stat, i) => (
+            <div
+              key={stat.label}
+              className={cn('bg-white rounded-2xl border border-white/80 p-4 border-l-4 opacity-0 animate-fade-in-up', stat.borderColor)}
+              style={{ animationDelay: `${i * 80}ms`, boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' }}
+            >
+              <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
+                {stat.label}
+              </p>
+              <p className={cn('text-2xl font-bold mt-1', stat.color)}>
+                {stat.value}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Search + Filters */}

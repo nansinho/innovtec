@@ -1,6 +1,7 @@
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Topbar } from '@/components/layout/Topbar';
 import { SearchModal } from '@/components/layout/SearchModal';
+import { NotificationPanel } from '@/components/layout/NotificationPanel';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ToastProvider } from '@/components/ui/Toast';
 
@@ -25,6 +26,7 @@ export default function AppLayout({
           </main>
         </div>
         <SearchModal />
+        <NotificationPanel />
       </div>
     </ToastProvider>
   );

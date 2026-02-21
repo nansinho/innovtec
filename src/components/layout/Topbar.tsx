@@ -3,8 +3,8 @@
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter, usePathname, Link } from '@/i18n/routing';
 import { Bell, Search, Settings, Menu, Globe, LogOut, User } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
-import { useCurrentUser } from '@/lib/hooks/use-supabase-query';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useCurrentUser, useRealtimeSubscription } from '@/lib/hooks/use-supabase-query';
 import { createClient } from '@/lib/supabase/client';
 import { cn, getInitials, getAvatarGradient, getRoleLabel, getRoleBadgeClass } from '@/lib/utils';
 
@@ -36,18 +36,23 @@ export function Topbar() {
   };
 
   // Fetch notification count
-  useEffect(() => {
+  const refetchNotifCount = useCallback(async () => {
     if (!user) return;
     const supabase = createClient();
-    supabase
+    const { count } = await supabase
       .from('notifications')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
-      .eq('is_read', false)
-      .then(({ count }) => {
-        setNotificationCount(count || 0);
-      });
+      .eq('is_read', false);
+    setNotificationCount(count || 0);
   }, [user]);
+
+  useEffect(() => {
+    refetchNotifCount();
+  }, [refetchNotifCount]);
+
+  // Realtime notification count
+  useRealtimeSubscription('notifications', refetchNotifCount);
 
   // Close user menu on outside click
   useEffect(() => {
@@ -98,7 +103,10 @@ export function Topbar() {
         </button>
 
         {/* Notifications */}
-        <button className="relative flex h-9 w-9 items-center justify-center rounded-xl hover:bg-gray-100/80 transition-colors">
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('toggle-notifications'))}
+          className="relative flex h-9 w-9 items-center justify-center rounded-xl hover:bg-gray-100/80 transition-colors"
+        >
           <Bell size={18} className="text-text-secondary" />
           {notificationCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[10px] font-bold text-white shadow-sm">

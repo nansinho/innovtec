@@ -24,6 +24,7 @@ const ROUTE_LABELS: Record<string, string> = {
   galerie: 'gallery',
   profil: 'profile',
   admin: 'admin',
+  'tableau-de-bord-2': 'dashboardV2',
 };
 
 function isUuidOrId(segment: string): boolean {

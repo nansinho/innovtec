@@ -3,8 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
-import { cn } from '@/lib/utils';
-import { getInitials, getAvatarGradient } from '@/lib/utils';
+import { cn, getInitials, getAvatarGradient, getRoleLabel } from '@/lib/utils';
 import { useCurrentUser } from '@/lib/hooks/use-supabase-query';
 import {
   LayoutDashboard,
@@ -128,7 +127,7 @@ export function Sidebar() {
   const displayName = user
     ? `${user.first_name} ${user.last_name}`
     : 'Utilisateur';
-  const roleLabel = user?.role || 'Collaborateur';
+  const roleLabel = getRoleLabel(user?.role);
   const initials = user
     ? getInitials(user.first_name, user.last_name)
     : 'IN';
@@ -226,7 +225,15 @@ export function Sidebar() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white truncate">{displayName}</p>
-              <p className="text-xs text-white/50 truncate capitalize">{roleLabel}</p>
+              <span className={cn(
+                'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold mt-0.5',
+                user?.role === 'admin' && 'bg-red-500/20 text-red-300',
+                user?.role === 'directeur' && 'bg-blue-500/20 text-blue-300',
+                user?.role === 'manager' && 'bg-amber-500/20 text-amber-300',
+                (!user?.role || user?.role === 'collaborateur') && 'bg-emerald-500/20 text-emerald-300'
+              )}>
+                {roleLabel}
+              </span>
             </div>
           </Link>
           <button

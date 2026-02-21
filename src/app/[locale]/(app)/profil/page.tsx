@@ -5,9 +5,9 @@ import { useState, useEffect } from 'react';
 import { User, Lock, Save, Check } from 'lucide-react';
 import { useCurrentUser } from '@/lib/hooks/use-supabase-query';
 import { createClient } from '@/lib/supabase/client';
-import { cn } from '@/lib/utils';
-import { getInitials, getAvatarGradient } from '@/lib/utils';
+import { cn, getInitials, getAvatarGradient, getRoleLabel, getRoleBadgeClass } from '@/lib/utils';
 import { useToast } from '@/components/ui/Toast';
+import { POSITIONS } from '@/lib/constants';
 
 export default function ProfilePage() {
   const t = useTranslations('profile');
@@ -115,7 +115,9 @@ export default function ProfilePage() {
           <div>
             <h2 className="text-xl font-bold text-text-primary">{displayName}</h2>
             <p className="text-sm text-text-secondary">{user?.email}</p>
-            <p className="text-xs text-text-muted capitalize mt-0.5">{user?.role || 'Collaborateur'}</p>
+            <span className={cn('badge mt-1', getRoleBadgeClass(user?.role))}>
+              {getRoleLabel(user?.role)}
+            </span>
           </div>
         </div>
 
@@ -194,28 +196,30 @@ export default function ProfilePage() {
               <label className="block text-sm font-semibold text-text-primary mb-1.5">
                 {t('position')}
               </label>
-              <input
-                type="text"
+              <select
                 value={position}
                 onChange={(e) => setPosition(e.target.value)}
-                placeholder="Chef de chantier"
                 className="input"
-              />
+              >
+                <option value="">{t('selectPosition')}</option>
+                {POSITIONS.map((pos) => (
+                  <option key={pos} value={pos}>{pos}</option>
+                ))}
+              </select>
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-text-primary mb-1.5">
                 {t('role')}
               </label>
-              <input
-                type="text"
-                value={user?.role || ''}
-                className="input bg-gray-50 cursor-not-allowed"
-                disabled
-              />
-              <p className="mt-1 text-xs text-text-muted">
-                Le rôle est défini par un administrateur.
-              </p>
+              <div className="flex items-center gap-3 rounded-button border border-border bg-gray-50 px-4 py-2.5">
+                <span className={cn('badge', getRoleBadgeClass(user?.role))}>
+                  {getRoleLabel(user?.role)}
+                </span>
+                <span className="text-xs text-text-muted">
+                  {t('roleDefinedByAdmin')}
+                </span>
+              </div>
             </div>
 
             <button

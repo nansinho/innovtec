@@ -46,7 +46,7 @@ export function useCurrentUser() {
     first_name: string;
     last_name: string;
     avatar_url: string | null;
-    role: string;
+    role: string | null;
     position: string | null;
     phone: string | null;
     team_id: string | null;

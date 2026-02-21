@@ -6,8 +6,7 @@ import { Bell, Search, Settings, Menu, Globe, LogOut, User } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react';
 import { useCurrentUser } from '@/lib/hooks/use-supabase-query';
 import { createClient } from '@/lib/supabase/client';
-import { cn } from '@/lib/utils';
-import { getInitials, getAvatarGradient } from '@/lib/utils';
+import { cn, getInitials, getAvatarGradient, getRoleLabel, getRoleBadgeClass } from '@/lib/utils';
 
 export function Topbar() {
   const t = useTranslations('common');
@@ -128,6 +127,9 @@ export function Topbar() {
                 <div className="px-4 py-3 border-b border-border">
                   <p className="text-sm font-semibold text-text-primary">{displayName}</p>
                   <p className="text-xs text-text-muted">{user.email}</p>
+                  <span className={cn('badge mt-1', getRoleBadgeClass(user.role))}>
+                    {getRoleLabel(user.role)}
+                  </span>
                 </div>
               )}
               <Link

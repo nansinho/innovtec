@@ -144,7 +144,7 @@ export default function AdminPage() {
     setOpenMenuId(null);
   };
 
-  if (loading) return <PageSkeleton variant="table" />;
+  if (loading) return <PageSkeleton variant="table" overlapping />;
 
   return (
     <div className="space-y-6">
@@ -152,29 +152,32 @@ export default function AdminPage() {
         icon={Shield}
         title="Administration"
         subtitle="Gestion des utilisateurs et des rôles"
+        overlapping
       />
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
-        {[
-          { label: 'Total utilisateurs', value: stats.total, color: 'text-primary', bg: 'bg-primary-50', icon: Users },
-          { label: 'Actifs', value: stats.active, color: 'text-success', bg: 'bg-emerald-50', icon: CheckCircle2 },
-          { label: 'Administrateurs', value: stats.admin, color: 'text-red-600', bg: 'bg-red-50', icon: Shield },
-          { label: 'Managers / Directeurs', value: stats.manager, color: 'text-amber-600', bg: 'bg-amber-50', icon: Building2 },
-        ].map((stat) => {
-          const StatIcon = stat.icon;
-          return (
-            <div key={stat.label} className="card p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', stat.bg)}>
-                  <StatIcon size={16} className={stat.color} />
+      {/* Stats - overlapping the banner */}
+      <div className="-mt-20 relative z-10 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
+          {[
+            { label: 'Total utilisateurs', value: stats.total, color: 'text-primary', bg: 'bg-primary-50', icon: Users },
+            { label: 'Actifs', value: stats.active, color: 'text-success', bg: 'bg-emerald-50', icon: CheckCircle2 },
+            { label: 'Administrateurs', value: stats.admin, color: 'text-red-600', bg: 'bg-red-50', icon: Shield },
+            { label: 'Managers / Directeurs', value: stats.manager, color: 'text-amber-600', bg: 'bg-amber-50', icon: Building2 },
+          ].map((stat, i) => {
+            const StatIcon = stat.icon;
+            return (
+              <div key={stat.label} className="bg-white rounded-2xl border border-white/80 p-4" style={{ animationDelay: `${i * 80}ms`, boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', stat.bg)}>
+                    <StatIcon size={16} className={stat.color} />
+                  </div>
                 </div>
+                <div className={cn('text-2xl font-bold', stat.color)}>{stat.value}</div>
+                <div className="text-xs text-text-muted font-medium mt-0.5">{stat.label}</div>
               </div>
-              <div className={cn('text-2xl font-bold', stat.color)}>{stat.value}</div>
-              <div className="text-xs text-text-muted font-medium mt-0.5">{stat.label}</div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* Search + Filters */}

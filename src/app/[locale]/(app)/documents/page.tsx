@@ -184,7 +184,7 @@ export default function DocumentsPage() {
     }
   };
 
-  if (loading) return <PageSkeleton variant="table" />;
+  if (loading) return <PageSkeleton variant="table" overlapping />;
 
   return (
     <div className="space-y-6">
@@ -192,6 +192,7 @@ export default function DocumentsPage() {
         icon={FolderOpen}
         title="Documents"
         subtitle={`${filteredDocuments.length} document${filteredDocuments.length > 1 ? 's' : ''} — ${totalSizeMB} Mo`}
+        overlapping
       >
         <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
           <Upload size={16} />
@@ -199,29 +200,32 @@ export default function DocumentsPage() {
         </button>
       </PageBanner>
 
-      {/* Stats bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
-        {typeStats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.type}
-              onClick={() => setSelectedType(stat.count > 0 ? stat.label : 'Tous')}
-              className={cn(
-                'card p-3 flex items-center gap-3 cursor-pointer transition-all hover:shadow-card-hover',
-                selectedType === stat.label && 'ring-2 ring-primary'
-              )}
-            >
-              <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg', stat.bg)}>
-                <Icon size={18} className={stat.color} />
+      {/* Stats bar - overlapping the banner */}
+      <div className="-mt-20 relative z-10 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
+          {typeStats.map((stat, i) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={stat.type}
+                onClick={() => setSelectedType(stat.count > 0 ? stat.label : 'Tous')}
+                className={cn(
+                  'bg-white rounded-2xl border border-white/80 p-3 flex items-center gap-3 cursor-pointer transition-all hover:shadow-card-hover',
+                  selectedType === stat.label && 'ring-2 ring-primary'
+                )}
+                style={{ animationDelay: `${i * 80}ms`, boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' }}
+              >
+                <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg', stat.bg)}>
+                  <Icon size={18} className={stat.color} />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-text-primary">{stat.count}</p>
+                  <p className="text-[10px] text-text-muted uppercase font-medium">{stat.label}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-lg font-bold text-text-primary">{stat.count}</p>
-                <p className="text-[10px] text-text-muted uppercase font-medium">{stat.label}</p>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* Search + Filters */}

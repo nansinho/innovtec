@@ -44,7 +44,7 @@ function Skeleton({ className }: { className?: string }) {
 export function BannerSkeleton({ overlapping = false }: { overlapping?: boolean }) {
   if (overlapping) {
     return (
-      <div className="relative overflow-hidden -mx-6 md:-mx-8 -mt-6 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-300 pb-32 pt-8 px-6 md:px-10 animate-pulse">
+      <div className="relative overflow-hidden -mx-6 md:-mx-8 -mt-6 sm:-mt-[3.75rem] z-10 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-300 pb-32 pt-5 sm:pt-10 px-6 md:px-10 animate-pulse">
         <div className="max-w-content mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
             <Skeleton className="h-12 w-12 rounded-xl bg-gray-400/40" />

@@ -384,8 +384,10 @@ export default function ProfilePage() {
         icon={User}
         title={t('title')}
         subtitle={user ? `${displayName} — ${user.position || ''}` : ''}
+        overlapping
       />
 
+      <div className="-mt-20 relative z-10 mb-6">
       <div className="card p-6">
         {/* ═══ Profile Header ═══ */}
         <div className="flex items-start gap-5 mb-6">
@@ -900,6 +902,7 @@ export default function ProfilePage() {
             </button>
           </form>
         )}
+      </div>
       </div>
     </div>
   );

@@ -46,7 +46,7 @@ export default function TrombinoscopePage() {
     return matchesTeam && matchesSearch;
   });
 
-  if (loading) return <PageSkeleton variant="cards" />;
+  if (loading) return <PageSkeleton variant="cards" overlapping />;
 
   return (
     <div className="space-y-6">
@@ -54,10 +54,11 @@ export default function TrombinoscopePage() {
         icon={Users}
         title={t('title')}
         subtitle={t('members', { count: filteredMembers.length })}
+        overlapping
       />
 
-      {/* Search + Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
+      {/* Search + Filters - overlapping the banner */}
+      <div className="-mt-20 relative z-10 mb-6 flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input

@@ -95,7 +95,7 @@ export default function BonnesPratiquesPage() {
     }
   };
 
-  if (loading) return <PageSkeleton variant="cards" />;
+  if (loading) return <PageSkeleton variant="cards" overlapping />;
 
   return (
     <div className="space-y-6">
@@ -103,6 +103,7 @@ export default function BonnesPratiquesPage() {
         icon={BookOpen}
         title="Bonnes Pratiques"
         subtitle="Partagez et consultez les bonnes pratiques terrain"
+        overlapping
       >
         <button
           onClick={() => setShowCreateModal(true)}
@@ -114,9 +115,9 @@ export default function BonnesPratiquesPage() {
         </button>
       </PageBanner>
 
-      {/* Search + Filters */}
+      {/* Search + Filters - overlapping the banner */}
       <div
-        className="flex flex-col sm:flex-row gap-4 animate-fade-in-up"
+        className="-mt-20 relative z-10 mb-6 flex flex-col sm:flex-row gap-4 animate-fade-in-up"
         style={{ animationDelay: '60ms' }}
       >
         <div className="relative flex-1">

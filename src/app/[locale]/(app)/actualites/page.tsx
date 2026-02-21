@@ -100,7 +100,7 @@ export default function ActualitesPage() {
     }
   };
 
-  if (loading) return <PageSkeleton variant="cards" />;
+  if (loading) return <PageSkeleton variant="cards" overlapping />;
 
   return (
     <div className="space-y-6">
@@ -108,6 +108,7 @@ export default function ActualitesPage() {
         icon={Newspaper}
         title={t('title')}
         subtitle={`${filteredArticles.length} article${filteredArticles.length > 1 ? 's' : ''}`}
+        overlapping
       >
         <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
           <Plus size={16} />
@@ -115,8 +116,8 @@ export default function ActualitesPage() {
         </button>
       </PageBanner>
 
-      {/* Search + Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
+      {/* Search + Filters - overlapping the banner */}
+      <div className="-mt-20 relative z-10 mb-6 flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input

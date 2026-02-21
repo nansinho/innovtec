@@ -171,7 +171,7 @@ export default function PlanningPage() {
 
   const todayKey = formatDateKey(new Date());
 
-  if (loading) return <PageSkeleton variant="calendar" />;
+  if (loading) return <PageSkeleton variant="calendar" overlapping />;
 
   return (
     <div className="space-y-6">
@@ -179,6 +179,7 @@ export default function PlanningPage() {
         icon={Calendar}
         title="Planning d'équipe"
         subtitle={`${filteredEvents.length} événement${filteredEvents.length > 1 ? 's' : ''} planifié${filteredEvents.length > 1 ? 's' : ''}`}
+        overlapping
       >
         <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
           <Plus size={16} />
@@ -186,8 +187,8 @@ export default function PlanningPage() {
         </button>
       </PageBanner>
 
-      {/* Toolbar */}
-      <div className="flex flex-col lg:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
+      {/* Toolbar - overlapping the banner */}
+      <div className="-mt-20 relative z-10 mb-6 flex flex-col lg:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
         <div className="flex items-center gap-3">
           <div className="flex rounded-button border border-border overflow-hidden">
             <button

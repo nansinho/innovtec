@@ -34,7 +34,7 @@ const FILE_TYPE_CONFIG: Record<FileType, { label: string; icon: typeof FileText;
   pdf: { label: 'PDF', icon: FileText, color: 'text-red-600', bg: 'bg-red-50', extensions: '.pdf' },
   word: { label: 'Word', icon: File, color: 'text-blue-600', bg: 'bg-blue-50', extensions: '.docx' },
   excel: { label: 'Excel', icon: FileSpreadsheet, color: 'text-emerald-600', bg: 'bg-emerald-50', extensions: '.xlsx' },
-  image: { label: 'Image', icon: Image, color: 'text-purple-600', bg: 'bg-purple-50', extensions: '.jpg/.png' },
+  image: { label: 'Image', icon: Image, color: 'text-sky-600', bg: 'bg-sky-50', extensions: '.jpg/.png' },
   other: { label: 'Autre', icon: FolderOpen, color: 'text-gray-600', bg: 'bg-gray-50', extensions: '' },
 };
 

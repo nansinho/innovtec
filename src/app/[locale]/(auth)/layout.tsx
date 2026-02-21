@@ -6,7 +6,7 @@ export default function AuthLayout({
   return (
     <div className="flex min-h-screen">
       {/* Left panel - branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-sidebar via-sidebar-light to-primary items-center justify-center p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-sidebar via-sidebar-light to-[#0F2A5E] items-center justify-center p-12 relative overflow-hidden">
         {/* Background circles */}
         <div className="absolute inset-0">
           <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-white/5" />
@@ -47,7 +47,7 @@ export default function AuthLayout({
             ].map((feature, i) => (
               <div key={i} className="flex items-center gap-3">
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/20">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D4A017" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </div>

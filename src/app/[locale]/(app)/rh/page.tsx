@@ -76,8 +76,8 @@ const QUICK_LINKS: QuickLink[] = [
     label: 'Entretiens',
     description: 'Planifier et consulter vos entretiens annuels',
     icon: MessageSquare,
-    color: 'text-purple-600',
-    bg: 'bg-purple-50',
+    color: 'text-slate-600',
+    bg: 'bg-slate-50',
   },
 ];
 
@@ -94,7 +94,7 @@ const RECENT_ACTIVITIES: RecentActivity[] = [
   { id: '1', type: 'Bulletin de paie', description: 'Bulletin de paie janvier 2026 disponible', date: '2026-02-05', icon: FileText, color: 'text-primary' },
   { id: '2', type: 'Contrat', description: 'Avenant au contrat de travail signé', date: '2026-02-01', icon: Briefcase, color: 'text-success' },
   { id: '3', type: 'Formation', description: 'Attestation AIPR ajoutée au dossier', date: '2026-01-28', icon: FileText, color: 'text-accent' },
-  { id: '4', type: 'Entretien', description: 'Entretien annuel planifié le 15 mars', date: '2026-01-25', icon: MessageSquare, color: 'text-purple-600' },
+  { id: '4', type: 'Entretien', description: 'Entretien annuel planifié le 15 mars', date: '2026-01-25', icon: MessageSquare, color: 'text-slate-600' },
 ];
 
 function getDayCount(start: string, end: string): number {

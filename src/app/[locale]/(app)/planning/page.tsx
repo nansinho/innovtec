@@ -23,8 +23,8 @@ type ViewMode = 'week' | 'month';
 
 const EVENT_TYPE_CONFIG: Record<EventType, { label: string; color: string; bg: string; border: string }> = {
   formation: { label: 'Formation', color: '#0052CC', bg: 'bg-blue-50', border: 'border-l-[#0052CC]' },
-  reunion: { label: 'Réunion', color: '#6B21A8', bg: 'bg-purple-50', border: 'border-l-purple-700' },
-  visite: { label: 'Visite', color: '#FF6B35', bg: 'bg-orange-50', border: 'border-l-orange-500' },
+  reunion: { label: 'Réunion', color: '#1E3A5F', bg: 'bg-slate-50', border: 'border-l-slate-700' },
+  visite: { label: 'Visite', color: '#D4A017', bg: 'bg-amber-50', border: 'border-l-amber-500' },
   deadline: { label: 'Deadline', color: '#FF5630', bg: 'bg-red-50', border: 'border-l-red-500' },
   conge: { label: 'Congé', color: '#36B37E', bg: 'bg-emerald-50', border: 'border-l-emerald-500' },
 };

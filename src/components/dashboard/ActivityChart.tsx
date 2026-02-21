@@ -166,8 +166,8 @@ export function ActivityChart() {
                 <stop offset="100%" stopColor="#36B37E" stopOpacity={0.02} />
               </linearGradient>
               <linearGradient id="gradEvents" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#FF6B35" stopOpacity={0.25} />
-                <stop offset="100%" stopColor="#FF6B35" stopOpacity={0.02} />
+                <stop offset="0%" stopColor="#D4A017" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="#D4A017" stopOpacity={0.02} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#EBECF0" vertical={false} />
@@ -203,7 +203,7 @@ export function ActivityChart() {
             />
             <Area type="monotone" dataKey="signalements" name={t('reports')} stroke="#0052CC" strokeWidth={2} fill="url(#gradReports)" dot={false} activeDot={{ r: 4, fill: '#0052CC', stroke: '#fff', strokeWidth: 2 }} />
             <Area type="monotone" dataKey="actions" name={t('actionPlansLabel')} stroke="#36B37E" strokeWidth={2} fill="url(#gradActions)" dot={false} activeDot={{ r: 4, fill: '#36B37E', stroke: '#fff', strokeWidth: 2 }} />
-            <Area type="monotone" dataKey="evenements" name={t('eventsLabel')} stroke="#FF6B35" strokeWidth={2} fill="url(#gradEvents)" dot={false} activeDot={{ r: 4, fill: '#FF6B35', stroke: '#fff', strokeWidth: 2 }} />
+            <Area type="monotone" dataKey="evenements" name={t('eventsLabel')} stroke="#D4A017" strokeWidth={2} fill="url(#gradEvents)" dot={false} activeDot={{ r: 4, fill: '#D4A017', stroke: '#fff', strokeWidth: 2 }} />
           </AreaChart>
         </ResponsiveContainer>
       </div>

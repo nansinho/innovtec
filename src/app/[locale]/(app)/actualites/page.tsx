@@ -14,29 +14,29 @@ import { createArticle } from '@/lib/actions';
 
 const CATEGORIES = [
   { name: 'Toutes', type: 'all', color: '#0052CC' },
-  { name: 'QSE', type: 'qse', color: '#D14900' },
+  { name: 'QSE', type: 'qse', color: '#D4A017' },
   { name: 'REX', type: 'rex', color: '#00875A' },
   { name: 'Info', type: 'info', color: '#0052CC' },
   { name: 'S\u00e9curit\u00e9', type: 'securite', color: '#FF5630' },
-  { name: 'Blog', type: 'blog', color: '#6B21A8' },
+  { name: 'Blog', type: 'blog', color: '#1E3A5F' },
 ];
 
 const COVER_GRADIENTS = [
   'from-blue-600 via-blue-500 to-cyan-400',
-  'from-indigo-600 via-purple-500 to-pink-400',
+  'from-sky-600 via-sky-500 to-blue-400',
   'from-emerald-600 via-emerald-500 to-teal-400',
-  'from-orange-600 via-orange-500 to-amber-400',
-  'from-rose-600 via-pink-500 to-fuchsia-400',
-  'from-violet-600 via-purple-500 to-indigo-400',
+  'from-amber-600 via-amber-500 to-yellow-400',
+  'from-teal-600 via-teal-500 to-cyan-400',
+  'from-slate-600 via-slate-500 to-blue-400',
 ];
 
 function getCoverGradient(index: number, categoryType?: string): string {
   const catMap: Record<string, string> = {
-    qse: 'from-orange-600 via-orange-500 to-amber-400',
+    qse: 'from-amber-600 via-amber-500 to-yellow-400',
     rex: 'from-emerald-600 via-emerald-500 to-teal-400',
     info: 'from-blue-600 via-blue-500 to-cyan-400',
-    securite: 'from-red-600 via-rose-500 to-pink-400',
-    blog: 'from-purple-600 via-violet-500 to-indigo-400',
+    securite: 'from-red-600 via-red-500 to-orange-400',
+    blog: 'from-slate-600 via-slate-500 to-blue-400',
   };
   if (categoryType && catMap[categoryType]) return catMap[categoryType];
   return COVER_GRADIENTS[index % COVER_GRADIENTS.length];
@@ -104,7 +104,7 @@ export default function ActualitesPage() {
   return (
     <div className="space-y-6">
       {/* Page Header with gradient banner */}
-      <div className="relative overflow-hidden rounded-card-lg bg-gradient-to-br from-[#0A1F44] via-primary to-[#1A6FFF] p-6 md:p-8 text-white shadow-banner">
+      <div className="relative overflow-hidden rounded-card-lg bg-gradient-to-br from-[#060E1F] via-[#0B1A3E] to-[#0F2A5E] p-6 md:p-8 text-white shadow-banner">
         <div className="banner-grid absolute inset-0" />
         <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/5 animate-float" />
         <div className="absolute left-1/3 bottom-0 h-32 w-32 rounded-full bg-white/5 animate-float-slow" />

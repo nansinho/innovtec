@@ -8,7 +8,7 @@
   :root {
     --primary: #0052CC;
     --primary-light: #4C9AFF;
-    --accent: #FF6B35;
+    --accent: #D4A017;
     --success: #36B37E;
     --warning: #FFAB00;
     --danger: #FF5630;
@@ -103,7 +103,7 @@
   }
 
   .badge-qse {
-    @apply bg-orange-100 text-orange-700;
+    @apply bg-amber-100 text-amber-700;
   }
 
   .badge-rex {
@@ -119,7 +119,7 @@
   }
 
   .badge-blog {
-    @apply bg-purple-100 text-purple-700;
+    @apply bg-slate-100 text-slate-700;
   }
 
   .badge-role-admin {

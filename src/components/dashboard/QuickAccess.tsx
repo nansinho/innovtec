@@ -14,9 +14,9 @@ import {
 const quickLinks = [
   { key: 'qsePolicy', href: '/qse/politique', icon: ShieldCheck, gradient: 'from-blue-500/15 to-blue-600/15', iconColor: 'text-blue-600', hoverBorder: 'hover:border-blue-200' },
   { key: 'teamDirectory', href: '/trombinoscope', icon: Users, gradient: 'from-emerald-500/15 to-emerald-600/15', iconColor: 'text-emerald-600', hoverBorder: 'hover:border-emerald-200' },
-  { key: 'trainings', href: '/formations', icon: GraduationCap, gradient: 'from-purple-500/15 to-purple-600/15', iconColor: 'text-purple-600', hoverBorder: 'hover:border-purple-200' },
-  { key: 'signDocument', href: '/signatures', icon: PenTool, gradient: 'from-orange-500/15 to-orange-600/15', iconColor: 'text-orange-600', hoverBorder: 'hover:border-orange-200' },
-  { key: 'declareRex', href: '/qse/rex', icon: Lightbulb, gradient: 'from-pink-500/15 to-pink-600/15', iconColor: 'text-pink-600', hoverBorder: 'hover:border-pink-200' },
+  { key: 'trainings', href: '/formations', icon: GraduationCap, gradient: 'from-sky-500/15 to-sky-600/15', iconColor: 'text-sky-600', hoverBorder: 'hover:border-sky-200' },
+  { key: 'signDocument', href: '/signatures', icon: PenTool, gradient: 'from-amber-500/15 to-amber-600/15', iconColor: 'text-amber-600', hoverBorder: 'hover:border-amber-200' },
+  { key: 'declareRex', href: '/qse/rex', icon: Lightbulb, gradient: 'from-teal-500/15 to-teal-600/15', iconColor: 'text-teal-600', hoverBorder: 'hover:border-teal-200' },
   { key: 'viewPlanning', href: '/planning', icon: Calendar, gradient: 'from-cyan-500/15 to-cyan-600/15', iconColor: 'text-cyan-600', hoverBorder: 'hover:border-cyan-200' },
 ];
 

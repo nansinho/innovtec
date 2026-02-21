@@ -19,7 +19,7 @@ export function WelcomeBanner() {
   const displayName = user ? user.first_name : '...';
 
   return (
-    <div className="relative overflow-hidden -mx-6 md:-mx-8 -mt-6 bg-gradient-to-br from-[#060E1F] via-[#0B2454] to-primary pb-32 pt-10 px-6 md:px-10 text-white">
+    <div className="relative overflow-hidden -mx-6 md:-mx-8 -mt-6 bg-gradient-to-br from-[#060E1F] via-[#0B1A3E] to-[#0F2A5E] pb-32 pt-10 px-6 md:px-10 text-white">
       {/* Grid pattern overlay */}
       <div className="banner-grid absolute inset-0" />
 

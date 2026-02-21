@@ -9,14 +9,12 @@ export function cn(...inputs: ClassValue[]) {
 const AVATAR_GRADIENTS = [
   'from-blue-500 to-blue-600',
   'from-emerald-500 to-emerald-600',
-  'from-purple-500 to-purple-600',
-  'from-orange-500 to-orange-600',
-  'from-pink-500 to-pink-600',
   'from-cyan-500 to-cyan-600',
-  'from-amber-500 to-amber-600',
-  'from-indigo-500 to-indigo-600',
-  'from-rose-500 to-rose-600',
   'from-teal-500 to-teal-600',
+  'from-sky-500 to-sky-600',
+  'from-amber-500 to-amber-600',
+  'from-blue-600 to-indigo-600',
+  'from-slate-500 to-slate-600',
 ];
 
 export function getAvatarGradient(name: string): string {
@@ -143,8 +141,8 @@ export function calculateSeniority(startDate: string | null): { years: number; m
 export function getEventColor(type: string): string {
   const map: Record<string, string> = {
     formation: '#0052CC',
-    reunion: '#6B21A8',
-    visite: '#FF6B35',
+    reunion: '#1E3A5F',
+    visite: '#D4A017',
     deadline: '#FF5630',
     conge: '#36B37E',
   };

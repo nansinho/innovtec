@@ -55,7 +55,8 @@
     "gallery": "Galerie",
     "blog": "Blog",
     "search": "Recherche",
-    "profile": "Profil"
+    "profile": "Profil",
+    "dashboardV2": "Tableau de bord 2"
   },
   "dashboard": {
     "welcome": "Bonjour, {name}",

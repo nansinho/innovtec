@@ -448,7 +448,7 @@ export default function TableauSSEPage() {
     : 1;
 
   if (isLoading) {
-    return <PageSkeleton variant="cards" />;
+    return <PageSkeleton variant="cards" overlapping />;
   }
 
   if (!rawMetrics || metrics.length === 0) {
@@ -458,6 +458,7 @@ export default function TableauSSEPage() {
           icon={Activity}
           title="Tableau de Bord SSE"
           subtitle="Indicateurs Santé, Sécurité et Environnement"
+          overlapping
         />
         <EmptyState
           message="Aucune donnée SSE disponible"
@@ -473,6 +474,7 @@ export default function TableauSSEPage() {
         icon={Activity}
         title="Tableau de Bord SSE"
         subtitle="Indicateurs Santé, Sécurité et Environnement"
+        overlapping
       >
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-3 py-1.5">
@@ -498,7 +500,8 @@ export default function TableauSSEPage() {
         </div>
       </PageBanner>
 
-      {/* KPI Cards */}
+      {/* KPI Cards - overlapping the banner */}
+      <div className="-mt-20 relative z-10 mb-6">
       <div
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in-up"
         style={{ animationDelay: '60ms' }}
@@ -517,7 +520,8 @@ export default function TableauSSEPage() {
           return (
             <div
               key={kpi.id}
-              className="card p-5 hover:shadow-card-hover transition-all duration-200"
+              className="bg-white rounded-2xl border border-white/80 p-5 hover:shadow-card-hover transition-all duration-200"
+              style={{ boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' }}
             >
               <div className="flex items-start justify-between mb-3">
                 <div
@@ -590,6 +594,7 @@ export default function TableauSSEPage() {
             </div>
           );
         })}
+      </div>
       </div>
 
       {/* Charts Row */}

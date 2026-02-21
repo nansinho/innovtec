@@ -104,7 +104,7 @@ export default function PolitiquePage() {
     }
   };
 
-  if (loading) return <PageSkeleton variant="cards" />;
+  if (loading) return <PageSkeleton variant="cards" overlapping />;
 
   return (
     <div className="space-y-6">
@@ -112,6 +112,7 @@ export default function PolitiquePage() {
         icon={Shield}
         title="Politiques QSE"
         subtitle="Gestion des documents de politique qualité, sécurité et environnement"
+        overlapping
       >
         <button
           onClick={() => setShowCreateModal(true)}
@@ -123,24 +124,26 @@ export default function PolitiquePage() {
         </button>
       </PageBanner>
 
-      {/* Stats cards */}
-      <div
-        className="grid grid-cols-2 sm:grid-cols-4 gap-4 opacity-0 animate-fade-in-up"
-        style={{ animationDelay: '60ms' }}
-      >
-        {[
-          { label: 'Total', value: stats.total, gradient: 'from-gray-500/10 to-gray-600/10', color: 'text-text-primary' },
-          { label: 'Actives', value: stats.active, gradient: 'from-emerald-500/10 to-emerald-600/10', color: 'text-emerald-600' },
-          { label: 'Brouillons', value: stats.draft, gradient: 'from-amber-500/10 to-amber-600/10', color: 'text-amber-600' },
-          { label: 'Archivees', value: stats.archived, gradient: 'from-gray-400/10 to-gray-500/10', color: 'text-gray-500' },
-        ].map((stat) => (
-          <div key={stat.label} className="card-elevated p-4">
-            <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
-              {stat.label}
-            </p>
-            <p className={cn('text-2xl font-extrabold mt-1 tracking-tight', stat.color)}>{stat.value}</p>
-          </div>
-        ))}
+      {/* Stats cards - overlapping the banner */}
+      <div className="-mt-20 relative z-10 mb-6">
+        <div
+          className="grid grid-cols-2 sm:grid-cols-4 gap-4 opacity-0 animate-fade-in-up"
+          style={{ animationDelay: '60ms' }}
+        >
+          {[
+            { label: 'Total', value: stats.total, color: 'text-text-primary', borderColor: 'border-l-gray-400' },
+            { label: 'Actives', value: stats.active, color: 'text-emerald-600', borderColor: 'border-l-emerald-500' },
+            { label: 'Brouillons', value: stats.draft, color: 'text-amber-600', borderColor: 'border-l-amber-500' },
+            { label: 'Archivees', value: stats.archived, color: 'text-gray-500', borderColor: 'border-l-gray-400' },
+          ].map((stat, i) => (
+            <div key={stat.label} className={cn('bg-white rounded-2xl border border-white/80 p-4 border-l-4', stat.borderColor)} style={{ animationDelay: `${i * 80}ms`, boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' }}>
+              <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
+                {stat.label}
+              </p>
+              <p className={cn('text-2xl font-extrabold mt-1 tracking-tight', stat.color)}>{stat.value}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Search + Status Filters */}

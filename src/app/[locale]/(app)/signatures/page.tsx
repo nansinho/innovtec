@@ -138,7 +138,7 @@ export default function SignaturesPage() {
     }
   };
 
-  if (loading) return <PageSkeleton variant="table" />;
+  if (loading) return <PageSkeleton variant="table" overlapping />;
 
   return (
     <div className="space-y-6">
@@ -146,6 +146,7 @@ export default function SignaturesPage() {
         icon={PenTool}
         title="Signatures électroniques"
         subtitle={`${pendingCount} document${pendingCount > 1 ? 's' : ''} en attente de signature`}
+        overlapping
       >
         <button className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
           <Plus size={16} />
@@ -153,27 +154,29 @@ export default function SignaturesPage() {
         </button>
       </PageBanner>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
-        {[
-          { label: 'Total', value: allRequests.length, icon: FileText, color: 'text-primary', bg: 'bg-primary-50' },
-          { label: 'En attente', value: pendingCount, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Signés', value: signedCount, icon: CheckCircle2, color: 'text-success', bg: 'bg-emerald-50' },
-          { label: 'Refusés', value: refusedCount, icon: XCircle, color: 'text-danger', bg: 'bg-red-50' },
-        ].map((card) => {
-          const Icon = card.icon;
-          return (
-            <div key={card.label} className="card p-4 flex items-center gap-3">
-              <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', card.bg)}>
-                <Icon size={20} className={card.color} />
+      {/* Summary cards - overlapping the banner */}
+      <div className="-mt-20 relative z-10 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
+          {[
+            { label: 'Total', value: allRequests.length, icon: FileText, color: 'text-primary', bg: 'bg-primary-50' },
+            { label: 'En attente', value: pendingCount, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+            { label: 'Signés', value: signedCount, icon: CheckCircle2, color: 'text-success', bg: 'bg-emerald-50' },
+            { label: 'Refusés', value: refusedCount, icon: XCircle, color: 'text-danger', bg: 'bg-red-50' },
+          ].map((card, i) => {
+            const Icon = card.icon;
+            return (
+              <div key={card.label} className="bg-white rounded-2xl border border-white/80 p-4 flex items-center gap-3" style={{ animationDelay: `${i * 80}ms`, boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' }}>
+                <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', card.bg)}>
+                  <Icon size={20} className={card.color} />
+                </div>
+                <div>
+                  <p className={cn('text-2xl font-bold', card.color)}>{card.value}</p>
+                  <p className="text-xs text-text-muted">{card.label}</p>
+                </div>
               </div>
-              <div>
-                <p className={cn('text-2xl font-bold', card.color)}>{card.value}</p>
-                <p className="text-xs text-text-muted">{card.label}</p>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* Tabs */}

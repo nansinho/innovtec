@@ -2,19 +2,20 @@
 
 import { type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Breadcrumb } from '@/components/layout/Breadcrumb';
 
 interface PageBannerProps {
   icon: LucideIcon;
   title: string;
   subtitle?: string;
-  children?: React.ReactNode; // for action buttons on the right
-  overlapping?: boolean; // full-bleed with bottom padding for overlapping cards
+  children?: React.ReactNode;
+  overlapping?: boolean;
 }
 
 export function PageBanner({ icon: Icon, title, subtitle, children, overlapping = false }: PageBannerProps) {
   if (overlapping) {
     return (
-      <div className="relative overflow-hidden -mx-6 md:-mx-8 -mt-6 bg-gradient-to-br from-[#060E1F] via-[#0B1A3E] to-[#0F2A5E] pb-32 pt-8 px-6 md:px-10 text-white">
+      <div className="relative overflow-hidden -mx-6 md:-mx-8 -mt-6 sm:-mt-[3.75rem] z-10 bg-gradient-to-br from-[#060E1F] via-[#0B1A3E] to-[#0F2A5E] pb-32 pt-5 sm:pt-4 px-6 md:px-10 text-white">
         {/* Grid pattern overlay */}
         <div className="banner-grid absolute inset-0" />
 
@@ -33,6 +34,11 @@ export function PageBanner({ icon: Icon, title, subtitle, children, overlapping 
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} className="h-1 w-1 rounded-full bg-white" />
           ))}
+        </div>
+
+        {/* Breadcrumb - inside the banner on desktop */}
+        <div className="hidden sm:block relative z-10 max-w-content mx-auto mb-5">
+          <Breadcrumb variant="dark" />
         </div>
 
         {/* Content */}

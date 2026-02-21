@@ -12,15 +12,15 @@ import { RecentActionPlans } from '@/components/dashboard/RecentActionPlans';
 export default function DashboardPage() {
   return (
     <div>
-      {/* Hero Banner */}
+      {/* Hero Banner - full bleed */}
       <WelcomeBanner />
 
-      {/* KPI Cards overlapping the banner */}
-      <div className="-mt-14 relative z-10 mb-6">
+      {/* KPI Cards overlapping the banner - dramatic overlap */}
+      <div className="-mt-20 relative z-10 mb-8">
         <KPICards />
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         <QuickAccess />
         <NewsSection />
         <PlanningWeek />

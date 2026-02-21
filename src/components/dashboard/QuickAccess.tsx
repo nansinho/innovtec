@@ -26,15 +26,15 @@ export function QuickAccess() {
   return (
     <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
       <h2 className="section-title mb-4">{t('quickAccess')}</h2>
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
         {quickLinks.map(({ key, href, icon: Icon, gradient, iconColor, hoverBorder }) => (
           <Link
             key={key}
             href={href}
-            className={`card-elevated group flex flex-col items-center gap-3 p-4 text-center hover:-translate-y-1 ${hoverBorder}`}
+            className={`card-elevated group flex flex-col items-center gap-3.5 p-5 text-center hover:-translate-y-1 ${hoverBorder}`}
           >
-            <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} ${iconColor} backdrop-blur-sm border border-white/60 group-hover:scale-110 transition-all duration-300`}>
-              <Icon size={22} strokeWidth={1.8} />
+            <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} ${iconColor} backdrop-blur-sm border border-white/60 group-hover:scale-110 transition-all duration-300`}>
+              <Icon size={24} strokeWidth={1.7} />
             </div>
             <span className="text-xs font-semibold text-text-secondary group-hover:text-text-primary transition-colors leading-tight">
               {t(key)}

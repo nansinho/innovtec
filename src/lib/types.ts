@@ -28,6 +28,18 @@ export interface Profile {
   team_id: string | null;
   position: string | null;
   phone: string | null;
+  date_of_birth: string | null;
+  birth_place: string | null;
+  nationality: string | null;
+  address: string | null;
+  city: string | null;
+  postal_code: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_phone: string | null;
+  emergency_contact_relationship: string | null;
+  employment_start_date: string | null;
+  contract_type: string | null;
+  bio: string | null;
   is_active: boolean;
   locale: UserLocale;
   created_at: string;
@@ -277,4 +289,25 @@ export interface ExpenseReport {
   approved_by: string | null;
   submitted_at: string;
   approved_at: string | null;
+}
+
+export interface Diploma {
+  id: string;
+  profile_id: string;
+  title: string;
+  institution: string | null;
+  year: number | null;
+  field_of_study: string | null;
+  created_at: string;
+}
+
+export interface Experience {
+  id: string;
+  profile_id: string;
+  company: string;
+  position: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  description: string | null;
+  created_at: string;
 }

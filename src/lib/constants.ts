@@ -25,3 +25,21 @@ export const POSITIONS = [
 ] as const;
 
 export type Position = (typeof POSITIONS)[number];
+
+export const CONTRACT_TYPES = [
+  { value: 'cdi', label: 'CDI' },
+  { value: 'cdd', label: 'CDD' },
+  { value: 'interim', label: 'Intérim' },
+  { value: 'apprentissage', label: 'Apprentissage' },
+  { value: 'professionnalisation', label: 'Contrat pro' },
+  { value: 'stage', label: 'Stage' },
+] as const;
+
+export const EMERGENCY_RELATIONSHIPS = [
+  'Conjoint(e)',
+  'Parent',
+  'Enfant',
+  'Frère/Soeur',
+  'Ami(e)',
+  'Autre',
+] as const;

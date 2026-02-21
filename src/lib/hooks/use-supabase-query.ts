@@ -50,38 +50,52 @@ export function useCurrentUser() {
     position: string | null;
     phone: string | null;
     team_id: string | null;
+    date_of_birth: string | null;
+    birth_place: string | null;
+    nationality: string | null;
+    address: string | null;
+    city: string | null;
+    postal_code: string | null;
+    emergency_contact_name: string | null;
+    emergency_contact_phone: string | null;
+    emergency_contact_relationship: string | null;
+    employment_start_date: string | null;
+    contract_type: string | null;
+    bio: string | null;
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const refetch = useCallback(async () => {
     const supabase = createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (authUser) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
 
-    const fetchUser = async () => {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (authUser) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', authUser.id)
-          .single();
-
-        if (profile) {
-          setUser(profile);
-        }
+      if (profile) {
+        setUser(profile);
       }
-      setLoading(false);
-    };
+    }
+    setLoading(false);
+  }, []);
 
-    fetchUser();
+  useEffect(() => {
+    refetch();
 
+    const supabase = createClient();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         setUser(null);
+      } else {
+        refetch();
       }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [refetch]);
 
-  return { user, loading };
+  return { user, loading, refetch };
 }

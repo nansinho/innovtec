@@ -219,6 +219,8 @@
     "team": "Équipe",
     "role": "Rôle",
     "language": "Langue",
+    "selectPosition": "Sélectionnez un poste",
+    "roleDefinedByAdmin": "Défini par un administrateur",
     "profileUpdated": "Profil mis à jour avec succès",
     "passwordUpdated": "Mot de passe mis à jour avec succès"
   },

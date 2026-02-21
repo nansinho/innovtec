@@ -219,6 +219,8 @@
     "team": "Equipe",
     "role": "Função",
     "language": "Idioma",
+    "selectPosition": "Selecione um cargo",
+    "roleDefinedByAdmin": "Definido por um administrador",
     "profileUpdated": "Perfil atualizado com sucesso",
     "passwordUpdated": "Senha atualizada com sucesso"
   },

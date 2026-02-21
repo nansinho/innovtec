@@ -107,6 +107,26 @@ export function getSeverityColor(severity: string): string {
   return map[severity] || 'text-gray-600 bg-gray-50 border-gray-200';
 }
 
+export function getRoleLabel(role: string | null | undefined): string {
+  const map: Record<string, string> = {
+    admin: 'Administrateur',
+    directeur: 'Directeur',
+    manager: 'Manager',
+    collaborateur: 'Collaborateur',
+  };
+  return map[role || ''] || 'Collaborateur';
+}
+
+export function getRoleBadgeClass(role: string | null | undefined): string {
+  const map: Record<string, string> = {
+    admin: 'badge-role-admin',
+    directeur: 'badge-role-directeur',
+    manager: 'badge-role-manager',
+    collaborateur: 'badge-role-collaborateur',
+  };
+  return map[role || ''] || 'badge-role-collaborateur';
+}
+
 export function getEventColor(type: string): string {
   const map: Record<string, string> = {
     formation: '#0052CC',

@@ -107,7 +107,7 @@ export async function getProfile() {
     .from('profiles')
     .select('*, team:teams(*)')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   return profile;
 }

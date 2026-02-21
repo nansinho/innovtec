@@ -22,7 +22,7 @@ export async function getProfileById(id: string) {
     .from('profiles')
     .select('*, team:teams(*)')
     .eq('id', id)
-    .single();
+    .maybeSingle();
   if (error) throw error;
   return data;
 }

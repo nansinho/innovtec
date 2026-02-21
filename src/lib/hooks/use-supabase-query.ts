@@ -75,9 +75,22 @@ export function useCurrentUser() {
         .from('profiles')
         .select('*')
         .eq('id', authUser.id)
-        .single();
+        .maybeSingle();
 
-      if (profile) {
+      if (!profile) {
+        // Profile missing — auto-create it
+        const { data: newProfile } = await supabase
+          .from('profiles')
+          .upsert({
+            id: authUser.id,
+            email: authUser.email || '',
+            first_name: authUser.user_metadata?.first_name || '',
+            last_name: authUser.user_metadata?.last_name || '',
+          })
+          .select('*')
+          .single();
+        if (newProfile) setUser(newProfile);
+      } else {
         setUser(profile);
       }
     }

@@ -538,6 +538,68 @@ export async function enrollInFormation(formationId: string) {
   return enrollment;
 }
 
+export async function createFormation(data: {
+  title: string;
+  description?: string;
+  category?: string;
+  type?: 'presentiel' | 'elearning' | 'mixte';
+  duration_hours?: number;
+  max_participants?: number;
+  status?: 'planifiee' | 'en_cours' | 'terminee' | 'annulee';
+  start_date?: string;
+  end_date?: string;
+  location?: string;
+  instructor?: string;
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Non authentifié');
+
+  const { data: formation, error } = await supabase
+    .from('formations')
+    .insert({ ...data, created_by: user.id })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return formation;
+}
+
+export async function updateFormation(id: string, data: {
+  title?: string;
+  description?: string;
+  category?: string;
+  type?: 'presentiel' | 'elearning' | 'mixte';
+  duration_hours?: number;
+  max_participants?: number;
+  status?: 'planifiee' | 'en_cours' | 'terminee' | 'annulee';
+  start_date?: string;
+  end_date?: string;
+  location?: string;
+  instructor?: string;
+}) {
+  const supabase = await createClient();
+  const { data: formation, error } = await supabase
+    .from('formations')
+    .update(data)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return formation;
+}
+
+export async function deleteFormation(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('formations')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
 export async function signDocument(signatureItemId: string, signatureData: string) {
   const supabase = await createClient();
   const { error } = await supabase

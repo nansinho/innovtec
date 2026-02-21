@@ -5,8 +5,9 @@ import { useState, useEffect } from 'react';
 import {
   User, Lock, Save, Check, Briefcase, GraduationCap, BookOpen,
   Plus, Pencil, Trash2, Calendar, MapPin, Phone, Shield, Clock,
-  Building2, X,
+  Building2, X, Award, ArrowRight,
 } from 'lucide-react';
+import { Link } from '@/i18n/routing';
 import { useCurrentUser, useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
 import { createClient } from '@/lib/supabase/client';
 import { cn, getInitials, getAvatarGradient, getRoleLabel, getRoleBadgeClass, calculateSeniority, formatDateShort } from '@/lib/utils';
@@ -302,6 +303,18 @@ export default function ProfilePage() {
     { key: 'security', icon: <Lock size={16} />, label: t('security') },
   ];
 
+  const getTabCompletion = (tabKey: ProfileTab): boolean => {
+    if (!user) return false;
+    switch (tabKey) {
+      case 'info': return !!(user.first_name && user.last_name && user.phone && user.address);
+      case 'career': return !!(user.position && user.contract_type && user.employment_start_date);
+      case 'diplomas': return (diplomas?.length || 0) > 0;
+      case 'experiences': return (experiences?.length || 0) > 0;
+      case 'formations': return (enrollments?.length || 0) > 0;
+      default: return false;
+    }
+  };
+
   const enrollmentStatusConfig: Record<string, { label: string; color: string }> = {
     inscrit: { label: 'Inscrit', color: 'bg-amber-50 text-amber-700' },
     en_cours: { label: 'En cours', color: 'bg-blue-50 text-blue-700' },
@@ -311,63 +324,127 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-text-primary">{t('title')}</h1>
-      </div>
-
-      <div className="card p-6">
-        {/* ═══ Profile Header ═══ */}
-        <div className="flex items-start gap-5 mb-6">
-          <div className={cn(
-            'flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br text-2xl font-bold text-white flex-shrink-0',
-            user ? getAvatarGradient(displayName) : 'from-primary to-primary-light'
-          )}>
+      {/* ═══ Profile Hero Banner ═══ */}
+      <div className="relative overflow-hidden rounded-card bg-gradient-to-r from-primary via-primary to-primary-light p-6 md:p-8 text-white animate-fade-in-up">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/20" />
+          <div className="absolute -left-10 -bottom-10 h-48 w-48 rounded-full bg-white/10" />
+        </div>
+        <div className="relative flex flex-col md:flex-row md:items-center gap-6">
+          <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm text-3xl font-bold text-white flex-shrink-0 border-2 border-white/30">
             {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-xl font-bold text-text-primary">{displayName}</h2>
-            <p className="text-sm text-text-secondary">{user?.email}</p>
-            <div className="flex flex-wrap items-center gap-2 mt-2">
-              <span className={cn('badge', getRoleBadgeClass(user?.role))}>
+            <h1 className="text-2xl md:text-3xl font-bold">{displayName || t('title')}</h1>
+            <p className="text-white/70 text-sm mt-1">{user?.email}</p>
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-xs font-semibold">
                 {getRoleLabel(user?.role)}
               </span>
               {user?.position && (
-                <span className="text-xs text-text-muted flex items-center gap-1">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/10 text-xs">
                   <Briefcase size={12} /> {user.position}
                 </span>
               )}
               {seniority && (
-                <span className="badge bg-primary/10 text-primary">
-                  <Clock size={12} className="mr-1" />
-                  {t('seniorityValue', { years: seniority.years, months: seniority.months })}
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/10 text-xs">
+                  <Clock size={12} /> {t('seniorityValue', { years: seniority.years, months: seniority.months })}
                 </span>
               )}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* ═══ Tab Bar ═══ */}
-        <div className="flex gap-1 border-b border-border mb-6 overflow-x-auto">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={cn(
-                'flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0',
-                activeTab === tab.key
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-text-muted hover:text-text-secondary'
-              )}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
+      {/* ═══ Stats Cards ═══ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
+        <div className="card p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+              <GraduationCap size={20} />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-text-primary">{diplomas?.length || 0}</p>
+              <p className="text-xs text-text-muted">{t('diplomasCount')}</p>
+            </div>
+          </div>
         </div>
+        <div className="card p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <Building2 size={20} />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-text-primary">{experiences?.length || 0}</p>
+              <p className="text-xs text-text-muted">{t('experiencesCount')}</p>
+            </div>
+          </div>
+        </div>
+        <div className="card p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+              <BookOpen size={20} />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-text-primary">
+                {enrollments?.filter(e => e.status === 'termine').length || 0}
+              </p>
+              <p className="text-xs text-text-muted">{t('completedFormations')}</p>
+            </div>
+          </div>
+        </div>
+        <div className="card p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+              <Award size={20} />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-text-primary">
+                {enrollments?.filter(e => e.certificate_url).length || 0}
+              </p>
+              <p className="text-xs text-text-muted">{t('certificates')}</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        {/* ═══ Tab: Personal Info ═══ */}
-        {activeTab === 'info' && (
-          <form onSubmit={handleUpdatePersonalInfo} className="space-y-5 max-w-2xl">
+      {/* ═══ Tab Bar ═══ */}
+      <div className="card p-1 animate-fade-in-up" style={{ animationDelay: '120ms' }}>
+        <div className="flex gap-1 overflow-x-auto">
+          {tabs.map((tab) => {
+            const isComplete = getTabCompletion(tab.key);
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-button transition-all whitespace-nowrap flex-shrink-0',
+                  activeTab === tab.key
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-text-secondary hover:bg-gray-50 hover:text-text-primary'
+                )}
+              >
+                {tab.icon}
+                {tab.label}
+                {isComplete && (
+                  <Check size={14} className={activeTab === tab.key ? 'text-white/70' : 'text-success'} />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ═══ Tab: Personal Info ═══ */}
+      {activeTab === 'info' && (
+        <div className="card p-6 animate-fade-in">
+          <h3 className="text-lg font-bold text-text-primary mb-6 flex items-center gap-2">
+            <User size={20} className="text-primary" />
+            {t('personalInfo')}
+          </h3>
+          <form onSubmit={handleUpdatePersonalInfo} className="space-y-5 max-w-3xl">
+            {/* Identity section */}
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide">{t('identity')}</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-text-primary mb-1.5">{t('firstName')}</label>
@@ -393,6 +470,11 @@ export default function ProfilePage() {
             <div>
               <label className="block text-sm font-semibold text-text-primary mb-1.5">{t('nationality')}</label>
               <input type="text" value={nationality} onChange={(e) => setNationality(e.target.value)} className="input" placeholder="Française" />
+            </div>
+
+            {/* Coordinates section */}
+            <div className="border-t border-border-light pt-6 mt-6">
+              <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-4">{t('coordinates')}</p>
             </div>
 
             <div>
@@ -456,11 +538,17 @@ export default function ProfilePage() {
               )}
             </button>
           </form>
-        )}
+        </div>
+      )}
 
-        {/* ═══ Tab: Career ═══ */}
-        {activeTab === 'career' && (
-          <form onSubmit={handleUpdateCareer} className="space-y-5 max-w-2xl">
+      {/* ═══ Tab: Career ═══ */}
+      {activeTab === 'career' && (
+        <div className="card p-6 animate-fade-in">
+          <h3 className="text-lg font-bold text-text-primary mb-6 flex items-center gap-2">
+            <Briefcase size={20} className="text-primary" />
+            {t('career')}
+          </h3>
+          <form onSubmit={handleUpdateCareer} className="space-y-5 max-w-3xl">
             <div>
               <label className="block text-sm font-semibold text-text-primary mb-1.5">{t('role')}</label>
               <div className="flex items-center gap-3 rounded-button border border-border bg-gray-50 px-4 py-2.5">
@@ -526,26 +614,31 @@ export default function ProfilePage() {
               )}
             </button>
           </form>
-        )}
+        </div>
+      )}
 
-        {/* ═══ Tab: Diplomas ═══ */}
-        {activeTab === 'diplomas' && (
-          <div className="max-w-2xl space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold text-text-primary">{t('diplomas')}</h3>
-              {!editingDiploma && (
-                <button
-                  onClick={() => { setEditingDiploma('new'); setDiplomaForm({ title: '', institution: '', year: '', field_of_study: '' }); }}
-                  className="btn-secondary inline-flex items-center gap-2 text-sm"
-                >
-                  <Plus size={16} /> {t('addDiploma')}
-                </button>
-              )}
-            </div>
+      {/* ═══ Tab: Diplomas ═══ */}
+      {activeTab === 'diplomas' && (
+        <div className="card p-6 animate-fade-in">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
+              <GraduationCap size={20} className="text-primary" />
+              {t('diplomas')}
+            </h3>
+            {!editingDiploma && (
+              <button
+                onClick={() => { setEditingDiploma('new'); setDiplomaForm({ title: '', institution: '', year: '', field_of_study: '' }); }}
+                className="btn-secondary inline-flex items-center gap-2 text-sm"
+              >
+                <Plus size={16} /> {t('addDiploma')}
+              </button>
+            )}
+          </div>
 
+          <div className="max-w-3xl space-y-4">
             {/* Diploma form */}
             {editingDiploma && (
-              <form onSubmit={handleSaveDiploma} className="card p-4 space-y-4 border-primary/20">
+              <form onSubmit={handleSaveDiploma} className="rounded-xl border-2 border-dashed border-primary/20 bg-primary/5 p-4 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-text-primary mb-1.5">{t('diplomaTitle')}</label>
@@ -580,9 +673,18 @@ export default function ProfilePage() {
 
             {/* Diploma list */}
             {(!diplomas || diplomas.length === 0) && !editingDiploma && (
-              <div className="py-12 text-center">
-                <GraduationCap size={40} className="mx-auto text-text-muted/40 mb-3" />
-                <p className="text-sm text-text-muted">{t('noDiplomas')}</p>
+              <div className="py-12 text-center rounded-xl border-2 border-dashed border-border bg-gray-50/50">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/5 mx-auto mb-4">
+                  <GraduationCap size={28} className="text-primary/40" />
+                </div>
+                <p className="text-sm font-medium text-text-secondary mb-1">{t('noDiplomas')}</p>
+                <p className="text-xs text-text-muted mb-4">{t('noDiplomasHelp')}</p>
+                <button
+                  onClick={() => { setEditingDiploma('new'); setDiplomaForm({ title: '', institution: '', year: '', field_of_study: '' }); }}
+                  className="btn-secondary inline-flex items-center gap-2 text-sm"
+                >
+                  <Plus size={14} /> {t('addDiploma')}
+                </button>
               </div>
             )}
 
@@ -609,26 +711,31 @@ export default function ProfilePage() {
               </div>
             ))}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* ═══ Tab: Experiences ═══ */}
-        {activeTab === 'experiences' && (
-          <div className="max-w-2xl space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold text-text-primary">{t('experiences')}</h3>
-              {!editingExperience && (
-                <button
-                  onClick={() => { setEditingExperience('new'); setExperienceForm({ company: '', position: '', start_date: '', end_date: '', description: '', is_current: false }); }}
-                  className="btn-secondary inline-flex items-center gap-2 text-sm"
-                >
-                  <Plus size={16} /> {t('addExperience')}
-                </button>
-              )}
-            </div>
+      {/* ═══ Tab: Experiences ═══ */}
+      {activeTab === 'experiences' && (
+        <div className="card p-6 animate-fade-in">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
+              <Building2 size={20} className="text-primary" />
+              {t('experiences')}
+            </h3>
+            {!editingExperience && (
+              <button
+                onClick={() => { setEditingExperience('new'); setExperienceForm({ company: '', position: '', start_date: '', end_date: '', description: '', is_current: false }); }}
+                className="btn-secondary inline-flex items-center gap-2 text-sm"
+              >
+                <Plus size={16} /> {t('addExperience')}
+              </button>
+            )}
+          </div>
 
+          <div className="max-w-3xl space-y-4">
             {/* Experience form */}
             {editingExperience && (
-              <form onSubmit={handleSaveExperience} className="card p-4 space-y-4 border-primary/20">
+              <form onSubmit={handleSaveExperience} className="rounded-xl border-2 border-dashed border-primary/20 bg-primary/5 p-4 space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-text-primary mb-1.5">{t('experienceCompany')}</label>
                   <input type="text" value={experienceForm.company} onChange={(e) => setExperienceForm({ ...experienceForm, company: e.target.value })} className="input" required />
@@ -680,9 +787,18 @@ export default function ProfilePage() {
 
             {/* Experience list (timeline) */}
             {(!experiences || experiences.length === 0) && !editingExperience && (
-              <div className="py-12 text-center">
-                <Building2 size={40} className="mx-auto text-text-muted/40 mb-3" />
-                <p className="text-sm text-text-muted">{t('noExperiences')}</p>
+              <div className="py-12 text-center rounded-xl border-2 border-dashed border-border bg-gray-50/50">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/5 mx-auto mb-4">
+                  <Building2 size={28} className="text-primary/40" />
+                </div>
+                <p className="text-sm font-medium text-text-secondary mb-1">{t('noExperiences')}</p>
+                <p className="text-xs text-text-muted mb-4">{t('noExperiencesHelp')}</p>
+                <button
+                  onClick={() => { setEditingExperience('new'); setExperienceForm({ company: '', position: '', start_date: '', end_date: '', description: '', is_current: false }); }}
+                  className="btn-secondary inline-flex items-center gap-2 text-sm"
+                >
+                  <Plus size={14} /> {t('addExperience')}
+                </button>
               </div>
             )}
 
@@ -720,17 +836,39 @@ export default function ProfilePage() {
               </div>
             ))}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* ═══ Tab: Formations ═══ */}
-        {activeTab === 'formations' && (
-          <div className="max-w-2xl space-y-4">
-            <h3 className="text-base font-semibold text-text-primary">{t('trainings')}</h3>
+      {/* ═══ Tab: Formations ═══ */}
+      {activeTab === 'formations' && (
+        <div className="card p-6 animate-fade-in">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
+              <BookOpen size={20} className="text-primary" />
+              {t('trainings')}
+            </h3>
+            <Link
+              href="/formations"
+              className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary-dark transition-colors"
+            >
+              {t('viewCatalog')} <ArrowRight size={14} />
+            </Link>
+          </div>
 
+          <div className="max-w-3xl space-y-4">
             {(!enrollments || enrollments.length === 0) && (
-              <div className="py-12 text-center">
-                <BookOpen size={40} className="mx-auto text-text-muted/40 mb-3" />
-                <p className="text-sm text-text-muted">{t('noFormations')}</p>
+              <div className="py-12 text-center rounded-xl border-2 border-dashed border-border bg-gray-50/50">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/5 mx-auto mb-4">
+                  <BookOpen size={28} className="text-primary/40" />
+                </div>
+                <p className="text-sm font-medium text-text-secondary mb-1">{t('noFormations')}</p>
+                <p className="text-xs text-text-muted mb-4">{t('noFormationsHelp')}</p>
+                <Link
+                  href="/formations"
+                  className="btn-secondary inline-flex items-center gap-2 text-sm"
+                >
+                  <BookOpen size={14} /> {t('viewCatalog')}
+                </Link>
               </div>
             )}
 
@@ -779,10 +917,16 @@ export default function ProfilePage() {
               })}
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* ═══ Tab: Security ═══ */}
-        {activeTab === 'security' && (
+      {/* ═══ Tab: Security ═══ */}
+      {activeTab === 'security' && (
+        <div className="card p-6 animate-fade-in">
+          <h3 className="text-lg font-bold text-text-primary mb-6 flex items-center gap-2">
+            <Lock size={20} className="text-primary" />
+            {t('security')}
+          </h3>
           <form onSubmit={handleChangePassword} className="space-y-5 max-w-lg">
             <div>
               <label className="block text-sm font-semibold text-text-primary mb-1.5">{t('newPassword')}</label>
@@ -801,8 +945,8 @@ export default function ProfilePage() {
               )}
             </button>
           </form>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

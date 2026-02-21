@@ -107,55 +107,59 @@ export default function PolitiquePage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
-        <div>
+      {/* Page Header with gradient banner */}
+      <div className="relative overflow-hidden rounded-card-lg bg-gradient-to-br from-[#0A1F44] via-primary to-[#1A6FFF] p-6 md:p-8 text-white shadow-banner">
+        <div className="banner-grid absolute inset-0" />
+        <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/5 animate-float" />
+        <div className="absolute left-1/4 bottom-0 h-32 w-32 rounded-full bg-white/5 animate-float-slow" />
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-card bg-primary/10">
-              <Shield size={20} className="text-primary" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl backdrop-blur-md border border-white/15" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <Shield size={24} className="text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-text-primary">
+              <h1 className="text-2xl font-extrabold tracking-tight">
                 Politiques QSE
               </h1>
-              <p className="text-sm text-text-secondary mt-0.5">
+              <p className="text-sm text-white/60 mt-0.5">
                 Gestion des documents de politique qualite, securite et environnement
               </p>
             </div>
           </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all"
+            style={{ background: 'rgba(255,255,255,0.1)' }}
+          >
+            <Plus size={16} />
+            Nouveau document
+          </button>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="btn-primary flex items-center gap-2 w-fit"
-        >
-          <Plus size={16} />
-          Nouveau document
-        </button>
       </div>
 
       {/* Stats cards */}
       <div
-        className="grid grid-cols-2 sm:grid-cols-4 gap-4 animate-fade-in-up"
+        className="grid grid-cols-2 sm:grid-cols-4 gap-4 opacity-0 animate-fade-in-up"
         style={{ animationDelay: '60ms' }}
       >
         {[
-          { label: 'Total', value: stats.total, color: 'text-text-primary', bg: 'bg-gray-50' },
-          { label: 'Actives', value: stats.active, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Brouillons', value: stats.draft, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Archivees', value: stats.archived, color: 'text-gray-500', bg: 'bg-gray-50' },
+          { label: 'Total', value: stats.total, gradient: 'from-gray-500/10 to-gray-600/10', color: 'text-text-primary' },
+          { label: 'Actives', value: stats.active, gradient: 'from-emerald-500/10 to-emerald-600/10', color: 'text-emerald-600' },
+          { label: 'Brouillons', value: stats.draft, gradient: 'from-amber-500/10 to-amber-600/10', color: 'text-amber-600' },
+          { label: 'Archivees', value: stats.archived, gradient: 'from-gray-400/10 to-gray-500/10', color: 'text-gray-500' },
         ].map((stat) => (
-          <div key={stat.label} className="card p-4 hover:shadow-card-hover transition-shadow">
+          <div key={stat.label} className="card-elevated p-4">
             <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
               {stat.label}
             </p>
-            <p className={cn('text-2xl font-bold mt-1', stat.color)}>{stat.value}</p>
+            <p className={cn('text-2xl font-extrabold mt-1 tracking-tight', stat.color)}>{stat.value}</p>
           </div>
         ))}
       </div>
 
       {/* Search + Status Filters */}
       <div
-        className="flex flex-col sm:flex-row gap-4 animate-fade-in-up"
+        className="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in-up"
         style={{ animationDelay: '120ms' }}
       >
         <div className="relative flex-1">
@@ -168,35 +172,27 @@ export default function PolitiquePage() {
             className="input pl-9"
           />
         </div>
-      </div>
-
-      {/* Status filter */}
-      <div
-        className="flex items-center gap-2 animate-fade-in-up"
-        style={{ animationDelay: '180ms' }}
-      >
-        <span className="text-xs font-medium text-text-secondary uppercase tracking-wide mr-2">
-          Statut :
-        </span>
-        {[
-          { label: 'Tous', value: 'all' },
-          { label: 'Active', value: 'active' },
-          { label: 'Brouillon', value: 'draft' },
-          { label: 'Archivee', value: 'archived' },
-        ].map((s) => (
-          <button
-            key={s.value}
-            onClick={() => setStatusFilter(s.value)}
-            className={cn(
-              'rounded-button px-3 py-1 text-xs font-medium transition-all duration-200',
-              statusFilter === s.value
-                ? 'bg-primary text-white'
-                : 'bg-white text-text-secondary border border-border hover:border-primary/30'
-            )}
-          >
-            {s.label}
-          </button>
-        ))}
+        <div className="flex items-center gap-2">
+          {[
+            { label: 'Tous', value: 'all' },
+            { label: 'Active', value: 'active' },
+            { label: 'Brouillon', value: 'draft' },
+            { label: 'Archivee', value: 'archived' },
+          ].map((s) => (
+            <button
+              key={s.value}
+              onClick={() => setStatusFilter(s.value)}
+              className={cn(
+                'rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200',
+                statusFilter === s.value
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-white text-text-secondary border border-border-light hover:border-primary/30 hover:shadow-sm'
+              )}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Policy List */}
@@ -215,13 +211,11 @@ export default function PolitiquePage() {
             return (
               <div
                 key={policy.id as string}
-                className="card group p-0 overflow-hidden hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
+                className="card-elevated group p-0 overflow-hidden hover:-translate-y-0.5 cursor-pointer"
               >
                 <div className="flex items-stretch">
                   {/* Color indicator */}
-                  <div
-                    className="w-1.5 shrink-0 bg-primary"
-                  />
+                  <div className="w-1.5 shrink-0 bg-gradient-to-b from-primary to-primary-light" />
 
                   <div className="flex-1 p-5">
                     <div className="flex flex-col lg:flex-row lg:items-start gap-4">
@@ -257,7 +251,7 @@ export default function PolitiquePage() {
                         <div className="flex items-center gap-4 mt-3 flex-wrap">
                           <div className="flex items-center gap-1.5">
                             <div
-                              className={`flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[8px] font-bold text-white`}
+                              className={`flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[8px] font-bold text-white ring-1 ring-white shadow-sm`}
                             >
                               {initials}
                             </div>
@@ -293,7 +287,7 @@ export default function PolitiquePage() {
                       {/* Actions */}
                       <div className="flex items-center gap-2 shrink-0 lg:pt-2">
                         <button
-                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary hover:bg-primary-100 transition-colors"
+                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-50 to-blue-50 text-primary hover:shadow-sm transition-all"
                           title="Visualiser"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -303,7 +297,7 @@ export default function PolitiquePage() {
                           <Eye size={14} />
                         </button>
                         <button
-                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary hover:bg-primary-100 transition-colors"
+                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-50 to-blue-50 text-primary hover:shadow-sm transition-all"
                           title="Telecharger"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -314,7 +308,7 @@ export default function PolitiquePage() {
                         </button>
                         <ChevronRight
                           size={16}
-                          className="text-text-muted ml-1"
+                          className="text-text-muted ml-1 group-hover:text-primary group-hover:translate-x-0.5 transition-all"
                         />
                       </div>
                     </div>

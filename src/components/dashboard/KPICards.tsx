@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { AlertTriangle, Eye, ShieldAlert, HeartPulse } from 'lucide-react';
+import { AlertTriangle, Eye, ShieldAlert, HeartPulse, TrendingUp } from 'lucide-react';
 import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
 
 export function KPICards() {
@@ -33,51 +33,72 @@ export function KPICards() {
     {
       titleKey: 'accidents',
       value: String(criticalReports),
-      icon: <AlertTriangle size={22} />,
-      color: criticalReports === 0 ? 'text-emerald-600' : 'text-red-600',
-      bgColor: criticalReports === 0 ? 'bg-emerald-50' : 'bg-red-50',
+      icon: <AlertTriangle size={20} />,
+      gradient: criticalReports === 0
+        ? 'from-emerald-500/15 to-emerald-600/15'
+        : 'from-red-500/15 to-red-600/15',
+      iconColor: criticalReports === 0 ? 'text-emerald-600' : 'text-red-600',
+      borderAccent: criticalReports === 0 ? 'border-emerald-200/50' : 'border-red-200/50',
+      trend: criticalReports === 0 ? 'Excellent' : null,
+      trendColor: 'text-emerald-500',
     },
     {
       titleKey: 'dangerousSituations',
       value: String(totalReports),
-      icon: <ShieldAlert size={22} />,
-      color: 'text-amber-600',
-      bgColor: 'bg-amber-50',
+      icon: <ShieldAlert size={20} />,
+      gradient: 'from-amber-500/15 to-orange-500/15',
+      iconColor: 'text-amber-600',
+      borderAccent: 'border-amber-200/50',
+      trend: null,
+      trendColor: '',
     },
     {
       titleKey: 'managerialVisits',
       value: String(activeProfiles.length),
-      icon: <Eye size={22} />,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      icon: <Eye size={20} />,
+      gradient: 'from-blue-500/15 to-indigo-500/15',
+      iconColor: 'text-blue-600',
+      borderAccent: 'border-blue-200/50',
+      trend: null,
+      trendColor: '',
     },
     {
       titleKey: 'sstRate',
       value: `${closureRate}%`,
-      icon: <HeartPulse size={22} />,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
+      icon: <HeartPulse size={20} />,
+      gradient: 'from-purple-500/15 to-violet-500/15',
+      iconColor: 'text-purple-600',
+      borderAccent: 'border-purple-200/50',
+      trend: closureRate >= 80 ? 'Bon' : null,
+      trendColor: 'text-emerald-500',
     },
   ];
 
   return (
-    <div className="animate-fade-in-up" style={{ animationDelay: '120ms' }}>
-      <h2 className="text-lg font-bold text-text-primary mb-4">{t('kpiTitle')}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpis.map((kpi) => (
-          <div key={kpi.titleKey} className="card p-5 hover:shadow-card-hover transition-all duration-200">
-            <div className="flex items-start justify-between">
-              <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${kpi.bgColor} ${kpi.color}`}>
-                {kpi.icon}
-              </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {kpis.map((kpi, i) => (
+        <div
+          key={kpi.titleKey}
+          className="card-elevated group p-5 opacity-0 animate-fade-in-up"
+          style={{ animationDelay: `${i * 80}ms` }}
+        >
+          <div className="flex items-start justify-between">
+            <div className={`icon-glass-colored h-11 w-11 rounded-xl bg-gradient-to-br ${kpi.gradient} ${kpi.iconColor}`}>
+              {kpi.icon}
             </div>
-            <div className="mt-4">
-              <p className="text-3xl font-bold text-text-primary">{kpi.value}</p>
-              <p className="mt-1 text-sm text-text-secondary">{t(kpi.titleKey)}</p>
-            </div>
+            {kpi.trend && (
+              <span className={`flex items-center gap-0.5 text-[11px] font-semibold ${kpi.trendColor}`}>
+                <TrendingUp size={12} />
+                {kpi.trend}
+              </span>
+            )}
           </div>
-        ))}
-      </div>
+          <div className="mt-4">
+            <p className="text-3xl font-extrabold text-text-primary tracking-tight">{kpi.value}</p>
+            <p className="mt-1 text-sm text-text-secondary">{t(kpi.titleKey)}</p>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

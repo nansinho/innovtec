@@ -2,23 +2,23 @@
 
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
-import { ArrowRight, Calendar, User } from 'lucide-react';
+import { ArrowRight, Calendar, User, ClipboardList } from 'lucide-react';
 import { cn, getStatusColor } from '@/lib/utils';
 import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
 
-const COVER_COLORS = [
-  'from-blue-500 to-indigo-600',
-  'from-red-500 to-rose-600',
-  'from-emerald-500 to-teal-600',
-  'from-amber-500 to-orange-600',
-  'from-purple-500 to-violet-600',
+const COVER_GRADIENTS = [
+  'from-blue-600 via-blue-500 to-cyan-400',
+  'from-red-500 via-rose-500 to-pink-400',
+  'from-emerald-600 via-emerald-500 to-teal-400',
+  'from-amber-500 via-orange-500 to-red-400',
+  'from-purple-600 via-violet-500 to-indigo-400',
 ];
 
 const STATUS_LABELS: Record<string, string> = {
   en_cours: 'En cours',
-  cloture: 'Cloturé',
+  cloture: 'Clotur\u00e9',
   en_retard: 'En retard',
-  annule: 'Annulé',
+  annule: 'Annul\u00e9',
 };
 
 export function RecentActionPlans() {
@@ -36,11 +36,16 @@ export function RecentActionPlans() {
   const items = (plans || []) as Record<string, any>[];
 
   return (
-    <div className="animate-fade-in-up" style={{ animationDelay: '540ms' }}>
+    <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: '620ms' }}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-text-primary">{t('recentActionPlans')}</h2>
-        <Link href="/qse/plans-actions" className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary-dark transition-colors">
-          Voir tout <ArrowRight size={14} />
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/10 to-indigo-500/10 text-blue-600">
+            <ClipboardList size={18} strokeWidth={1.8} />
+          </div>
+          <h2 className="section-title">{t('recentActionPlans')}</h2>
+        </div>
+        <Link href="/qse/plans-actions" className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-dark transition-colors group">
+          Voir tout <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
         </Link>
       </div>
 
@@ -52,8 +57,17 @@ export function RecentActionPlans() {
 
             return (
               <Link key={plan.id as string} href={`/qse/plans-actions/${plan.id}`}>
-                <div className="card overflow-hidden group cursor-pointer hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5">
-                  <div className={`h-2 bg-gradient-to-r ${COVER_COLORS[index % COVER_COLORS.length]}`} />
+                <div className="card-elevated overflow-hidden group cursor-pointer hover:-translate-y-1">
+                  {/* Gradient top bar */}
+                  <div className={`relative h-20 bg-gradient-to-br ${COVER_GRADIENTS[index % COVER_GRADIENTS.length]} overflow-hidden`}>
+                    <div className="absolute inset-0 opacity-20">
+                      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/20" />
+                      <div className="absolute left-1/4 bottom-0 h-16 w-16 rounded-full bg-white/10" />
+                    </div>
+                    <div className="absolute bottom-3 right-3 opacity-30">
+                      <ClipboardList size={24} className="text-white" />
+                    </div>
+                  </div>
                   <div className="p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <span className={cn('badge', getStatusColor(status))}>
@@ -84,7 +98,7 @@ export function RecentActionPlans() {
           })}
         </div>
       ) : (
-        <p className="text-sm text-text-muted text-center py-4">Aucun plan d&apos;action récent</p>
+        <p className="text-sm text-text-muted text-center py-4">Aucun plan d&apos;action r&eacute;cent</p>
       )}
     </div>
   );

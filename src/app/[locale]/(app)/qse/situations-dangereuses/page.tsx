@@ -133,30 +133,34 @@ export default function SituationsDangereusesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
-        <div>
+      {/* Page Header with gradient banner */}
+      <div className="relative overflow-hidden rounded-card-lg bg-gradient-to-br from-[#2D0A0A] via-danger-dark to-danger p-6 md:p-8 text-white shadow-banner">
+        <div className="banner-grid absolute inset-0" />
+        <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/5 animate-float" />
+        <div className="absolute left-1/3 bottom-0 h-32 w-32 rounded-full bg-white/5 animate-float-slow" />
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-card bg-danger/10">
-              <AlertTriangle size={20} className="text-danger" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl backdrop-blur-md border border-white/15" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <AlertTriangle size={24} className="text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-text-primary">
+              <h1 className="text-2xl font-extrabold tracking-tight">
                 Situations Dangereuses
               </h1>
-              <p className="text-sm text-text-secondary mt-0.5">
-                Déclaration et suivi des situations dangereuses sur les chantiers
+              <p className="text-sm text-white/60 mt-0.5">
+                D&eacute;claration et suivi des situations dangereuses sur les chantiers
               </p>
             </div>
           </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all"
+            style={{ background: 'rgba(255,255,255,0.1)' }}
+          >
+            <Plus size={16} />
+            Nouvelle d&eacute;claration
+          </button>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="btn-primary flex items-center gap-2 w-fit bg-danger hover:bg-danger-dark"
-        >
-          <Plus size={16} />
-          Nouvelle déclaration
-        </button>
       </div>
 
       {/* Stats */}
@@ -172,7 +176,7 @@ export default function SituationsDangereusesPage() {
         ].map((stat) => (
           <div
             key={stat.label}
-            className={cn('card p-4 border-l-4 hover:shadow-card-hover transition-shadow', stat.borderColor)}
+            className={cn('card-elevated p-4 border-l-4', stat.borderColor)}
           >
             <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
               {stat.label}
@@ -289,7 +293,7 @@ export default function SituationsDangereusesPage() {
 
             return (
               <Link key={sd.id as string} href={`/qse/situations-dangereuses/${sd.id}`}>
-                <div className="card group p-0 overflow-hidden hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 cursor-pointer mb-3">
+                <div className="card-elevated group p-0 overflow-hidden hover:-translate-y-0.5 cursor-pointer mb-3">
                   <div className="flex items-stretch">
                     {/* Severity color bar */}
                     <div

@@ -11,24 +11,32 @@ import { RecentActionPlans } from '@/components/dashboard/RecentActionPlans';
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-6">
+    <div>
+      {/* Hero Banner */}
       <WelcomeBanner />
-      <QuickAccess />
-      <KPICards />
-      <NewsSection />
-      <PlanningWeek />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TeamPreview />
-        <DocumentsToSign />
+      {/* KPI Cards overlapping the banner */}
+      <div className="-mt-14 relative z-10 mb-6">
+        <KPICards />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <FormationsProgress />
-        <SSEMetrics />
-      </div>
+      <div className="space-y-6">
+        <QuickAccess />
+        <NewsSection />
+        <PlanningWeek />
 
-      <RecentActionPlans />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TeamPreview />
+          <DocumentsToSign />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <FormationsProgress />
+          <SSEMetrics />
+        </div>
+
+        <RecentActionPlans />
+      </div>
     </div>
   );
 }

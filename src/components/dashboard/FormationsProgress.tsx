@@ -28,11 +28,16 @@ export function FormationsProgress() {
   const items = (formations || []) as Record<string, any>[];
 
   return (
-    <div className="card p-5 animate-fade-in-up" style={{ animationDelay: '420ms' }}>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-text-primary">{t('trainingsInProgress')}</h2>
-        <Link href="/formations" className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary-dark transition-colors">
-          Voir tout <ArrowRight size={14} />
+    <div className="card-elevated p-6 opacity-0 animate-fade-in-up" style={{ animationDelay: '500ms' }}>
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-600/10 text-purple-600">
+            <GraduationCap size={18} strokeWidth={1.8} />
+          </div>
+          <h2 className="section-title">{t('trainingsInProgress')}</h2>
+        </div>
+        <Link href="/formations" className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-dark transition-colors group">
+          Voir tout <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
         </Link>
       </div>
 
@@ -40,22 +45,22 @@ export function FormationsProgress() {
         <div className="space-y-4">
           {items.map((formation) => (
             <div key={formation.id as string} className="group cursor-pointer">
-              <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <GraduationCap size={14} className="text-text-muted flex-shrink-0" />
                   <p className="text-sm font-medium text-text-primary truncate group-hover:text-primary transition-colors">
                     {formation.title as string}
                   </p>
                 </div>
-                <span className="text-xs font-bold text-text-secondary ml-2 flex-shrink-0">
+                <span className="text-xs font-bold text-primary/70 bg-primary-50 px-2 py-0.5 rounded-full ml-2 flex-shrink-0">
                   En cours
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-2 rounded-bar bg-gray-100 overflow-hidden">
-                  <div className={`h-full rounded-bar transition-all duration-500 ${getProgressColor(50)}`} style={{ width: '50%' }} />
+                <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
+                  <div className={`h-full rounded-full transition-all duration-500 ${getProgressColor(50)}`} style={{ width: '50%' }} />
                 </div>
-                <span className="text-[10px] text-text-muted flex-shrink-0">{formation.duration_hours as number}h</span>
+                <span className="text-[10px] text-text-muted flex-shrink-0 font-medium">{formation.duration_hours as number}h</span>
               </div>
             </div>
           ))}

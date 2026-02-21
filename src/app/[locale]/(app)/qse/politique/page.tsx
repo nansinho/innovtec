@@ -16,154 +16,16 @@ import {
   Shield,
 } from 'lucide-react';
 import { cn, getAvatarGradient, getInitials } from '@/lib/utils';
-
-// --- Types ---
-interface PolicyDocument {
-  id: string;
-  title: string;
-  description: string;
-  version: string;
-  status: 'brouillon' | 'active' | 'archivee';
-  category: string;
-  author: { first_name: string; last_name: string };
-  created_at: string;
-  updated_at: string;
-  file_size: string;
-}
-
-// --- Demo Data ---
-const POLICY_CATEGORIES = [
-  { name: 'Toutes', value: 'all' },
-  { name: 'Qualite', value: 'qualite' },
-  { name: 'Securite', value: 'securite' },
-  { name: 'Environnement', value: 'environnement' },
-  { name: 'General', value: 'general' },
-];
-
-const DEMO_POLICIES: PolicyDocument[] = [
-  {
-    id: '1',
-    title: 'Politique Qualite INNOVTEC 2025',
-    description:
-      'Document de reference definissant les engagements qualite de l\'entreprise pour l\'ensemble des activites reseaux et telecoms. Inclut les objectifs annuels et les indicateurs de performance.',
-    version: '3.2',
-    status: 'active',
-    category: 'qualite',
-    author: { first_name: 'Maria', last_name: 'Silva' },
-    created_at: '2024-01-15',
-    updated_at: '2025-01-10',
-    file_size: '2.4 Mo',
-  },
-  {
-    id: '2',
-    title: 'Plan de Prevention des Risques Chantiers',
-    description:
-      'Plan detaille de prevention des risques pour les interventions sur chantier. Couvre les risques electriques, les travaux en hauteur, les travaux en tranchee et la co-activite.',
-    version: '5.1',
-    status: 'active',
-    category: 'securite',
-    author: { first_name: 'Pierre', last_name: 'Oliveira' },
-    created_at: '2023-06-20',
-    updated_at: '2025-02-01',
-    file_size: '4.8 Mo',
-  },
-  {
-    id: '3',
-    title: 'Charte Environnementale - Gestion des Dechets',
-    description:
-      'Politique de gestion et tri des dechets de chantier conforme a la reglementation RE2020. Procedures de collecte, tri selectif et tracabilite des bordereaux de suivi.',
-    version: '2.0',
-    status: 'active',
-    category: 'environnement',
-    author: { first_name: 'Claire', last_name: 'Petit' },
-    created_at: '2024-03-01',
-    updated_at: '2024-11-15',
-    file_size: '1.8 Mo',
-  },
-  {
-    id: '4',
-    title: 'Procedure d\'Accueil Securite Nouveaux Arrivants',
-    description:
-      'Procedure obligatoire d\'accueil securite pour tout nouvel arrivant ou interimaire. Comprend le livret d\'accueil, la visite chantier et l\'evaluation des competences securite.',
-    version: '4.0',
-    status: 'active',
-    category: 'securite',
-    author: { first_name: 'Sophie', last_name: 'Martin' },
-    created_at: '2023-09-10',
-    updated_at: '2025-01-20',
-    file_size: '3.1 Mo',
-  },
-  {
-    id: '5',
-    title: 'Politique RSE et Developpement Durable 2026',
-    description:
-      'Nouvelle politique de responsabilite societale et environnementale. En cours de redaction par le comite QSE. Objectifs de reduction carbone et plan de mobilite durable.',
-    version: '0.3',
-    status: 'brouillon',
-    category: 'environnement',
-    author: { first_name: 'Maria', last_name: 'Silva' },
-    created_at: '2025-12-01',
-    updated_at: '2026-02-15',
-    file_size: '1.2 Mo',
-  },
-  {
-    id: '6',
-    title: 'Manuel Qualite ISO 9001:2015',
-    description:
-      'Manuel qualite certifie ISO 9001:2015. Description du systeme de management de la qualite, cartographie des processus et matrice de responsabilites.',
-    version: '6.0',
-    status: 'active',
-    category: 'qualite',
-    author: { first_name: 'Maria', last_name: 'Silva' },
-    created_at: '2020-05-01',
-    updated_at: '2024-06-30',
-    file_size: '8.5 Mo',
-  },
-  {
-    id: '7',
-    title: 'Protocole Securite Electrique - Consignation',
-    description:
-      'Protocole detaille de consignation/deconsignation des ouvrages electriques. Procedures BT/HTA conformes a la norme NF C18-510.',
-    version: '3.1',
-    status: 'archivee',
-    category: 'securite',
-    author: { first_name: 'Thomas', last_name: 'Ferreira' },
-    created_at: '2022-02-15',
-    updated_at: '2024-01-10',
-    file_size: '2.9 Mo',
-  },
-  {
-    id: '8',
-    title: 'Reglement Interieur - Dispositions Generales',
-    description:
-      'Reglement interieur de l\'entreprise regissant les regles de vie, les horaires, la discipline et les mesures sanitaires applicables a l\'ensemble du personnel.',
-    version: '2.3',
-    status: 'active',
-    category: 'general',
-    author: { first_name: 'Sophie', last_name: 'Martin' },
-    created_at: '2023-01-01',
-    updated_at: '2025-01-05',
-    file_size: '1.5 Mo',
-  },
-  {
-    id: '9',
-    title: 'Plan de Gestion Environnementale Chantier Type',
-    description:
-      'Ancienne version du plan de gestion environnementale. Remplacee par la version 2.0 de la Charte Environnementale.',
-    version: '1.4',
-    status: 'archivee',
-    category: 'environnement',
-    author: { first_name: 'Claire', last_name: 'Petit' },
-    created_at: '2021-07-01',
-    updated_at: '2023-12-31',
-    file_size: '2.1 Mo',
-  },
-];
+import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
+import { createQSEPolicy } from '@/lib/actions';
+import { Modal } from '@/components/ui/Modal';
+import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { useToast } from '@/components/ui/Toast';
 
 // --- Helpers ---
-function getStatusConfig(status: PolicyDocument['status']) {
-  const map = {
-    brouillon: {
+function getStatusConfig(status: string) {
+  const map: Record<string, { label: string; icon: typeof Edit3; classes: string }> = {
+    draft: {
       label: 'Brouillon',
       icon: Edit3,
       classes: 'text-amber-600 bg-amber-50 border border-amber-200',
@@ -173,60 +35,75 @@ function getStatusConfig(status: PolicyDocument['status']) {
       icon: CheckCircle2,
       classes: 'text-emerald-600 bg-emerald-50 border border-emerald-200',
     },
-    archivee: {
+    archived: {
       label: 'Archivee',
       icon: Archive,
       classes: 'text-gray-500 bg-gray-50 border border-gray-200',
     },
   };
-  return map[status];
-}
-
-function getCategoryColor(category: string) {
-  const map: Record<string, string> = {
-    qualite: '#0052CC',
-    securite: '#FF5630',
-    environnement: '#36B37E',
-    general: '#6B21A8',
-  };
-  return map[category] || '#5E6C84';
-}
-
-function getCategoryLabel(category: string) {
-  const map: Record<string, string> = {
-    qualite: 'Qualite',
-    securite: 'Securite',
-    environnement: 'Environnement',
-    general: 'General',
-  };
-  return map[category] || category;
+  return map[status] || map['draft'];
 }
 
 // --- Component ---
 export default function PolitiquePage() {
   const t = useTranslations('qse');
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
 
-  const filteredPolicies = DEMO_POLICIES.filter((policy) => {
-    const matchesCategory =
-      selectedCategory === 'all' || policy.category === selectedCategory;
-    const matchesStatus =
-      statusFilter === 'all' || policy.status === statusFilter;
+  const { data: policies, loading, refetch } = useSupabaseQuery(
+    (supabase) =>
+      supabase
+        .from('qse_policies')
+        .select('*, author:profiles!qse_policies_author_id_fkey(*)')
+        .order('updated_at', { ascending: false }),
+  );
+
+  const allPolicies = (policies || []) as Record<string, any>[];
+
+  const filteredPolicies = allPolicies.filter((policy) => {
+    const title = (policy.title as string) || '';
+    const content = (policy.content as string) || '';
+    const status = (policy.status as string) || '';
+    const matchesStatus = statusFilter === 'all' || status === statusFilter;
     const matchesSearch =
       searchQuery === '' ||
-      policy.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      policy.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesStatus && matchesSearch;
+      title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      content.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
   });
 
   const stats = {
-    total: DEMO_POLICIES.length,
-    active: DEMO_POLICIES.filter((p) => p.status === 'active').length,
-    brouillon: DEMO_POLICIES.filter((p) => p.status === 'brouillon').length,
-    archivee: DEMO_POLICIES.filter((p) => p.status === 'archivee').length,
+    total: allPolicies.length,
+    active: allPolicies.filter((p) => (p.status as string) === 'active').length,
+    draft: allPolicies.filter((p) => (p.status as string) === 'draft').length,
+    archived: allPolicies.filter((p) => (p.status as string) === 'archived').length,
   };
+
+  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSaving(true);
+    const formData = new FormData(e.currentTarget);
+    try {
+      await createQSEPolicy({
+        title: formData.get('title') as string,
+        content: (formData.get('content') as string) || undefined,
+        version: (formData.get('version') as string) || undefined,
+        status: (formData.get('status') as string) || undefined,
+      });
+      toast('Politique creee avec succes', 'success');
+      setShowCreateModal(false);
+      refetch();
+    } catch {
+      toast('Erreur lors de la creation', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <LoadingState />;
 
   return (
     <div className="space-y-6">
@@ -247,7 +124,10 @@ export default function PolitiquePage() {
             </div>
           </div>
         </div>
-        <button className="btn-primary flex items-center gap-2 w-fit">
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="btn-primary flex items-center gap-2 w-fit"
+        >
           <Plus size={16} />
           Nouveau document
         </button>
@@ -261,8 +141,8 @@ export default function PolitiquePage() {
         {[
           { label: 'Total', value: stats.total, color: 'text-text-primary', bg: 'bg-gray-50' },
           { label: 'Actives', value: stats.active, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Brouillons', value: stats.brouillon, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Archivees', value: stats.archivee, color: 'text-gray-500', bg: 'bg-gray-50' },
+          { label: 'Brouillons', value: stats.draft, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: 'Archivees', value: stats.archived, color: 'text-gray-500', bg: 'bg-gray-50' },
         ].map((stat) => (
           <div key={stat.label} className="card p-4 hover:shadow-card-hover transition-shadow">
             <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
@@ -273,7 +153,7 @@ export default function PolitiquePage() {
         ))}
       </div>
 
-      {/* Search + Filters */}
+      {/* Search + Status Filters */}
       <div
         className="flex flex-col sm:flex-row gap-4 animate-fade-in-up"
         style={{ animationDelay: '120ms' }}
@@ -288,22 +168,6 @@ export default function PolitiquePage() {
             className="input pl-9"
           />
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {POLICY_CATEGORIES.map((cat) => (
-            <button
-              key={cat.value}
-              onClick={() => setSelectedCategory(cat.value)}
-              className={cn(
-                'rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200',
-                selectedCategory === cat.value
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'bg-white text-text-secondary border border-border hover:border-primary/30'
-              )}
-            >
-              {cat.name}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Status filter */}
@@ -317,8 +181,8 @@ export default function PolitiquePage() {
         {[
           { label: 'Tous', value: 'all' },
           { label: 'Active', value: 'active' },
-          { label: 'Brouillon', value: 'brouillon' },
-          { label: 'Archivee', value: 'archivee' },
+          { label: 'Brouillon', value: 'draft' },
+          { label: 'Archivee', value: 'archived' },
         ].map((s) => (
           <button
             key={s.value}
@@ -336,127 +200,168 @@ export default function PolitiquePage() {
       </div>
 
       {/* Policy List */}
-      <div className="space-y-3 animate-stagger">
-        {filteredPolicies.map((policy) => {
-          const statusConfig = getStatusConfig(policy.status);
-          const StatusIcon = statusConfig.icon;
-          const gradient = getAvatarGradient(
-            policy.author.first_name + policy.author.last_name
-          );
-          const initials = getInitials(
-            policy.author.first_name,
-            policy.author.last_name
-          );
+      {filteredPolicies.length > 0 ? (
+        <div className="space-y-3 animate-stagger">
+          {filteredPolicies.map((policy) => {
+            const status = (policy.status as string) || 'draft';
+            const statusConfig = getStatusConfig(status);
+            const StatusIcon = statusConfig.icon;
+            const author = policy.author as { first_name: string; last_name: string } | null;
+            const firstName = author?.first_name || '';
+            const lastName = author?.last_name || '';
+            const gradient = getAvatarGradient(firstName + lastName);
+            const initials = firstName && lastName ? getInitials(firstName, lastName) : '?';
 
-          return (
-            <div
-              key={policy.id}
-              className="card group p-0 overflow-hidden hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
-            >
-              <div className="flex items-stretch">
-                {/* Color indicator */}
-                <div
-                  className="w-1.5 shrink-0"
-                  style={{ backgroundColor: getCategoryColor(policy.category) }}
-                />
+            return (
+              <div
+                key={policy.id as string}
+                className="card group p-0 overflow-hidden hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
+              >
+                <div className="flex items-stretch">
+                  {/* Color indicator */}
+                  <div
+                    className="w-1.5 shrink-0 bg-primary"
+                  />
 
-                <div className="flex-1 p-5">
-                  <div className="flex flex-col lg:flex-row lg:items-start gap-4">
-                    {/* Main content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span
-                          className="badge text-white text-[10px]"
-                          style={{
-                            backgroundColor: getCategoryColor(policy.category),
+                  <div className="flex-1 p-5">
+                    <div className="flex flex-col lg:flex-row lg:items-start gap-4">
+                      {/* Main content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span
+                            className={cn(
+                              'badge gap-1 text-[10px]',
+                              statusConfig.classes
+                            )}
+                          >
+                            <StatusIcon size={10} />
+                            {statusConfig.label}
+                          </span>
+                          {policy.version && (
+                            <span className="text-[10px] font-mono text-text-muted bg-gray-100 px-1.5 py-0.5 rounded">
+                              v{policy.version as string}
+                            </span>
+                          )}
+                        </div>
+
+                        <h3 className="text-base font-bold text-text-primary group-hover:text-primary transition-colors">
+                          {policy.title as string}
+                        </h3>
+                        {policy.content && (
+                          <p className="text-sm text-text-secondary mt-1 line-clamp-2">
+                            {policy.content as string}
+                          </p>
+                        )}
+
+                        {/* Meta info */}
+                        <div className="flex items-center gap-4 mt-3 flex-wrap">
+                          <div className="flex items-center gap-1.5">
+                            <div
+                              className={`flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[8px] font-bold text-white`}
+                            >
+                              {initials}
+                            </div>
+                            <span className="text-xs text-text-secondary">
+                              {firstName} {lastName}
+                            </span>
+                          </div>
+                          {policy.updated_at && (
+                            <span className="flex items-center gap-1 text-xs text-text-muted">
+                              <Clock size={11} />
+                              Mis a jour le{' '}
+                              {new Date(policy.updated_at as string).toLocaleDateString('fr-FR', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                              })}
+                            </span>
+                          )}
+                          {policy.published_at && (
+                            <span className="flex items-center gap-1 text-xs text-text-muted">
+                              <FileText size={11} />
+                              Publie le{' '}
+                              {new Date(policy.published_at as string).toLocaleDateString('fr-FR', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                              })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-2 shrink-0 lg:pt-2">
+                        <button
+                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary hover:bg-primary-100 transition-colors"
+                          title="Visualiser"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast('Apercu du document : ' + (policy.title as string), 'info');
                           }}
                         >
-                          {getCategoryLabel(policy.category)}
-                        </span>
-                        <span
-                          className={cn(
-                            'badge gap-1 text-[10px]',
-                            statusConfig.classes
-                          )}
+                          <Eye size={14} />
+                        </button>
+                        <button
+                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary hover:bg-primary-100 transition-colors"
+                          title="Telecharger"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast('Telechargement de : ' + (policy.title as string), 'info');
+                          }}
                         >
-                          <StatusIcon size={10} />
-                          {statusConfig.label}
-                        </span>
-                        <span className="text-[10px] font-mono text-text-muted bg-gray-100 px-1.5 py-0.5 rounded">
-                          v{policy.version}
-                        </span>
+                          <Download size={14} />
+                        </button>
+                        <ChevronRight
+                          size={16}
+                          className="text-text-muted ml-1"
+                        />
                       </div>
-
-                      <h3 className="text-base font-bold text-text-primary group-hover:text-primary transition-colors">
-                        {policy.title}
-                      </h3>
-                      <p className="text-sm text-text-secondary mt-1 line-clamp-2">
-                        {policy.description}
-                      </p>
-
-                      {/* Meta info */}
-                      <div className="flex items-center gap-4 mt-3 flex-wrap">
-                        <div className="flex items-center gap-1.5">
-                          <div
-                            className={`flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[8px] font-bold text-white`}
-                          >
-                            {initials}
-                          </div>
-                          <span className="text-xs text-text-secondary">
-                            {policy.author.first_name} {policy.author.last_name}
-                          </span>
-                        </div>
-                        <span className="flex items-center gap-1 text-xs text-text-muted">
-                          <Clock size={11} />
-                          Mis a jour le{' '}
-                          {new Date(policy.updated_at).toLocaleDateString('fr-FR', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                          })}
-                        </span>
-                        <span className="flex items-center gap-1 text-xs text-text-muted">
-                          <FileText size={11} />
-                          {policy.file_size}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 shrink-0 lg:pt-2">
-                      <button
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary hover:bg-primary-100 transition-colors"
-                        title="Visualiser"
-                      >
-                        <Eye size={14} />
-                      </button>
-                      <button
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary hover:bg-primary-100 transition-colors"
-                        title="Telecharger"
-                      >
-                        <Download size={14} />
-                      </button>
-                      <ChevronRight
-                        size={16}
-                        className="text-text-muted ml-1"
-                      />
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {filteredPolicies.length === 0 && (
-        <div className="text-center py-16">
-          <FileText size={40} className="text-text-muted mx-auto mb-3" />
-          <p className="text-text-muted text-sm">
-            Aucun document trouve pour ces criteres
-          </p>
+            );
+          })}
         </div>
+      ) : (
+        <EmptyState
+          message="Aucun document trouve"
+          description="Aucun document ne correspond a ces criteres. Creez-en un en cliquant sur le bouton ci-dessus."
+        />
       )}
+
+      {/* Create Modal */}
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Nouveau document de politique" size="lg">
+        <form onSubmit={handleCreate} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Titre *</label>
+            <input name="title" required className="input w-full" placeholder="Titre du document" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Contenu</label>
+            <textarea name="content" rows={4} className="input w-full" placeholder="Description ou contenu du document..." />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Version</label>
+              <input name="version" className="input w-full" placeholder="ex: 1.0" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Statut</label>
+              <select name="status" className="input w-full">
+                <option value="draft">Brouillon</option>
+                <option value="active">Active</option>
+                <option value="archived">Archivee</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-border-light">
+            <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">Annuler</button>
+            <button type="submit" disabled={saving} className="btn-primary">{saving ? 'Enregistrement...' : 'Creer le document'}</button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -7,8 +7,10 @@ interface UseQueryOptions {
   enabled?: boolean;
 }
 
-export function useSupabaseQuery<T>(
-  queryFn: (supabase: ReturnType<typeof createClient>) => Promise<{ data: T | null; error: Error | null }>,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useSupabaseQuery<T = any>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  queryFn: (supabase: ReturnType<typeof createClient>) => PromiseLike<{ data: any; error: any }>,
   deps: unknown[] = [],
   options: UseQueryOptions = {}
 ) {
@@ -26,7 +28,7 @@ export function useSupabaseQuery<T>(
     if (result.error) {
       setError(result.error.message);
     } else {
-      setData(result.data);
+      setData(result.data as T);
     }
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -10,34 +10,24 @@ import {
   Filter,
   Clock,
   MapPin,
-  Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
+import { createEvent } from '@/lib/actions';
+import { Modal } from '@/components/ui/Modal';
+import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { useToast } from '@/components/ui/Toast';
 
 type EventType = 'formation' | 'reunion' | 'visite' | 'deadline' | 'conge';
 type ViewMode = 'week' | 'month';
 
-interface PlanningEvent {
-  id: string;
-  title: string;
-  type: EventType;
-  date: string;
-  startTime: string;
-  endTime: string;
-  location?: string;
-  team: string;
-  participants: string[];
-}
-
 const EVENT_TYPE_CONFIG: Record<EventType, { label: string; color: string; bg: string; border: string }> = {
   formation: { label: 'Formation', color: '#0052CC', bg: 'bg-blue-50', border: 'border-l-[#0052CC]' },
-  reunion: { label: 'Réunion', color: '#6B21A8', bg: 'bg-purple-50', border: 'border-l-purple-700' },
+  reunion: { label: 'Reunion', color: '#6B21A8', bg: 'bg-purple-50', border: 'border-l-purple-700' },
   visite: { label: 'Visite', color: '#FF6B35', bg: 'bg-orange-50', border: 'border-l-orange-500' },
   deadline: { label: 'Deadline', color: '#FF5630', bg: 'bg-red-50', border: 'border-l-red-500' },
-  conge: { label: 'Congé', color: '#36B37E', bg: 'bg-emerald-50', border: 'border-l-emerald-500' },
+  conge: { label: 'Conge', color: '#36B37E', bg: 'bg-emerald-50', border: 'border-l-emerald-500' },
 };
-
-const TEAMS = ['Toutes les équipes', 'Direction', 'QSE', 'Travaux', 'Administration', 'Bureau d\'études'];
 
 function getWeekDates(baseDate: Date): Date[] {
   const startOfWeek = new Date(baseDate);
@@ -75,175 +65,60 @@ function formatDateKey(date: Date): string {
   return date.toISOString().split('T')[0];
 }
 
-const today = new Date();
-const monday = new Date(today);
-const dayOfWeek = monday.getDay();
-const mondayDiff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-monday.setDate(monday.getDate() + mondayDiff);
-
-function dateOffset(base: Date, days: number): string {
-  const d = new Date(base);
-  d.setDate(d.getDate() + days);
-  return formatDateKey(d);
+function formatTime(dateStr: string): string {
+  const d = new Date(dateStr);
+  return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 }
-
-const DEMO_EVENTS: PlanningEvent[] = [
-  {
-    id: '1',
-    title: 'Formation Habilitation Électrique B1V',
-    type: 'formation',
-    date: dateOffset(monday, 0),
-    startTime: '09:00',
-    endTime: '17:00',
-    location: 'Salle A - Siège Bordeaux',
-    team: 'Travaux',
-    participants: ['Jean Dupont', 'Thomas Ferreira', 'Carlos Santos'],
-  },
-  {
-    id: '2',
-    title: 'Réunion hebdomadaire Direction',
-    type: 'reunion',
-    date: dateOffset(monday, 0),
-    startTime: '10:00',
-    endTime: '11:30',
-    location: 'Salle de conférence',
-    team: 'Direction',
-    participants: ['Nicolas Bernard', 'Ana Costa'],
-  },
-  {
-    id: '3',
-    title: 'Visite chantier Mérignac - Fibre FTTH',
-    type: 'visite',
-    date: dateOffset(monday, 1),
-    startTime: '08:30',
-    endTime: '12:00',
-    location: 'Chantier Mérignac Lot 3',
-    team: 'Travaux',
-    participants: ['Pierre Oliveira', 'Maria Silva'],
-  },
-  {
-    id: '4',
-    title: 'Remise DOE Chantier Talence',
-    type: 'deadline',
-    date: dateOffset(monday, 2),
-    startTime: '18:00',
-    endTime: '18:00',
-    team: 'Bureau d\'études',
-    participants: ['Sophie Martin'],
-  },
-  {
-    id: '5',
-    title: 'Congé annuel - Thomas Ferreira',
-    type: 'conge',
-    date: dateOffset(monday, 3),
-    startTime: '00:00',
-    endTime: '23:59',
-    team: 'Travaux',
-    participants: ['Thomas Ferreira'],
-  },
-  {
-    id: '6',
-    title: 'Formation CACES Nacelle R486',
-    type: 'formation',
-    date: dateOffset(monday, 3),
-    startTime: '08:00',
-    endTime: '16:30',
-    location: 'Centre de formation AFPA',
-    team: 'Travaux',
-    participants: ['Miguel Rodrigues', 'Carlos Santos'],
-  },
-  {
-    id: '7',
-    title: 'Réunion QSE mensuelle',
-    type: 'reunion',
-    date: dateOffset(monday, 4),
-    startTime: '14:00',
-    endTime: '16:00',
-    location: 'Salle B - Siège',
-    team: 'QSE',
-    participants: ['Maria Silva', 'Claire Petit', 'Nicolas Bernard'],
-  },
-  {
-    id: '8',
-    title: 'Visite sécurité chantier Pessac Gaz',
-    type: 'visite',
-    date: dateOffset(monday, 4),
-    startTime: '09:00',
-    endTime: '11:00',
-    location: 'Chantier Pessac - Réseau Gaz',
-    team: 'QSE',
-    participants: ['Maria Silva', 'Jean Dupont'],
-  },
-  {
-    id: '9',
-    title: 'Date limite inscription formations Q2',
-    type: 'deadline',
-    date: dateOffset(monday, 5),
-    startTime: '23:59',
-    endTime: '23:59',
-    team: 'Administration',
-    participants: ['Lucie Moreau'],
-  },
-  {
-    id: '10',
-    title: 'Congé annuel - Isabelle Dubois',
-    type: 'conge',
-    date: dateOffset(monday, 1),
-    startTime: '00:00',
-    endTime: '23:59',
-    team: 'Administration',
-    participants: ['Isabelle Dubois'],
-  },
-  {
-    id: '11',
-    title: 'Réunion de lancement chantier Bègles',
-    type: 'reunion',
-    date: dateOffset(monday, 2),
-    startTime: '09:00',
-    endTime: '10:30',
-    location: 'Visioconférence Teams',
-    team: 'Travaux',
-    participants: ['Pierre Oliveira', 'Jean Dupont', 'Nicolas Bernard'],
-  },
-  {
-    id: '12',
-    title: 'Formation SST Recyclage',
-    type: 'formation',
-    date: dateOffset(monday, 8),
-    startTime: '08:30',
-    endTime: '17:00',
-    location: 'Salle A - Siège Bordeaux',
-    team: 'Travaux',
-    participants: ['Miguel Rodrigues', 'Thomas Ferreira'],
-  },
-];
 
 const DAY_NAMES_SHORT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 const MONTH_NAMES = [
-  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+  'Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre',
 ];
 
 export default function PlanningPage() {
   const t = useTranslations('planning');
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedTeam, setSelectedTeam] = useState('Toutes les équipes');
+  const [selectedTeam, setSelectedTeam] = useState('all');
   const [selectedType, setSelectedType] = useState<string>('all');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
+
+  const { data: events, loading, refetch } = useSupabaseQuery(
+    (supabase) =>
+      supabase
+        .from('events')
+        .select('*, team:teams(*)')
+        .order('start_date'),
+  );
+
+  const { data: teams } = useSupabaseQuery(
+    (supabase) => supabase.from('teams').select('id, name').order('name'),
+  );
+
+  const allEvents = (events || []) as Record<string, any>[];
+  const allTeams = (teams || []) as Record<string, any>[];
 
   const filteredEvents = useMemo(() => {
-    return DEMO_EVENTS.filter((event) => {
-      const matchesTeam = selectedTeam === 'Toutes les équipes' || event.team === selectedTeam;
-      const matchesType = selectedType === 'all' || event.type === selectedType;
+    return allEvents.filter((event) => {
+      const team = event.team as Record<string, any> | null;
+      const teamName = team ? (team.name as string) : '';
+      const matchesTeam = selectedTeam === 'all' || (event.team_id as string) === selectedTeam;
+      const matchesType = selectedType === 'all' || (event.type as string) === selectedType;
       return matchesTeam && matchesType;
     });
-  }, [selectedTeam, selectedType]);
+  }, [allEvents, selectedTeam, selectedType]);
 
   const eventsByDate = useMemo(() => {
-    const map: Record<string, PlanningEvent[]> = {};
+    const map: Record<string, Record<string, any>[]> = {};
     filteredEvents.forEach((event) => {
-      if (!map[event.date]) map[event.date] = [];
-      map[event.date].push(event);
+      const startDate = event.start_date as string;
+      if (!startDate) return;
+      const dateKey = startDate.split('T')[0];
+      if (!map[dateKey]) map[dateKey] = [];
+      map[dateKey].push(event);
     });
     return map;
   }, [filteredEvents]);
@@ -265,25 +140,51 @@ export default function PlanningPage() {
     setCurrentDate(new Date());
   }
 
+  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSaving(true);
+    const formData = new FormData(e.currentTarget);
+    try {
+      await createEvent({
+        title: formData.get('title') as string,
+        description: (formData.get('description') as string) || undefined,
+        type: formData.get('type') as string,
+        start_date: formData.get('start_date') as string,
+        end_date: (formData.get('end_date') as string) || undefined,
+        location: (formData.get('location') as string) || undefined,
+        team_id: (formData.get('team_id') as string) || undefined,
+      });
+      toast('Evenement cree avec succes', 'success');
+      setShowCreateModal(false);
+      refetch();
+    } catch {
+      toast('Erreur lors de la creation', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const headerLabel = viewMode === 'week'
     ? `${weekDates[0].getDate()} ${MONTH_NAMES[weekDates[0].getMonth()].substring(0, 3)} - ${weekDates[6].getDate()} ${MONTH_NAMES[weekDates[6].getMonth()].substring(0, 3)} ${weekDates[6].getFullYear()}`
     : `${MONTH_NAMES[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
 
   const todayKey = formatDateKey(new Date());
 
+  if (loading) return <LoadingState />;
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Planning d&apos;équipe</h1>
+          <h1 className="text-2xl font-bold text-text-primary">Planning d&apos;equipe</h1>
           <p className="text-sm text-text-secondary mt-1">
-            {filteredEvents.length} événement{filteredEvents.length > 1 ? 's' : ''} planifié{filteredEvents.length > 1 ? 's' : ''}
+            {filteredEvents.length} evenement{filteredEvents.length > 1 ? 's' : ''} planifie{filteredEvents.length > 1 ? 's' : ''}
           </p>
         </div>
-        <button className="btn-primary flex items-center gap-2 w-fit">
+        <button onClick={() => setShowCreateModal(true)} className="btn-primary flex items-center gap-2 w-fit">
           <Plus size={16} />
-          Nouvel événement
+          Nouvel evenement
         </button>
       </div>
 
@@ -346,8 +247,9 @@ export default function PlanningPage() {
             onChange={(e) => setSelectedTeam(e.target.value)}
             className="input w-auto text-sm"
           >
-            {TEAMS.map((team) => (
-              <option key={team} value={team}>{team}</option>
+            <option value="all">Toutes les equipes</option>
+            {allTeams.map((team) => (
+              <option key={team.id as string} value={team.id as string}>{team.name as string}</option>
             ))}
           </select>
           <select
@@ -373,222 +275,298 @@ export default function PlanningPage() {
         ))}
       </div>
 
-      {/* Week View */}
-      {viewMode === 'week' && (
-        <div className="card overflow-hidden animate-fade-in-up" style={{ animationDelay: '180ms' }}>
-          <div className="grid grid-cols-7 border-b border-border-light">
-            {weekDates.map((date, idx) => {
-              const isToday = formatDateKey(date) === todayKey;
-              return (
-                <div
-                  key={idx}
-                  className={cn(
-                    'p-3 text-center border-r border-border-light last:border-r-0',
-                    isToday && 'bg-primary-50'
-                  )}
-                >
-                  <div className="text-xs font-medium text-text-muted uppercase">
-                    {DAY_NAMES_SHORT[idx]}
-                  </div>
-                  <div
-                    className={cn(
-                      'text-lg font-bold mt-1',
-                      isToday ? 'text-primary' : 'text-text-primary'
-                    )}
-                  >
-                    {date.getDate()}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="grid grid-cols-7 min-h-[400px]">
-            {weekDates.map((date, idx) => {
-              const dateKey = formatDateKey(date);
-              const dayEvents = eventsByDate[dateKey] || [];
-              const isToday = dateKey === todayKey;
-
-              return (
-                <div
-                  key={idx}
-                  className={cn(
-                    'border-r border-border-light last:border-r-0 p-2 space-y-1.5',
-                    isToday && 'bg-primary-50/30'
-                  )}
-                >
-                  {dayEvents.map((event) => {
-                    const config = EVENT_TYPE_CONFIG[event.type];
-                    return (
+      {allEvents.length === 0 ? (
+        <EmptyState
+          message="Aucun evenement"
+          description="Creez votre premier evenement en cliquant sur le bouton ci-dessus."
+        />
+      ) : (
+        <>
+          {/* Week View */}
+          {viewMode === 'week' && (
+            <div className="card overflow-hidden animate-fade-in-up" style={{ animationDelay: '180ms' }}>
+              <div className="grid grid-cols-7 border-b border-border-light">
+                {weekDates.map((date, idx) => {
+                  const isToday = formatDateKey(date) === todayKey;
+                  return (
+                    <div
+                      key={idx}
+                      className={cn(
+                        'p-3 text-center border-r border-border-light last:border-r-0',
+                        isToday && 'bg-primary-50'
+                      )}
+                    >
+                      <div className="text-xs font-medium text-text-muted uppercase">
+                        {DAY_NAMES_SHORT[idx]}
+                      </div>
                       <div
-                        key={event.id}
                         className={cn(
-                          'rounded-lg p-2 border-l-[3px] cursor-pointer hover:shadow-sm transition-shadow',
-                          config.bg
+                          'text-lg font-bold mt-1',
+                          isToday ? 'text-primary' : 'text-text-primary'
                         )}
-                        style={{ borderLeftColor: config.color }}
                       >
-                        <div className="text-xs font-bold text-text-primary line-clamp-2">
-                          {event.title}
-                        </div>
-                        {event.type !== 'conge' && (
-                          <div className="flex items-center gap-1 mt-1">
-                            <Clock size={10} className="text-text-muted" />
-                            <span className="text-[10px] text-text-muted">
-                              {event.startTime} - {event.endTime}
-                            </span>
-                          </div>
-                        )}
-                        {event.location && (
-                          <div className="flex items-center gap-1 mt-0.5">
-                            <MapPin size={10} className="text-text-muted" />
-                            <span className="text-[10px] text-text-muted line-clamp-1">
-                              {event.location}
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-1 mt-1">
-                          <Users size={10} className="text-text-muted" />
-                          <span className="text-[10px] text-text-muted">
-                            {event.participants.length} participant{event.participants.length > 1 ? 's' : ''}
-                          </span>
-                        </div>
+                        {date.getDate()}
                       </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Month View */}
-      {viewMode === 'month' && (
-        <div className="card overflow-hidden animate-fade-in-up" style={{ animationDelay: '180ms' }}>
-          <div className="grid grid-cols-7 border-b border-border-light">
-            {DAY_NAMES_SHORT.map((day) => (
-              <div key={day} className="p-3 text-center text-xs font-semibold text-text-muted uppercase border-r border-border-light last:border-r-0">
-                {day}
+                    </div>
+                  );
+                })}
               </div>
-            ))}
-          </div>
 
-          <div className="grid grid-cols-7">
-            {monthDates.map((date, idx) => {
-              const dateKey = formatDateKey(date);
-              const dayEvents = eventsByDate[dateKey] || [];
-              const isToday = dateKey === todayKey;
-              const isCurrentMonth = date.getMonth() === currentDate.getMonth();
+              <div className="grid grid-cols-7 min-h-[400px]">
+                {weekDates.map((date, idx) => {
+                  const dateKey = formatDateKey(date);
+                  const dayEvents = eventsByDate[dateKey] || [];
+                  const isToday = dateKey === todayKey;
 
-              return (
-                <div
-                  key={idx}
-                  className={cn(
-                    'min-h-[100px] border-r border-b border-border-light p-1.5',
-                    !isCurrentMonth && 'bg-gray-50/50',
-                    isToday && 'bg-primary-50/30'
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'text-xs font-medium mb-1',
-                      isToday ? 'text-primary font-bold' : isCurrentMonth ? 'text-text-primary' : 'text-text-muted'
-                    )}
-                  >
-                    {date.getDate()}
+                  return (
+                    <div
+                      key={idx}
+                      className={cn(
+                        'border-r border-border-light last:border-r-0 p-2 space-y-1.5',
+                        isToday && 'bg-primary-50/30'
+                      )}
+                    >
+                      {dayEvents.map((event) => {
+                        const eventType = (event.type as EventType) || 'reunion';
+                        const config = EVENT_TYPE_CONFIG[eventType] || EVENT_TYPE_CONFIG.reunion;
+                        const startDate = event.start_date as string;
+                        const endDate = event.end_date as string | null;
+                        return (
+                          <div
+                            key={event.id as string}
+                            className={cn(
+                              'rounded-lg p-2 border-l-[3px] cursor-pointer hover:shadow-sm transition-shadow',
+                              config.bg
+                            )}
+                            style={{ borderLeftColor: config.color }}
+                          >
+                            <div className="text-xs font-bold text-text-primary line-clamp-2">
+                              {event.title as string}
+                            </div>
+                            {eventType !== 'conge' && startDate && (
+                              <div className="flex items-center gap-1 mt-1">
+                                <Clock size={10} className="text-text-muted" />
+                                <span className="text-[10px] text-text-muted">
+                                  {formatTime(startDate)}{endDate ? ` - ${formatTime(endDate)}` : ''}
+                                </span>
+                              </div>
+                            )}
+                            {event.location && (
+                              <div className="flex items-center gap-1 mt-0.5">
+                                <MapPin size={10} className="text-text-muted" />
+                                <span className="text-[10px] text-text-muted line-clamp-1">
+                                  {event.location as string}
+                                </span>
+                              </div>
+                            )}
+                            {event.team && (
+                              <div className="flex items-center gap-1 mt-1">
+                                <span className="text-[10px] text-text-muted">
+                                  {((event.team as Record<string, any>).name as string)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Month View */}
+          {viewMode === 'month' && (
+            <div className="card overflow-hidden animate-fade-in-up" style={{ animationDelay: '180ms' }}>
+              <div className="grid grid-cols-7 border-b border-border-light">
+                {DAY_NAMES_SHORT.map((day) => (
+                  <div key={day} className="p-3 text-center text-xs font-semibold text-text-muted uppercase border-r border-border-light last:border-r-0">
+                    {day}
                   </div>
-                  <div className="space-y-0.5">
-                    {dayEvents.slice(0, 3).map((event) => {
-                      const config = EVENT_TYPE_CONFIG[event.type];
-                      return (
-                        <div
-                          key={event.id}
-                          className="rounded px-1.5 py-0.5 text-[10px] font-medium text-white truncate cursor-pointer"
-                          style={{ backgroundColor: config.color }}
-                          title={event.title}
-                        >
-                          {event.title}
-                        </div>
-                      );
-                    })}
-                    {dayEvents.length > 3 && (
-                      <div className="text-[10px] text-text-muted font-medium pl-1">
-                        +{dayEvents.length - 3} autre{dayEvents.length - 3 > 1 ? 's' : ''}
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7">
+                {monthDates.map((date, idx) => {
+                  const dateKey = formatDateKey(date);
+                  const dayEvents = eventsByDate[dateKey] || [];
+                  const isToday = dateKey === todayKey;
+                  const isCurrentMonth = date.getMonth() === currentDate.getMonth();
+
+                  return (
+                    <div
+                      key={idx}
+                      className={cn(
+                        'min-h-[100px] border-r border-b border-border-light p-1.5',
+                        !isCurrentMonth && 'bg-gray-50/50',
+                        isToday && 'bg-primary-50/30'
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'text-xs font-medium mb-1',
+                          isToday ? 'text-primary font-bold' : isCurrentMonth ? 'text-text-primary' : 'text-text-muted'
+                        )}
+                      >
+                        {date.getDate()}
                       </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                      <div className="space-y-0.5">
+                        {dayEvents.slice(0, 3).map((event) => {
+                          const eventType = (event.type as EventType) || 'reunion';
+                          const config = EVENT_TYPE_CONFIG[eventType] || EVENT_TYPE_CONFIG.reunion;
+                          return (
+                            <div
+                              key={event.id as string}
+                              className="rounded px-1.5 py-0.5 text-[10px] font-medium text-white truncate cursor-pointer"
+                              style={{ backgroundColor: config.color }}
+                              title={event.title as string}
+                            >
+                              {event.title as string}
+                            </div>
+                          );
+                        })}
+                        {dayEvents.length > 3 && (
+                          <div className="text-[10px] text-text-muted font-medium pl-1">
+                            +{dayEvents.length - 3} autre{dayEvents.length - 3 > 1 ? 's' : ''}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Upcoming events sidebar list */}
+          <div className="card p-5 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
+            <h2 className="text-base font-bold text-text-primary mb-4 flex items-center gap-2">
+              <Calendar size={18} className="text-primary" />
+              Prochains evenements
+            </h2>
+            <div className="space-y-3">
+              {filteredEvents
+                .sort((a, b) => {
+                  const aDate = (a.start_date as string) || '';
+                  const bDate = (b.start_date as string) || '';
+                  return aDate.localeCompare(bDate);
+                })
+                .slice(0, 6)
+                .map((event) => {
+                  const eventType = (event.type as EventType) || 'reunion';
+                  const config = EVENT_TYPE_CONFIG[eventType] || EVENT_TYPE_CONFIG.reunion;
+                  const startDate = event.start_date as string;
+                  const endDate = event.end_date as string | null;
+                  const eventDate = new Date(startDate);
+                  return (
+                    <div
+                      key={event.id as string}
+                      className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      <div className="flex flex-col items-center min-w-[48px]">
+                        <span className="text-xs font-medium text-text-muted uppercase">
+                          {DAY_NAMES_SHORT[(eventDate.getDay() + 6) % 7]}
+                        </span>
+                        <span className="text-lg font-bold text-text-primary">{eventDate.getDate()}</span>
+                        <span className="text-[10px] text-text-muted">
+                          {MONTH_NAMES[eventDate.getMonth()].substring(0, 3)}
+                        </span>
+                      </div>
+                      <div
+                        className="w-1 self-stretch rounded-full"
+                        style={{ backgroundColor: config.color }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-text-primary">{event.title as string}</div>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-text-secondary">
+                          {eventType !== 'conge' && startDate && (
+                            <span className="flex items-center gap-1">
+                              <Clock size={12} />
+                              {formatTime(startDate)}{endDate ? ` - ${formatTime(endDate)}` : ''}
+                            </span>
+                          )}
+                          {event.location && (
+                            <span className="flex items-center gap-1">
+                              <MapPin size={12} />
+                              {event.location as string}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span
+                            className="badge text-white text-[10px]"
+                            style={{ backgroundColor: config.color }}
+                          >
+                            {config.label}
+                          </span>
+                          {event.team && (
+                            <span className="text-[10px] text-text-muted">
+                              {((event.team as Record<string, any>).name as string)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
-      {/* Upcoming events sidebar list */}
-      <div className="card p-5 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
-        <h2 className="text-base font-bold text-text-primary mb-4 flex items-center gap-2">
-          <Calendar size={18} className="text-primary" />
-          Prochains événements
-        </h2>
-        <div className="space-y-3">
-          {filteredEvents
-            .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime))
-            .slice(0, 6)
-            .map((event) => {
-              const config = EVENT_TYPE_CONFIG[event.type];
-              const eventDate = new Date(event.date);
-              return (
-                <div
-                  key={event.id}
-                  className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  <div className="flex flex-col items-center min-w-[48px]">
-                    <span className="text-xs font-medium text-text-muted uppercase">
-                      {DAY_NAMES_SHORT[(eventDate.getDay() + 6) % 7]}
-                    </span>
-                    <span className="text-lg font-bold text-text-primary">{eventDate.getDate()}</span>
-                    <span className="text-[10px] text-text-muted">
-                      {MONTH_NAMES[eventDate.getMonth()].substring(0, 3)}
-                    </span>
-                  </div>
-                  <div
-                    className="w-1 self-stretch rounded-full"
-                    style={{ backgroundColor: config.color }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-text-primary">{event.title}</div>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-text-secondary">
-                      {event.type !== 'conge' && (
-                        <span className="flex items-center gap-1">
-                          <Clock size={12} />
-                          {event.startTime} - {event.endTime}
-                        </span>
-                      )}
-                      {event.location && (
-                        <span className="flex items-center gap-1">
-                          <MapPin size={12} />
-                          {event.location}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1.5">
-                      <span
-                        className="badge text-white text-[10px]"
-                        style={{ backgroundColor: config.color }}
-                      >
-                        {config.label}
-                      </span>
-                      <span className="text-[10px] text-text-muted">
-                        {event.participants.join(', ')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-        </div>
-      </div>
+      {/* Create Modal */}
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Nouvel evenement" size="lg">
+        <form onSubmit={handleCreate} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Titre *</label>
+            <input name="title" required className="input w-full" placeholder="Titre de l'evenement" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Description</label>
+            <textarea name="description" rows={3} className="input w-full" placeholder="Description detaillee..." />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Type *</label>
+              <select name="type" required className="input w-full">
+                {Object.entries(EVENT_TYPE_CONFIG).map(([key, config]) => (
+                  <option key={key} value={key}>{config.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Equipe</label>
+              <select name="team_id" className="input w-full">
+                <option value="">-- Selectionner --</option>
+                {allTeams.map((team) => (
+                  <option key={team.id as string} value={team.id as string}>{team.name as string}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Date de debut *</label>
+              <input name="start_date" type="datetime-local" required className="input w-full" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1">Date de fin</label>
+              <input name="end_date" type="datetime-local" className="input w-full" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">Lieu</label>
+            <input name="location" className="input w-full" placeholder="Lieu de l'evenement" />
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-border-light">
+            <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">Annuler</button>
+            <button type="submit" disabled={saving} className="btn-primary">
+              {saving ? 'Enregistrement...' : 'Creer l\'evenement'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

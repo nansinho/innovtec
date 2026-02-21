@@ -22,7 +22,8 @@ import { cn, getAvatarGradient, getInitials } from '@/lib/utils';
 import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
 import { createLeaveRequest, updateLeaveRequestStatus } from '@/lib/actions';
 import { Modal } from '@/components/ui/Modal';
-import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { PageSkeleton, EmptyState } from '@/components/ui/DataStates';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { useToast } from '@/components/ui/Toast';
 
 type LeaveStatus = 'approuve' | 'en_attente' | 'refuse';
@@ -262,23 +263,20 @@ export default function RHPage() {
 
   const isLoading = loadingLeaves || loadingExpenses || loadingProfiles;
 
-  if (isLoading) return <LoadingState />;
+  if (isLoading) return <PageSkeleton variant="cards" />;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Ressources Humaines</h1>
-          <p className="text-sm text-text-secondary mt-1">
-            Tableau de bord RH et gestion administrative
-          </p>
-        </div>
-        <button onClick={() => setShowCreateModal(true)} className="btn-primary flex items-center gap-2 w-fit">
+      <PageBanner
+        icon={Users}
+        title="Ressources Humaines"
+        subtitle="Tableau de bord RH et gestion administrative"
+      >
+        <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
           <Plus size={16} />
-          Nouvelle demande de cong&eacute;
+          Nouvelle demande de congé
         </button>
-      </div>
+      </PageBanner>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-stagger">

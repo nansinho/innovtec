@@ -18,7 +18,8 @@ import { Link } from '@/i18n/routing';
 import { useSupabaseQuery, useRealtimeSubscription } from '@/lib/hooks/use-supabase-query';
 import { useToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
-import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { PageSkeleton, EmptyState } from '@/components/ui/DataStates';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { createActionPlan } from '@/lib/actions';
 
 function getPriorityConfig(priority: string) {
@@ -111,26 +112,20 @@ export default function PlansActionsPage() {
 
   const columns: string[] = ['en_cours', 'cloture', 'en_retard'];
 
-  if (loading) return <LoadingState />;
+  if (loading) return <PageSkeleton variant="kanban" />;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-card bg-primary/10">
-            <Target size={20} className="text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-text-primary">Plans d&apos;Actions</h1>
-            <p className="text-sm text-text-secondary mt-0.5">Suivi et gestion des plans d&apos;actions QSE</p>
-          </div>
-        </div>
-        <button onClick={() => setShowCreateModal(true)} className="btn-primary flex items-center gap-2 w-fit">
+      <PageBanner
+        icon={Target}
+        title="Plans d'Actions"
+        subtitle="Suivi et gestion des plans d'actions QSE"
+      >
+        <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
           <Plus size={16} />
           Nouveau plan d&apos;action
         </button>
-      </div>
+      </PageBanner>
 
       {/* Search + Filters */}
       <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>

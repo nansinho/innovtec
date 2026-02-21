@@ -9,7 +9,8 @@ import { Link } from '@/i18n/routing';
 import { useSupabaseQuery, useRealtimeSubscription } from '@/lib/hooks/use-supabase-query';
 import { useToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
-import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { PageSkeleton, EmptyState } from '@/components/ui/DataStates';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { createArticle } from '@/lib/actions';
 
 const CATEGORIES = [
@@ -99,28 +100,20 @@ export default function ActualitesPage() {
     }
   };
 
-  if (loading) return <LoadingState />;
+  if (loading) return <PageSkeleton variant="cards" />;
 
   return (
     <div className="space-y-6">
-      {/* Page Header with gradient banner */}
-      <div className="relative overflow-hidden rounded-card-lg bg-gradient-to-br from-[#060E1F] via-[#0B1A3E] to-[#0F2A5E] p-6 md:p-8 text-white shadow-banner">
-        <div className="banner-grid absolute inset-0" />
-        <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/5 animate-float" />
-        <div className="absolute left-1/3 bottom-0 h-32 w-32 rounded-full bg-white/5 animate-float-slow" />
-        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">{t('title')}</h1>
-            <p className="text-sm text-white/60 mt-1">
-              {filteredArticles.length} article{filteredArticles.length > 1 ? 's' : ''}
-            </p>
-          </div>
-          <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
-            <Plus size={16} />
-            {t('newArticle')}
-          </button>
-        </div>
-      </div>
+      <PageBanner
+        icon={Newspaper}
+        title={t('title')}
+        subtitle={`${filteredArticles.length} article${filteredArticles.length > 1 ? 's' : ''}`}
+      >
+        <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
+          <Plus size={16} />
+          {t('newArticle')}
+        </button>
+      </PageBanner>
 
       {/* Search + Filters */}
       <div className="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '60ms' }}>

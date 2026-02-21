@@ -2,11 +2,12 @@
 
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { Search, LayoutGrid, GitBranch, Phone, Mail, Briefcase } from 'lucide-react';
+import { Search, LayoutGrid, GitBranch, Phone, Mail, Briefcase, Users } from 'lucide-react';
 import { cn, getAvatarGradient, getInitials } from '@/lib/utils';
 import { Link } from '@/i18n/routing';
 import { useSupabaseQuery, useRealtimeSubscription } from '@/lib/hooks/use-supabase-query';
-import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { PageSkeleton, EmptyState } from '@/components/ui/DataStates';
+import { PageBanner } from '@/components/ui/PageBanner';
 
 export default function TrombinoscopePage() {
   const t = useTranslations('team');
@@ -45,17 +46,15 @@ export default function TrombinoscopePage() {
     return matchesTeam && matchesSearch;
   });
 
-  if (loading) return <LoadingState />;
+  if (loading) return <PageSkeleton variant="cards" />;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="animate-fade-in-up">
-        <h1 className="text-2xl font-bold text-text-primary">{t('title')}</h1>
-        <p className="text-sm text-text-secondary mt-1">
-          {t('members', { count: filteredMembers.length })}
-        </p>
-      </div>
+      <PageBanner
+        icon={Users}
+        title={t('title')}
+        subtitle={t('members', { count: filteredMembers.length })}
+      />
 
       {/* Search + Filters */}
       <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>

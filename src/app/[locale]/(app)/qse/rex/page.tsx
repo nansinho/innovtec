@@ -8,7 +8,8 @@ import { Link } from '@/i18n/routing';
 import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
 import { useToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
-import { LoadingState, EmptyState } from '@/components/ui/DataStates';
+import { PageSkeleton, EmptyState } from '@/components/ui/DataStates';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { createRexReport } from '@/lib/actions';
 
 export default function RexPage() {
@@ -62,25 +63,20 @@ export default function RexPage() {
     }
   };
 
-  if (loading) return <LoadingState />;
+  if (loading) return <PageSkeleton variant="cards" />;
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-card bg-success/10">
-            <Lightbulb size={20} className="text-success" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-text-primary">Retours d&apos;Expérience (REX)</h1>
-            <p className="text-sm text-text-secondary mt-0.5">Capitaliser sur les expériences terrain pour progresser ensemble</p>
-          </div>
-        </div>
-        <button onClick={() => setShowCreateModal(true)} className="bg-success text-white px-4 py-2 rounded-button flex items-center gap-2 w-fit hover:bg-success/90 transition-colors font-medium text-sm">
+      <PageBanner
+        icon={Lightbulb}
+        title="Retours d'Expérience (REX)"
+        subtitle="Capitaliser sur les expériences terrain pour progresser ensemble"
+      >
+        <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-fit rounded-xl px-5 py-2.5 font-semibold text-sm text-white backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all" style={{ background: 'rgba(255,255,255,0.1)' }}>
           <Plus size={16} />
           Nouveau REX
         </button>
-      </div>
+      </PageBanner>
 
       <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
         <div className="relative flex-1">

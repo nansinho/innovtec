@@ -12,7 +12,7 @@
     --success: #36B37E;
     --warning: #FFAB00;
     --danger: #FF5630;
-    --background: #F4F5F7;
+    --background: #F0F2F5;
     --card: #FFFFFF;
     --sidebar-bg: #0A1628;
     --sidebar-light: #0D2137;
@@ -37,18 +37,51 @@
 }
 
 @layer components {
+  /* ─── Card System ─── */
   .card {
-    @apply bg-card rounded-card border border-border-light shadow-card transition-shadow duration-200;
+    @apply bg-card rounded-card border border-border-light/60 shadow-card transition-all duration-300;
   }
 
   .card:hover {
     @apply shadow-card-hover;
   }
 
+  .card-glass {
+    @apply rounded-card border border-white/20 shadow-glass backdrop-blur-lg transition-all duration-300;
+    background: rgba(255, 255, 255, 0.7);
+  }
+
+  .card-glass:hover {
+    @apply shadow-glass-hover;
+    background: rgba(255, 255, 255, 0.85);
+  }
+
+  .card-elevated {
+    @apply bg-card rounded-card border border-border-light/40 shadow-card-elevated transition-all duration-300;
+  }
+
+  .card-elevated:hover {
+    @apply shadow-card-hover -translate-y-0.5;
+  }
+
+  /* ─── Glass Icon Container ─── */
+  .icon-glass {
+    @apply flex items-center justify-center rounded-xl backdrop-blur-sm transition-all duration-200;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .icon-glass-colored {
+    @apply flex items-center justify-center rounded-xl backdrop-blur-sm transition-all duration-200;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* ─── Buttons ─── */
   .btn-primary {
     @apply bg-primary text-white rounded-button px-5 py-2.5 font-semibold text-sm
            hover:bg-primary-dark transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-primary/30;
+           focus:outline-none focus:ring-2 focus:ring-primary/30
+           shadow-sm hover:shadow-md;
   }
 
   .btn-secondary {
@@ -60,9 +93,11 @@
   .btn-accent {
     @apply bg-accent text-white rounded-button px-5 py-2.5 font-semibold text-sm
            hover:bg-accent-dark transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-accent/30;
+           focus:outline-none focus:ring-2 focus:ring-accent/30
+           shadow-sm hover:shadow-md;
   }
 
+  /* ─── Badges ─── */
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
   }
@@ -103,6 +138,7 @@
     @apply bg-emerald-100 text-emerald-700;
   }
 
+  /* ─── Input ─── */
   .input {
     @apply w-full rounded-button border border-border bg-white px-4 py-2.5 text-sm
            placeholder:text-text-muted
@@ -110,8 +146,19 @@
            transition-all duration-200;
   }
 
+  /* ─── Section Title ─── */
+  .section-title {
+    @apply text-lg font-bold text-text-primary tracking-tight;
+  }
+
+  .section-subtitle {
+    @apply text-sm text-text-secondary mt-0.5;
+  }
+
+  /* ─── Stagger Animation ─── */
   .animate-stagger > * {
     @apply animate-fade-in-up;
+    opacity: 0;
   }
 
   .animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
@@ -124,7 +171,7 @@
   .animate-stagger > *:nth-child(8) { animation-delay: 420ms; }
 }
 
-/* Custom scrollbar */
+/* ─── Custom Scrollbar ─── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -143,11 +190,28 @@
   background: #97A0AF;
 }
 
-/* Sidebar scrollbar */
+/* ─── Sidebar Scrollbar ─── */
 .sidebar-scroll::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
+}
+
+/* ─── Banner Grid Pattern ─── */
+.banner-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ─── Photo Card Gradient Overlays ─── */
+.photo-card-overlay {
+  background: linear-gradient(180deg, transparent 0%, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+.photo-card-overlay-top {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, transparent 50%);
 }

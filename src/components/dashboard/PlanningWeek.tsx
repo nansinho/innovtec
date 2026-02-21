@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, CalendarDays } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { getEventColor } from '@/lib/utils';
 import { useSupabaseQuery } from '@/lib/hooks/use-supabase-query';
@@ -54,22 +54,27 @@ export function PlanningWeek() {
   }, [allEvents]);
 
   return (
-    <div className="card p-5 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-text-primary">{t('weekPlanning')}</h2>
-        <Link href="/planning" className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary-dark transition-colors">
-          Voir tout <ArrowRight size={14} />
+    <div className="card-elevated p-6 opacity-0 animate-fade-in-up" style={{ animationDelay: '320ms' }}>
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500/10 to-cyan-600/10 text-cyan-600">
+            <CalendarDays size={18} strokeWidth={1.8} />
+          </div>
+          <h2 className="section-title">{t('weekPlanning')}</h2>
+        </div>
+        <Link href="/planning" className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-dark transition-colors group">
+          Voir tout <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
         </Link>
       </div>
 
       <div className="grid grid-cols-5 gap-2">
         {weekDays.map((day) => (
           <div key={day.name} className="min-h-[120px]">
-            <div className={`text-center mb-2 pb-2 border-b ${day.isToday ? 'border-primary' : 'border-border-light'}`}>
+            <div className={`text-center mb-3 pb-2 border-b-2 rounded-sm ${day.isToday ? 'border-primary' : 'border-border-light/50'}`}>
               <p className={`text-xs font-semibold ${day.isToday ? 'text-primary' : 'text-text-muted'}`}>{day.name}</p>
               <p className={`text-lg font-bold ${day.isToday ? 'text-primary' : 'text-text-primary'}`}>{day.date}</p>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {day.events.map((event) => {
                 const type = (event.type as string) || 'reunion';
                 const startDate = new Date(event.start_date as string);
@@ -77,7 +82,7 @@ export function PlanningWeek() {
                 return (
                   <div
                     key={event.id as string}
-                    className="rounded-lg px-2 py-1.5 text-[11px]"
+                    className="rounded-lg px-2.5 py-2 text-[11px] transition-all hover:scale-[1.02]"
                     style={{ backgroundColor: `${getEventColor(type)}10`, borderLeft: `3px solid ${getEventColor(type)}` }}
                   >
                     <p className="font-bold" style={{ color: getEventColor(type) }}>{time}</p>
